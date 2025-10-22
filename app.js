@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const { Board, Piece, Pawn, King, Queen, Bishop, Knight, Rook  } = require('./game');
 
 const app = express();
 app.use(express.static('static')); // serve client files from /public
@@ -32,5 +33,16 @@ io.on('connection', (socket) => {
 
     socket.on('chat message', (msg) => {
         io.emit('chat message', msg);
+    });
+
+    socket.on('newBoard', () => {
+        console.log('newBoard event received - creating board on server');
+        let board = new Board();
+        io.emit('updateBoard', board.layout);
+    });
+
+    socket.on('updateBoard', (boardData) => {
+        console.log('updateBoard event received');
+        io.emit('updateBoard', boardData)
     });
 });
