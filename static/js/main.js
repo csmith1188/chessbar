@@ -2,6 +2,8 @@ const socket = io()
 const canvas = document.getElementById('canvas')
 /** @type {CanvasRenderingContext2D} */
 const ctx = /** @type {CanvasRenderingContext2D} */ (canvas.getContext('2d'))
+canvas.width = Settings.boardSquareSize * 8
+canvas.height = Settings.boardSquareSize * 8
 
 socket.on('updateBoard', (newBoard) => {
     board = newBoard
@@ -10,7 +12,7 @@ socket.on('updateBoard', (newBoard) => {
 function drawBoard() {
     color = 'light'
     for (let i = 0; i < 8; i++) {
-        for (let a = 0; a < 8; a++) {
+        for (let a = 0; a < 9; a++) {
             if (color == 'light') {
                 ctx.fillStyle = Settings.lightSquareColor
                 color = 'dark'
