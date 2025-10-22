@@ -14,7 +14,11 @@ function drawBoard() {
             if (color == 'light') {
                 ctx.fillStyle = Settings.lightSquareColor
                 color = 'dark'
+            } else {
+                ctx.fillStyle = Settings.darkSquareColor
+                color = 'light'
             }
+            ctx.fillRect(a * Settings.boardSquareSize, i * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
         }
     }
 }

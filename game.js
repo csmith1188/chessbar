@@ -1,6 +1,13 @@
 const socket = io()
 
-class Piece {}
+class Piece {
+    constructor (x, y, img) {
+        this.x = x
+        this.y = y
+        this.img = new Image()
+        this.img.src = img
+    }
+}
 
 class Pawn {}
 class King {}
@@ -19,9 +26,3 @@ let board = [
     ['Wp', 'Wp', 'Wp', 'Wp', 'Wp', 'Wp', 'Wp', 'Wp'],
     ['Wr', 'Wkn', 'Wb', 'Wq', 'Wki', 'Wb', 'Wkn', 'Wr']
 ]
-
-board[y][x]
-
-socket.on('move', (from, to) => {
-
-})
