@@ -12,8 +12,16 @@ class Pawn extends Piece {
         super(side)
     }
 
-    validMove(x1, y1, x2, y2) {
-        return true
+    validMove(board, x1, y1, x2, y2) {
+        if (x1 == x2 && Math.abs(y2 - y1) <= 2) {
+            if (!board[y1 - 1][x1] && !board[y2][x2]) {
+                return true
+            } else {
+                console.log(y1, board[y1 - 1][x1], board[y2][x2])
+            }
+        }
+
+        return false
     }
 }
 
@@ -22,11 +30,11 @@ class King extends Piece {
         super(side)
     }
 
-    validMove(x1, y1, x2, y2) {
+    validMove(board, x1, y1, x2, y2) {
         if (
             (Math.abs(x2 - x1) == 1 && y1 == y2) ||
             (Math.abs(y2 - y1) == 1 && x1 == x2) ||
-            ((Math.abs(x2 - x1) == 1 && Math.abs(y2 - y1) == 1) && !this.board?.occupied(x2, y2))
+            ((Math.abs(x2 - x1) == 1 && Math.abs(y2 - y1) == 1) && board[y][x].side != this.side)
         ) {
             return true
         }
@@ -39,7 +47,7 @@ class Queen extends Piece {
         super(side)
     }
 
-    validMove(x1, y1, x2, y2) {
+    validMove(board, x1, y1, x2, y2) {
         return true
     }
 }
@@ -49,7 +57,7 @@ class Bishop extends Piece {
         super(side)
     }
 
-    validMove(x1, y1, x2, y2) {
+    validMove(board, x1, y1, x2, y2) {
         return true
     }
 }
@@ -59,7 +67,7 @@ class Knight extends Piece {
         super(side)
     }
 
-    validMove(x1, y1, x2, y2) {
+    validMove(board, x1, y1, x2, y2) {
         return true
     }
 }
@@ -69,7 +77,7 @@ class Rook extends Piece {
         super(side)
     }
 
-    validMove(x1, y1, x2, y2) {
+    validMove(board, x1, y1, x2, y2) {
         return true
     }
 }
@@ -97,18 +105,22 @@ const classes = { Pawn, Rook, Knight, Bishop, Queen, King }
 
 function attachSocket(io) {
     io.on('connection', (socket) => {
+
         socket.on('move', (board, piece, x2, y2) => {
+
             let x1 = piece.x
             let y1 = piece.y
 
             if (board[y1][x1] && y2 <= 7 && x2 <= 7 && x2 >= 0 && y2 >= 0) {
-                if (board[y2][x2].side != piece.side) {
+                let foo = new classes[piece.name](piece.side)
+                if (board[y2][x2].side != piece.side && foo.validMove(board, x1, y1, x2, y2)) {
                     board[y1][x1] = 0
-                    board[y2][x2] = new classes[piece.name](piece.side)
+                    board[y2][x2] = foo
                 }
             }
             io.emit('updateBoard', board)
         })
+
     })
 }
 

@@ -2,7 +2,8 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-const { Board, attachSocket  } = require('./game');
+const { Board, attachSocket } = require('./game');
+const { User } = require('./user');
 
 const app = express();
 app.use(express.static('static')); // serve client files from /public
@@ -26,12 +27,39 @@ server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
 
+let users = [];
+
 io.on('connection', (socket) => {
-    console.log('A user connected');
+    let currentUser;
+    
+    // Find the next available user ID
+    let nextId = 1;
+    while (users.find(user => user.id === nextId)) {
+        nextId++;
+    }
+    
+    // Determine user side based on existing users
+    let userSide;
+    if (nextId === 1) {
+        userSide = 'white';
+    } else if (nextId === 2) {
+        userSide = 'black';
+    } else {
+        userSide = 'spectating';
+    }
+
+    currentUser = new User(nextId, userSide, socket);
+    users.push(currentUser);    console.log('A user connected:', currentUser.id, currentUser.side);
 
     socket.on('disconnect', () => {
         console.log('User disconnected');
+        const userIndex = users.findIndex(user => user.id === currentUser.id);
+        if (userIndex !== -1) {
+            users.splice(userIndex, 1);
+        }
     });
+
+    socket.emit('youAre', {id: currentUser.id, side: currentUser.side})
 
     socket.on('chat message', (msg) => {
         io.emit('chat message', msg);
