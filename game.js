@@ -23,12 +23,14 @@ class King extends Piece {
     }
 
     validMove(x1, y1, x2, y2) {
-        if ((Math.abs(x2 - x1) == 1 && y1 == y2) ||
-            ((Math.abs(y2 - y1) == 1) && x1 == x2) ||
-            ((Math.abs(x2 - x1) == 1) && (Math.abs(y2 - y1) == 1)) &&
-            !this.board.occupied(x2, y2)) {
+        if (
+            (Math.abs(x2 - x1) == 1 && y1 == y2) ||
+            (Math.abs(y2 - y1) == 1 && x1 == x2) ||
+            ((Math.abs(x2 - x1) == 1 && Math.abs(y2 - y1) == 1) && !this.board?.occupied(x2, y2))
+        ) {
             return true
         }
+        return false
     }
 }
 
@@ -87,8 +89,27 @@ class Board {
     }
 
     occupied(x, y) {
-        if (this.layout[y][x]) return true
+        return !!this.layout[y][x]
     }
 }
 
-module.exports = { Board, Piece, Pawn, King, Queen, Bishop, Knight, Rook };
+const classes = { Pawn, Rook, Knight, Bishop, Queen, King }
+
+function attachSocket(io) {
+    io.on('connection', (socket) => {
+        socket.on('move', (board, piece, x2, y2) => {
+            let x1 = piece.x
+            let y1 = piece.y
+
+            if (board[y1][x1] && y2 <= 7 && x2 <= 7 && x2 >= 0 && y2 >= 0) {
+                if (board[y2][x2].side != piece.side) {
+                    board[y1][x1] = 0
+                    board[y2][x2] = new classes[piece.name](piece.side)
+                }
+            }
+            io.emit('updateBoard', board)
+        })
+    })
+}
+
+module.exports = { Board, Piece, Pawn, King, Queen, Bishop, Knight, Rook, attachSocket };

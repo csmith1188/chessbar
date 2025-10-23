@@ -56,48 +56,27 @@ let board
 
 socket.emit('newBoard')
 socket.on('updateBoard', (newBoard) => {
-    for (let y of newBoard) {
-        for (let obj of y) {
-            if (obj.name) {
-                let img = new Image
-                img.src = `img/${Settings.pieceStyle}/${obj.side}_${obj.name.toLowerCase()}.png`
-                obj.imgObj = img
-            }
-        }
-    }
+    {
+        board = null
+        pieces = []
 
-    board = newBoard
+        let x = 0
+        let y2 = 0
+
+        for (let y of newBoard) {
+            x = 0
+            for (let obj of y) {
+                if (obj) new Piece(x * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, y2 * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, `img/${Settings.pieceStyle}/${obj.side}_${obj.name.toLowerCase()}.png`, obj.name, obj.side)
+                x++
+            }
+            y2++
+        }
+
+        board = newBoard
+    }
 })
 
-function drawBoard() {
-    let color = 'light'
-    for (let y = 0; y < 8; y++) {
-        for (let x = 0; x < 8; x++) {
-            if (color == 'light') {
-                ctx.fillStyle = Settings.lightSquareColor
-                color = 'dark'
-            } else {
-                ctx.fillStyle = Settings.darkSquareColor
-                color = 'light'
-            }
-            ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
-
-            if (board[y][x] && board[y][x].imgObj && board[y][x].imgObj.complete) {
-                ctx.drawImage(board[y][x].imgObj,
-                    x * Settings.boardSquareSize + Settings.defaultPieceMargin / 2,
-                    y * Settings.boardSquareSize + Settings.defaultPieceMargin / 2,
-                    Settings.boardSquareSize - Settings.defaultPieceMargin,
-                    Settings.boardSquareSize - Settings.defaultPieceMargin
-                )
-            }
-        }
-        color = (color == 'light') ? 'dark' : 'light'
-    }
-}
-
 function main() {
-    // ...
-
     if (board) drawBoard()
 
     if (Debug.showHoverSquare) {

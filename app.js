@@ -2,7 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-const { Board, Piece, Pawn, King, Queen, Bishop, Knight, Rook  } = require('./game');
+const { Board, attachSocket  } = require('./game');
 
 const app = express();
 app.use(express.static('static')); // serve client files from /public
@@ -18,6 +18,8 @@ const server = http.createServer(app);
 const io = new Server(server, {
     cors: { origin: '*' } // adjust for production
 });
+
+attachSocket(io);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
