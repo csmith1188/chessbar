@@ -4,6 +4,7 @@ const canvas = document.getElementById('canvas')
 const ctx = /** @type {CanvasRenderingContext2D} */ (canvas.getContext('2d'))
 canvas.width = Settings.boardSquareSize * 8
 canvas.height = Settings.boardSquareSize * 8
+ctx.imageSmoothingEnabled = false
 
 let Mouse = {
     x: 0,
@@ -57,9 +58,11 @@ socket.emit('newBoard')
 socket.on('updateBoard', (newBoard) => {
     for (let y of newBoard) {
         for (let obj of y) {
-            let img = new Image
-            img.src = obj.img
-            obj.imgObj = img
+            if (obj.name) {
+                let img = new Image
+                img.src = `img/${Settings.pieceStyle}/${obj.side}_${obj.name.toLowerCase()}.png`
+                obj.imgObj = img
+            }
         }
     }
 
@@ -67,7 +70,7 @@ socket.on('updateBoard', (newBoard) => {
 })
 
 function drawBoard() {
-    color = 'light'
+    let color = 'light'
     for (let y = 0; y < 8; y++) {
         for (let x = 0; x < 8; x++) {
             if (color == 'light') {
@@ -79,7 +82,7 @@ function drawBoard() {
             }
             ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
 
-            if (board[y][x].img) {
+            if (board[y][x] && board[y][x].imgObj && board[y][x].imgObj.complete) {
                 ctx.drawImage(board[y][x].imgObj,
                     x * Settings.boardSquareSize + Settings.defaultPieceMargin / 2,
                     y * Settings.boardSquareSize + Settings.defaultPieceMargin / 2,
@@ -93,6 +96,8 @@ function drawBoard() {
 }
 
 function main() {
+    // ...
+
     if (board) drawBoard()
 
     if (Debug.showHoverSquare) {

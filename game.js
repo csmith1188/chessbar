@@ -1,19 +1,15 @@
 class Piece {
-    constructor(side, img = '') {
+    constructor(side) {
         this.side = side
-        if (img) {
-            this.img = `img/${img}.png`
-        } else {
-            this.img = `img/goofy/${this.side}_${this.constructor.name.toLowerCase()}.png`
-        }
+        this.name = this.constructor.name
     }
 
     move() { }
 }
 
 class Pawn extends Piece {
-    constructor(side, img) {
-        super(side, img)
+    constructor(side) {
+        super(side)
     }
 
     validMove(x1, y1, x2, y2) {
@@ -22,8 +18,8 @@ class Pawn extends Piece {
 }
 
 class King extends Piece {
-    constructor(side, img) {
-        super(side, img)
+    constructor(side) {
+        super(side)
     }
 
     validMove(x1, y1, x2, y2) {
@@ -37,8 +33,8 @@ class King extends Piece {
 }
 
 class Queen extends Piece {
-    constructor(side, img) {
-        super(side, img)
+    constructor(side) {
+        super(side)
     }
 
     validMove(x1, y1, x2, y2) {
@@ -47,8 +43,8 @@ class Queen extends Piece {
 }
 
 class Bishop extends Piece {
-    constructor(side, img) {
-        super(side, img)
+    constructor(side) {
+        super(side)
     }
 
     validMove(x1, y1, x2, y2) {
@@ -57,8 +53,8 @@ class Bishop extends Piece {
 }
 
 class Knight extends Piece {
-    constructor(side, img) {
-        super(side, img)
+    constructor(side) {
+        super(side)
     }
 
     validMove(x1, y1, x2, y2) {
@@ -67,8 +63,8 @@ class Knight extends Piece {
 }
 
 class Rook extends Piece {
-    constructor(side, img) {
-        super(side, img)
+    constructor(side) {
+        super(side)
     }
 
     validMove(x1, y1, x2, y2) {
@@ -91,7 +87,7 @@ class Board {
     }
 
     occupied(x, y) {
-        if(this.layout[y][x]) return true
+        if (this.layout[y][x]) return true
     }
 }
 
