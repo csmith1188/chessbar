@@ -4,7 +4,7 @@ class Piece {
         if (img) {
             this.img = `img/${img}.png`
         } else {
-            this.img = `img/${this.constructor.name.toLowerCase()}.png`
+            this.img = `img/goofy/${this.side}_${this.constructor.name.toLowerCase()}.png`
         }
     }
 
