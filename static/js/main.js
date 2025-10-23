@@ -6,6 +6,8 @@ canvas.width = Settings.boardSquareSize * 8
 canvas.height = Settings.boardSquareSize * 8
 ctx.imageSmoothingEnabled = false
 
+let me
+
 let Mouse = {
     x: 0,
     y: 0,
@@ -74,6 +76,10 @@ socket.on('updateBoard', (newBoard) => {
 
         board = newBoard
     }
+})
+
+socket.on('youAre', (foo) => {
+    me = foo
 })
 
 function main() {
