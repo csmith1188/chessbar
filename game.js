@@ -14,10 +14,20 @@ class Pawn extends Piece {
 
     validMove(board, x1, y1, x2, y2) {
         if (x1 == x2 && Math.abs(y2 - y1) <= 2) {
-            if (!board[y1 - 1][x1] && !board[y2][x2]) {
-                return true
+            if (y2 < y1) {
+                if (y1 - y2 > 0 && this.side == 'white' && !board[y1 - 1][x1] && !board[y2][x2]) {
+                    return true
+                }
             } else {
-                console.log(y1, board[y1 - 1][x1], board[y2][x2])
+                if (y1 - y2 < 0 && this.side == 'black' && !board[y1 + 1][x1] && !board[y2][x2]) {
+                    return true
+                }
+            }
+        } else if (Math.abs(x2 - x1) == 1 && Math.abs(y2 - y1) == 1 && board[y2][x2] && board[y2][x2].side != this.side) {
+            if (this.side == 'white' && y2 < y1) {
+                return true
+            } else if (this.side == 'black' && y2 > y1) {
+                return true
             }
         }
 
@@ -34,7 +44,7 @@ class King extends Piece {
         if (
             (Math.abs(x2 - x1) == 1 && y1 == y2) ||
             (Math.abs(y2 - y1) == 1 && x1 == x2) ||
-            ((Math.abs(x2 - x1) == 1 && Math.abs(y2 - y1) == 1) && board[y][x].side != this.side)
+            ((Math.abs(x2 - x1) == 1 && Math.abs(y2 - y1) == 1) && board[y2][x2].side != this.side)
         ) {
             return true
         }
