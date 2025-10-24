@@ -37,14 +37,36 @@ class Piece {
             if (!Mouse.left) {
                 this.selected = false
                 selected = null
-                socket.emit('move', board,
-                    {
-                        name: this.name,
-                        side: this.side,
-                        x: this.bx,
-                        y: this.by
-                    },
-                    Math.floor((this.x + this.w / 2) / Settings.boardSquareSize), Math.floor((this.y + this.h / 2) / Settings.boardSquareSize))
+                if (me.side == this.side) {
+                    if (me.side == 'white') {
+                        socket.emit('move', board,
+                            {
+                                name: this.name,
+                                side: this.side,
+                                x: this.bx,
+                                y: this.by
+                            },
+                            Math.floor((this.x + this.w / 2) / Settings.boardSquareSize), Math.floor((this.y + this.h / 2) / Settings.boardSquareSize))
+                    } else {
+                        socket.emit('move', board,
+                            {
+                                name: this.name,
+                                side: this.side,
+                                x: this.bx,
+                                y: this.by
+                            },
+                            Math.floor((this.x + this.w / 2) / Settings.boardSquareSize), Math.floor((this.y + this.h / 2) / Settings.boardSquareSize))
+                    }
+                } else {
+                    socket.emit('move', board,
+                            {
+                                name: this.name,
+                                side: this.side,
+                                x: this.bx,
+                                y: this.by
+                            },
+                            this.bx, this.by)
+                }
             }
             this.x = Mouse.x - this.w / 2
             this.y = Mouse.y - this.h / 2
@@ -79,10 +101,10 @@ function drawBoard() {
         }
         color = (color == 'light') ? 'dark' : 'light'
     }
-
     for (let piece of pieces) {
         if (piece.img && piece.img.complete) {
             piece.draw()
         }
     }
+
 }

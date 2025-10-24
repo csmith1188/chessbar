@@ -10,5 +10,6 @@ let Settings = {
 let Debug = {
     logMouseEvents: false,
     showHoverSquare: true,
-    showClickSquare: false
+    showClickSquare: false,
+    logMoveEvents: true
 }

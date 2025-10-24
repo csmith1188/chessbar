@@ -56,7 +56,12 @@ document.addEventListener('mouseup', (e) => {
 
 let board
 
+socket.on('youAre', (foo) => {
+    me = foo
+})
+
 socket.emit('newBoard')
+
 socket.on('updateBoard', (newBoard) => {
     {
         board = null
@@ -65,21 +70,28 @@ socket.on('updateBoard', (newBoard) => {
         let x = 0
         let y2 = 0
 
-        for (let y of newBoard) {
-            x = 0
-            for (let obj of y) {
-                if (obj) new Piece(x * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, y2 * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, `img/${Settings.pieceStyle}/${obj.side}_${obj.name.toLowerCase()}.png`, obj.name, obj.side)
-                x++
+        if (me.side == 'white') {
+            for (let y of newBoard) {
+                x = 0
+                for (let obj of y) {
+                    if (obj) new Piece(x * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, y2 * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, `img/${Settings.pieceStyle}/${obj.side}_${obj.name.toLowerCase()}.png`, obj.name, obj.side)
+                    x++
+                }
+                y2++
             }
-            y2++
+        } else {
+            for (let y of [...newBoard].reverse()) {
+                x = 0
+                for (let obj of y) {
+                    if (obj) new Piece(x * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, y2 * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, `img/${Settings.pieceStyle}/${obj.side}_${obj.name.toLowerCase()}.png`, obj.name, obj.side)
+                    x++
+                }
+                y2++
+            }
         }
 
         board = newBoard
     }
-})
-
-socket.on('youAre', (foo) => {
-    me = foo
 })
 
 function main() {

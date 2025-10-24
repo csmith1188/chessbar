@@ -14,21 +14,14 @@ class Pawn extends Piece {
 
     validMove(board, x1, y1, x2, y2) {
         if (x1 == x2 && Math.abs(y2 - y1) <= 2) {
-            if (y2 < y1) {
-                if (y1 - y2 > 0 && this.side == 'white' && !board[y1 - 1][x1] && !board[y2][x2]) {
-                    return true
-                }
-            } else {
-                if (y1 - y2 < 0 && this.side == 'black' && !board[y1 + 1][x1] && !board[y2][x2]) {
-                    return true
-                }
+            if (y1 - y2 > 0 && !board[y1 - 1][x1] && !board[y2][x2]) {
+                return true
+            }
+            if (y1 - y2 < 0 && !board[y1 + 1][x1] && !board[y2][x2]) {
+                return true
             }
         } else if (Math.abs(x2 - x1) == 1 && Math.abs(y2 - y1) == 1 && board[y2][x2] && board[y2][x2].side != this.side) {
-            if (this.side == 'white' && y2 < y1) {
-                return true
-            } else if (this.side == 'black' && y2 > y1) {
-                return true
-            }
+            return true
         }
 
         return false
@@ -78,7 +71,12 @@ class Knight extends Piece {
     }
 
     validMove(board, x1, y1, x2, y2) {
-        return true
+        if (Math.abs(y2 - y1) == 1 && Math.abs(x2 - x1) == 2 && (!board[y2][x2] || board[y2][x2].side != this.side)) {
+            return true
+        } else if (Math.abs(x2 - x1) == 1 && Math.abs(y2 - y1) == 2 && (!board[y2][x2] || board[y2][x2].side != this.side)) {
+            return true
+        }
+        return false
     }
 }
 
@@ -104,6 +102,7 @@ class Board {
             [new Pawn('white'), new Pawn('white'), new Pawn('white'), new Pawn('white'), new Pawn('white'), new Pawn('white'), new Pawn('white'), new Pawn('white')],
             [new Rook('white'), new Knight('white'), new Bishop('white'), new Queen('white'), new King('white'), new Bishop('white'), new Knight('white'), new Rook('white')]
         ]
+        this.turn = 'white'
     }
 
     occupied(x, y) {
@@ -117,9 +116,16 @@ function attachSocket(io) {
     io.on('connection', (socket) => {
 
         socket.on('move', (board, piece, x2, y2) => {
-
             let x1 = piece.x
             let y1 = piece.y
+
+            if (piece.side == 'black') {
+                x1 = x1
+                y1 = 7 - y1
+                y2  = 7 - y2
+            }
+
+            console.log(`${piece.name} (${x1}, ${y1}) is moving to (${x2}, ${y2})`)
 
             if (board[y1][x1] && y2 <= 7 && x2 <= 7 && x2 >= 0 && y2 >= 0) {
                 let foo = new classes[piece.name](piece.side)
