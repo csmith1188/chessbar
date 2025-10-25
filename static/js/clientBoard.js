@@ -58,14 +58,7 @@ class Piece {
                             Math.floor((this.x + this.w / 2) / Settings.boardSquareSize), Math.floor((this.y + this.h / 2) / Settings.boardSquareSize))
                     }
                 } else {
-                    socket.emit('move', board,
-                            {
-                                name: this.name,
-                                side: this.side,
-                                x: this.bx,
-                                y: this.by
-                            },
-                            this.bx, this.by)
+                    socket.emit('updateBoard', board)
                 }
             }
             this.x = Mouse.x - this.w / 2
