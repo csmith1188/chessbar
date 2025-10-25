@@ -120,20 +120,28 @@ function attachSocket(io) {
             let y1 = piece.y
 
             if (piece.side == 'black') {
-                x1 = 7 -x1
+                x1 = 7 - x1
                 x2 = 7 - x2
                 y1 = 7 - y1
-                y2  = 7 - y2
+                y2 = 7 - y2
             }
 
-            console.log(`${piece.name} (${x1}, ${y1}) is moving to (${x2}, ${y2})`)
+            console.log(`\n${board.turn}'s turn.`)
+            console.log(`${piece.side} ${piece.name.toLowerCase()} (${x1}, ${y1}) is attempting to move to (${x2}, ${y2})`)
 
-            if (board[y1][x1] && y2 <= 7 && x2 <= 7 && x2 >= 0 && y2 >= 0) {
-                let foo = new classes[piece.name](piece.side)
-                if (board[y2][x2].side != piece.side && foo.validMove(board, x1, y1, x2, y2)) {
-                    board[y1][x1] = 0
-                    board[y2][x2] = foo
+            if (board.turn == piece.side && !(x1 == x2 && y1 == y2)) {
+
+                board.turn = board.turn == 'white' ? 'black' : 'white'
+                if (board.layout[y1][x1] && y2 <= 7 && x2 <= 7 && x2 >= 0 && y2 >= 0) {
+                    let foo = new classes[piece.name](piece.side)
+                    if (board.layout[y2][x2].side != piece.side && foo.validMove(board.layout, x1, y1, x2, y2)) {
+                        board.layout[y1][x1] = 0
+                        board.layout[y2][x2] = foo
+                    }
                 }
+                console.log(`Move successful, it's now ${board.turn}'s turn.`)
+            } else {
+                console.log(`Still ${board.turn}'s turn, move failed.`)
             }
             io.emit('updateBoard', board)
         })

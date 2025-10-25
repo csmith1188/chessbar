@@ -64,6 +64,7 @@ socket.emit('newBoard')
 
 socket.on('updateBoard', (newBoard) => {
     {
+        let layout = newBoard.layout
         board = null
         pieces = []
 
@@ -71,7 +72,7 @@ socket.on('updateBoard', (newBoard) => {
         let y2 = 0
 
         if (me.side == 'white') {
-            for (let y of newBoard) {
+            for (let y of layout) {
                 x = 0
                 for (let obj of y) {
                     if (obj) new Piece(x * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, y2 * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, `img/${Settings.pieceStyle}/${obj.side}_${obj.name.toLowerCase()}.png`, obj.name, obj.side)
@@ -80,7 +81,7 @@ socket.on('updateBoard', (newBoard) => {
                 y2++
             }
         } else {
-            for (let y of [...newBoard].reverse()) {
+            for (let y of [...layout].reverse()) {
                 x = 0
                 for (let obj of [...y].reverse()) {
                     if (obj) new Piece(x * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, y2 * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, `img/${Settings.pieceStyle}/${obj.side}_${obj.name.toLowerCase()}.png`, obj.name, obj.side)

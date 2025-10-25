@@ -68,11 +68,11 @@ io.on('connection', (socket) => {
     socket.on('newBoard', () => {
         console.log('newBoard event received - creating board on server');
         let board = new Board();
-        io.emit('updateBoard', board.layout);
+        io.emit('updateBoard', board);
     });
 
-    socket.on('updateBoard', (boardData) => {
+    socket.on('updateBoard', (board) => {
         console.log('updateBoard event received');
-        io.emit('updateBoard', boardData)
+        io.emit('updateBoard', board)
     });
 });
