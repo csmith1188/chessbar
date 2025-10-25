@@ -131,15 +131,17 @@ function attachSocket(io) {
 
             if (board.turn == piece.side && !(x1 == x2 && y1 == y2)) {
 
-                board.turn = board.turn == 'white' ? 'black' : 'white'
                 if (board.layout[y1][x1] && y2 <= 7 && x2 <= 7 && x2 >= 0 && y2 >= 0) {
+
                     let foo = new classes[piece.name](piece.side)
+
                     if (board.layout[y2][x2].side != piece.side && foo.validMove(board.layout, x1, y1, x2, y2)) {
                         board.layout[y1][x1] = 0
                         board.layout[y2][x2] = foo
+                        board.turn = board.turn == 'white' ? 'black' : 'white'
+                        console.log(`Move successful, it's now ${board.turn}'s turn.`)
                     }
                 }
-                console.log(`Move successful, it's now ${board.turn}'s turn.`)
             } else {
                 console.log(`Still ${board.turn}'s turn, move failed.`)
             }
