@@ -4,7 +4,7 @@ const canvas = document.getElementById('canvas')
 const ctx = /** @type {CanvasRenderingContext2D} */ (canvas.getContext('2d'))
 canvas.width = Settings.boardSquareSize * 8
 canvas.height = Settings.boardSquareSize * 8
-ctx.imageSmoothingEnabled = false
+if (Settings.pieceStyle == 'pixel') ctx.imageSmoothingEnabled = false
 
 let me
 
@@ -82,7 +82,7 @@ socket.on('updateBoard', (newBoard) => {
         } else {
             for (let y of [...newBoard].reverse()) {
                 x = 0
-                for (let obj of y) {
+                for (let obj of [...y].reverse()) {
                     if (obj) new Piece(x * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, y2 * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, `img/${Settings.pieceStyle}/${obj.side}_${obj.name.toLowerCase()}.png`, obj.name, obj.side)
                     x++
                 }

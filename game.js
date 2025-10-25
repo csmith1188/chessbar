@@ -120,7 +120,8 @@ function attachSocket(io) {
             let y1 = piece.y
 
             if (piece.side == 'black') {
-                x1 = x1
+                x1 = 7 -x1
+                x2 = 7 - x2
                 y1 = 7 - y1
                 y2  = 7 - y2
             }
