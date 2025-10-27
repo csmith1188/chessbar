@@ -86,7 +86,105 @@ class Rook extends Piece {
     }
 
     validMove(board, x1, y1, x2, y2) {
-        return true
+        let validMoves = []
+
+        let l = true, r = true, u = true, d = true
+
+        let ix = x1
+        let iy = y1
+
+
+
+        while (l) {
+            ix--
+            if (ix < 0) {
+                l = false
+                break
+            }
+
+            if (board[y1][ix]) {
+                if (board[y1][ix].side == this.side) {
+                    l = false
+                } else {
+                    validMoves.push({ x: ix, y: y1 })
+                    l = false
+                }
+            } else {
+                validMoves.push({ x: ix, y: y1 })
+            }
+        }
+
+        ix = x1
+        iy = y1
+
+        while (r) {
+            ix++
+            if (ix > 7) {
+                r = false
+                break
+            }
+
+            if (board[y1][ix]) {
+                if (board[y1][ix].side == this.side) {
+                    r = false
+                } else {
+                    validMoves.push({ x: ix, y: y1 })
+                    r = false
+                }
+            } else {
+                validMoves.push({ x: ix, y: y1 })
+            }
+        }
+
+        ix = x1
+        iy = y1
+
+        while (u) {
+            iy++
+            if (iy > 7) {
+                u = false
+                break
+            }
+
+            if (board[iy][x1]) {
+                if (board[iy][x1].side == this.side) {
+                    u = false
+                } else {
+                    validMoves.push({ x: x1, y: iy })
+                    u = false
+                }
+            } else {
+                validMoves.push({ x: x1, y: iy })
+            }
+        }
+
+        ix = x1
+        iy = y1
+
+        while (d) {
+            iy--
+            if (iy < 0) {
+                d = false
+                break
+            }
+
+            if (board[iy][x1]) {
+                if (board[iy][x1].side == this.side) {
+                    d = false
+                } else {
+                    validMoves.push({ x: x1, y: iy })
+                    d = false
+                }
+            } else {
+                validMoves.push({ x: x1, y: iy })
+            }
+        }
+
+        for (let move of validMoves) {
+            if (move.x == x2 && move.y == y2) return true
+        }
+
+        return false
     }
 }
 
@@ -115,7 +213,7 @@ const classes = { Pawn, Rook, Knight, Bishop, Queen, King }
 function attachSocket(io) {
     io.on('connection', (socket) => {
 
-        socket.on('move', (board, piece, x2, y2) => {
+        socket.on('move', (board, player, piece, x2, y2) => {
             let x1 = piece.x
             let y1 = piece.y
 
@@ -129,7 +227,7 @@ function attachSocket(io) {
             console.log(`\n${board.turn}'s turn.`)
             console.log(`${piece.side} ${piece.name.toLowerCase()} (${x1}, ${y1}) is attempting to move to (${x2}, ${y2})`)
 
-            if (board.turn == piece.side && !(x1 == x2 && y1 == y2)) {
+            if (board.turn == player.side && !(x1 == x2 && y1 == y2)) {
 
                 if (board.layout[y1][x1] && y2 <= 7 && x2 <= 7 && x2 >= 0 && y2 >= 0) {
 
@@ -140,10 +238,20 @@ function attachSocket(io) {
                         board.layout[y2][x2] = foo
                         board.turn = board.turn == 'white' ? 'black' : 'white'
                         console.log(`Move successful, it's now ${board.turn}'s turn.`)
+                    } else {
+                        console.log(`Still ${board.turn}'s turn, move failed (Invalid).`)
                     }
+                } else {
+                    console.log(`Still ${board.turn}'s turn, move failed (Off screen).`)
                 }
+            } else if (player.side == 'spectating') {
+
+                console.log(`Spectators can't play, move failed.`)
+
             } else {
+
                 console.log(`Still ${board.turn}'s turn, move failed.`)
+
             }
             io.emit('updateBoard', board)
         })

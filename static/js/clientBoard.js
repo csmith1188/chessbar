@@ -39,7 +39,7 @@ class Piece {
                 selected = null
                 if (me.side == this.side) {
                     if (me.side == 'white') {
-                        socket.emit('move', board,
+                        socket.emit('move', board, me,
                             {
                                 name: this.name,
                                 side: this.side,
@@ -48,7 +48,7 @@ class Piece {
                             },
                             Math.floor((this.x + this.w / 2) / Settings.boardSquareSize), Math.floor((this.y + this.h / 2) / Settings.boardSquareSize))
                     } else {
-                        socket.emit('move', board,
+                        socket.emit('move', board, me,
                             {
                                 name: this.name,
                                 side: this.side,
@@ -76,6 +76,10 @@ class Piece {
 }
 
 function drawBoard() {
+    if (selected && !Mouse.left) {
+        selected.selected = false
+        selected = null
+    }
     for (let piece of pieces) {
         piece.update()
     }
