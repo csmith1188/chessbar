@@ -61,7 +61,31 @@ class Bishop extends Piece {
     }
 
     validMove(board, x1, y1, x2, y2) {
-        return true
+        // Bishop moves diagonally - the absolute difference in x and y must be equal
+        const dx = Math.abs(x2 - x1);
+        const dy = Math.abs(y2 - y1);
+        
+        if (dx !== dy || dx === 0) {
+            return false;
+        }
+        
+        // Check if the path is clear
+        const xStep = x2 > x1 ? 1 : -1;
+        const yStep = y2 > y1 ? 1 : -1;
+        
+        let x = x1 + xStep;
+        let y = y1 + yStep;
+        
+        while (x !== x2 || y !== y2) {
+            if (board[y][x]) {
+                return false; // Path is blocked
+            }
+            x += xStep;
+            y += yStep;
+        }
+        
+        // Destination must be empty or contain opponent's piece
+        return !board[y2][x2] || board[y2][x2].side !== this.side;
     }
 }
 
