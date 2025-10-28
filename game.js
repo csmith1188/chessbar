@@ -44,17 +44,238 @@ class King extends Piece {
         return false
     }
 }
-
+/*
+ ::::::::  :::    ::: :::::::::: :::::::::: ::::    :::
+:+:    :+: :+:    :+: :+:        :+:        :+:+:   :+:
++:+    +:+ +:+    +:+ +:+        +:+        :+:+:+  +:+
++#+    +:+ +#+    +:+ +#++:++#   +#++:++#   +#+ +:+ +#+
++#+  # +#+ +#+    +#+ +#+        +#+        +#+  +#+#+#
+#+#   +#+  #+#    #+# #+#        #+#        #+#   #+#+#
+ ###### ### ########  ########## ########## ###    ####
+*/
 class Queen extends Piece {
     constructor(side) {
         super(side)
     }
 
     validMove(board, x1, y1, x2, y2) {
-        return true
+        let validMoves = []
+
+        let l, r, u, d, ne, se, sw, nw
+        l = r = u = d = ne = se = sw = nw = true
+
+        let ix = x1
+        let iy = y1
+
+        while (l) {
+            ix--
+            if (ix < 0) {
+                l = false
+                break
+            }
+
+            if (board[y1][ix]) {
+                if (board[y1][ix].side == this.side) {
+                    l = false
+                } else {
+                    validMoves.push({ x: ix, y: y1 })
+                    l = false
+                }
+            } else {
+                validMoves.push({ x: ix, y: y1 })
+            }
+        }
+
+        ix = x1
+        iy = y1
+
+        while (r) {
+            ix++
+            if (ix > 7) {
+                r = false
+                break
+            }
+
+            if (board[y1][ix]) {
+                if (board[y1][ix].side == this.side) {
+                    r = false
+                } else {
+                    validMoves.push({ x: ix, y: y1 })
+                    r = false
+                }
+            } else {
+                validMoves.push({ x: ix, y: y1 })
+            }
+        }
+
+        ix = x1
+        iy = y1
+
+        while (u) {
+            iy++
+            if (iy > 7) {
+                u = false
+                break
+            }
+
+            if (board[iy][x1]) {
+                if (board[iy][x1].side == this.side) {
+                    u = false
+                } else {
+                    validMoves.push({ x: x1, y: iy })
+                    u = false
+                }
+            } else {
+                validMoves.push({ x: x1, y: iy })
+            }
+        }
+
+        ix = x1
+        iy = y1
+
+        while (d) {
+            iy--
+            if (iy < 0) {
+                d = false
+                break
+            }
+
+            if (board[iy][x1]) {
+                if (board[iy][x1].side == this.side) {
+                    d = false
+                } else {
+                    validMoves.push({ x: x1, y: iy })
+                    d = false
+                }
+            } else {
+                validMoves.push({ x: x1, y: iy })
+            }
+        }
+
+        ix = x1
+        iy = y1
+
+        while (ne) {
+            iy--
+            ix++
+            if (iy < 0) {
+                ne = false
+                break
+            }
+            if (ix > 7) {
+                ne = false
+                break
+            }
+
+            if (board[iy][ix]) {
+                if (board[iy][ix].side == this.side) {
+                    ne = false
+                } else {
+                    validMoves.push({ x: ix, y: iy })
+                    ne = false
+                }
+            } else {
+                validMoves.push({ x: ix, y: iy })
+            }
+        }
+
+        ix = x1
+        iy = y1
+
+        while (se) {
+            iy++
+            ix++
+            if (iy > 7) {
+                se = false
+                break
+            }
+            if (ix > 7) {
+                se = false
+                break
+            }
+
+            if (board[iy][ix]) {
+                if (board[iy][ix].side == this.side) {
+                    se = false
+                } else {
+                    validMoves.push({ x: ix, y: iy })
+                    se = false
+                }
+            } else {
+                validMoves.push({ x: ix, y: iy })
+            }
+        }
+
+        ix = x1
+        iy = y1
+
+        while (sw) {
+            iy++
+            ix--
+            if (iy > 7) {
+                ne = false
+                break
+            }
+            if (ix < 0) {
+                ne = false
+                break
+            }
+
+            if (board[iy][ix]) {
+                if (board[iy][ix].side == this.side) {
+                    ne = false
+                } else {
+                    validMoves.push({ x: ix, y: iy })
+                    ne = false
+                }
+            } else {
+                validMoves.push({ x: ix, y: iy })
+            }
+        }
+
+        ix = x1
+        iy = y1
+
+        while (nw) {
+            iy--
+            ix--
+            if (iy < 0) {
+                ne = false
+                break
+            }
+            if (ix < 0) {
+                ne = false
+                break
+            }
+
+            if (board[iy][ix]) {
+                if (board[iy][ix].side == this.side) {
+                    ne = false
+                } else {
+                    validMoves.push({ x: ix, y: iy })
+                    ne = false
+                }
+            } else {
+                validMoves.push({ x: ix, y: iy })
+            }
+        }
+
+        for (let move of validMoves) {
+            if (move.x == x2 && move.y == y2) return true
+        }
+
+        return false
     }
 }
-
+/*
+::::::::: ::::::::::: ::::::::  :::    :::  ::::::::  :::::::::
+:+:    :+:    :+:    :+:    :+: :+:    :+: :+:    :+: :+:    :+:
++:+    +:+    +:+    +:+        +:+    +:+ +:+    +:+ +:+    +:+
++#++:++#+     +#+    +#++:++#++ +#++:++#++ +#+    +:+ +#++:++#+
++#+    +#+    +#+           +#+ +#+    +#+ +#+    +#+ +#+
+#+#    #+#    #+#    #+#    #+# #+#    #+# #+#    #+# #+#
+######### ########### ########  ###    ###  ########  ###
+*/
 class Bishop extends Piece {
     constructor(side) {
         super(side)
@@ -88,12 +309,11 @@ class Rook extends Piece {
     validMove(board, x1, y1, x2, y2) {
         let validMoves = []
 
-        let l = true, r = true, u = true, d = true
+        let l, r, u, d
+        l = r = u = d = true
 
         let ix = x1
         let iy = y1
-
-
 
         while (l) {
             ix--

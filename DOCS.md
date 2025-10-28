@@ -17,6 +17,7 @@
 ### Truit
 - Fixed selection bug
 - Began queen move validation
+- Completed queen move validation
 
 ### Kayden
 - Info box shows turns with font
