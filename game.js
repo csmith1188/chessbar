@@ -201,6 +201,7 @@ class Board {
             [new Rook('white'), new Knight('white'), new Bishop('white'), new Queen('white'), new King('white'), new Bishop('white'), new Knight('white'), new Rook('white')]
         ]
         this.turn = 'white'
+        this.captured = []
     }
 
     occupied(x, y) {
@@ -235,6 +236,7 @@ function attachSocket(io) {
 
                     if (board.layout[y2][x2].side != piece.side && foo.validMove(board.layout, x1, y1, x2, y2)) {
                         board.layout[y1][x1] = 0
+                        if (board.layout[y2][x2]) board.captured.push({name: board.layout[y2][x2].name, side: board.layout[y2][x2].side})
                         board.layout[y2][x2] = foo
                         board.turn = board.turn == 'white' ? 'black' : 'white'
                         console.log(`Move successful, it's now ${board.turn}'s turn.`)
