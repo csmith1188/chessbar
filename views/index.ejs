@@ -3,6 +3,7 @@
 
 <head>
     <title>Chess</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lavishly+Yours&display=swap" rel="stylesheet">
     <style>
         #container {
             display: flex;
@@ -28,6 +29,12 @@
             border: 10px solid black;
             width: 175px;
             height: 100px;
+            font-size: 90px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Lavishly Yours', cursive;
+            font-weight: 400;
         }
     </style>
 </head>
@@ -38,7 +45,7 @@
         <div id="sidebar">
             <div id="CapturedW" class="captureBox"></div>
             <div id="CapturedB" class="captureBox"></div>
-            <div id="InfoBox"><!-- varible for turn go here me thinks--></div>
+            <div id="InfoBox"></div>
         </div>
     </div>
 
@@ -49,6 +56,12 @@
 
     <script src="js/clientBoard.js"></script>
     <script src="js/main.js"></script>
+    <script>
+        const InfoBox = document.getElementById("InfoBox");
+        socket.on("updateBoard", (board) => {
+            InfoBox.innerHTML = board.turn
+        })
+    </script>
 </body>
 
 </html>

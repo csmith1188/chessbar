@@ -11,3 +11,13 @@
 - added css to index
 - made two boxes for captured pieces and a box for turns
 - added containers
+
+## 10/28
+ 
+### Truit
+- Fixed selection bug
+- Began queen move validation
+
+### Kayden
+- Info box shows turns with font
+- 

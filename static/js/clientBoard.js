@@ -76,10 +76,10 @@ class Piece {
 }
 
 function drawBoard() {
-    if (selected && !Mouse.left) {
-        selected.selected = false
-        selected = null
-    }
+    // if (selected && !Mouse.left) {
+    //     selected.selected = false
+    //     selected = null
+    // }
     for (let piece of pieces) {
         piece.update()
     }
