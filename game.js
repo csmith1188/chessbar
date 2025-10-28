@@ -518,22 +518,25 @@ function attachSocket(io) {
                         foo.moves++
                         board.turn = board.turn == 'white' ? 'black' : 'white'
                         console.log(`Move successful, it's now ${board.turn}'s turn.`)
+                        io.emit('updateBoard', board)
                     } else {
                         console.log(`Still ${board.turn}'s turn, move failed (Invalid).`)
+                        socket.emit('updateBoard', board)
                     }
                 } else {
                     console.log(`Still ${board.turn}'s turn, move failed (Off screen).`)
+                    socket.emit('updateBoard', board)
                 }
             } else if (player.side == 'spectating') {
 
                 console.log(`Spectators can't play, move failed.`)
+                socket.emit('updateBoard', board)
 
             } else {
-
                 console.log(`Still ${board.turn}'s turn, move failed.`)
-
+                socket.emit('updateBoard', board)
             }
-            io.emit('updateBoard', board)
+            
         })
 
     })

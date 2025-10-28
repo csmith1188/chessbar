@@ -35,14 +35,14 @@ class Piece {
             this.selected = true
         }
 
-        if (this.selected) {
+        if (this.selected && me.side == this.side) {
             this.x = Mouse.x - this.w / 2
             this.y = Mouse.y - this.h / 2
         }
     }
 
     draw() {
-        if (this.hover()) {
+        if (this.hover() && me.side == this.side) {
             ctx.drawImage(this.img, this.x - Settings.hoverSizeIncrease / 2, this.y - Settings.hoverSizeIncrease, this.w + Settings.hoverSizeIncrease, this.h + Settings.hoverSizeIncrease)
         } else {
             ctx.drawImage(this.img, this.x, this.y, this.w, this.h)
@@ -85,12 +85,11 @@ function drawBoard() {
                     },
                     Math.floor((selected.x + selected.w / 2) / Settings.boardSquareSize), Math.floor((selected.y + selected.h / 2) / Settings.boardSquareSize))
             }
-        } else {
-            socket.emit('updateBoard', board)
         }
         selected.selected = false
         selected = null
     }
+
     for (let piece of pieces) {
         piece.update()
     }
