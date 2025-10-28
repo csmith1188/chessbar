@@ -20,6 +20,7 @@
 - Completed queen move validation
 - Added piece move count
 - Pawn can only move two spaces when it's their first move
+- Players cant moe other players pieces
 
 ### Kayden
 - Info box shows turns with font
