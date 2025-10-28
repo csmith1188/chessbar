@@ -2,11 +2,13 @@ let pieces = []
 selected = null
 
 class Piece {
-    constructor(x, y, img, name, side) {
+    constructor(x, y, img, name, side, moves) {
         this.x = x
         this.y = y
         this.w = Settings.boardSquareSize - Settings.defaultPieceMargin
         this.h = Settings.boardSquareSize - Settings.defaultPieceMargin
+
+        this.moves = moves
 
         this.name = name
         this.side = side
@@ -48,7 +50,18 @@ class Piece {
     }
 }
 
+/*
+:::::::::  :::::::::      :::     :::       :::
+:+:    :+: :+:    :+:   :+: :+:   :+:       :+:
++:+    +:+ +:+    +:+  +:+   +:+  +:+       +:+
++#+    +:+ +#++:++#:  +#++:++#++: +#+  +:+  +#+
++#+    +#+ +#+    +#+ +#+     +#+ +#+ +#+#+ +#+
+#+#    #+# #+#    #+# #+#     #+#  #+#+# #+#+#
+#########  ###    ### ###     ###   ###   ###
+*/
 function drawBoard() {
+    // if (selected) console.log(selected.moves)
+
     if (!Mouse.left && selected) {
         if (me.side == selected.side) {
             if (me.side == 'white') {
@@ -57,7 +70,8 @@ function drawBoard() {
                         name: selected.name,
                         side: selected.side,
                         x: selected.bx,
-                        y: selected.by
+                        y: selected.by,
+                        moves: selected.moves
                     },
                     Math.floor((selected.x + selected.w / 2) / Settings.boardSquareSize), Math.floor((selected.y + selected.h / 2) / Settings.boardSquareSize))
             } else {
@@ -66,7 +80,8 @@ function drawBoard() {
                         name: selected.name,
                         side: selected.side,
                         x: selected.bx,
-                        y: selected.by
+                        y: selected.by,
+                        moves: selected.moves
                     },
                     Math.floor((selected.x + selected.w / 2) / Settings.boardSquareSize), Math.floor((selected.y + selected.h / 2) / Settings.boardSquareSize))
             }

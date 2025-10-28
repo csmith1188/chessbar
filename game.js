@@ -8,9 +8,10 @@
 ###       ########### ########## ########  ##########
 */
 class Piece {
-    constructor(side) {
+    constructor(side, moves = 0) {
         this.side = side
         this.name = this.constructor.name
+        this.moves = moves
     }
 
     move() { }
@@ -25,12 +26,12 @@ class Piece {
 ###       ###     ###   ###   ###   ###    ####
 */
 class Pawn extends Piece {
-    constructor(side) {
-        super(side)
+    constructor(side, moves = 0) {
+        super(side, moves)
     }
 
     validMove(board, x1, y1, x2, y2) {
-        if (x1 == x2 && Math.abs(y2 - y1) <= 2) {
+        if (x1 == x2 && Math.abs(y2 - y1) == 1) {
             if (y1 - y2 > 0 && !board[y1 - 1][x1] && !board[y2][x2]) {
                 return true
             }
@@ -39,6 +40,13 @@ class Pawn extends Piece {
             }
         } else if (Math.abs(x2 - x1) == 1 && Math.abs(y2 - y1) == 1 && board[y2][x2] && board[y2][x2].side != this.side) {
             return true
+        } else if (x1 == x2 && Math.abs(y2 - y1) == 2 && this.moves == 0) {
+            if (y1 - y2 > 0 && !board[y1 - 1][x1] && !board[y2][x2]) {
+                return true
+            }
+            if (y1 - y2 < 0 && !board[y1 + 1][x1] && !board[y2][x2]) {
+                return true
+            }
         }
 
         return false
@@ -54,8 +62,8 @@ class Pawn extends Piece {
 ###    ### ########### ###    ####  ########
 */
 class King extends Piece {
-    constructor(side) {
-        super(side)
+    constructor(side, moves = 0) {
+        super(side, moves)
     }
 
     validMove(board, x1, y1, x2, y2) {
@@ -79,8 +87,8 @@ class King extends Piece {
  ###### ### ########  ########## ########## ###    ####
 */
 class Queen extends Piece {
-    constructor(side) {
-        super(side)
+    constructor(side, moves = 0) {
+        super(side, moves)
     }
 
     validMove(board, x1, y1, x2, y2) {
@@ -265,20 +273,20 @@ class Queen extends Piece {
             iy--
             ix--
             if (iy < 0) {
-                ne = false
+                nw = false
                 break
             }
             if (ix < 0) {
-                ne = false
+                nw = false
                 break
             }
 
             if (board[iy][ix]) {
                 if (board[iy][ix].side == this.side) {
-                    ne = false
+                    nw = false
                 } else {
                     validMoves.push({ x: ix, y: iy })
-                    ne = false
+                    nw = false
                 }
             } else {
                 validMoves.push({ x: ix, y: iy })
@@ -302,8 +310,8 @@ class Queen extends Piece {
 ######### ########### ########  ###    ###  ########  ###
 */
 class Bishop extends Piece {
-    constructor(side) {
-        super(side)
+    constructor(side, moves = 0) {
+        super(side, moves)
     }
 
     validMove(board, x1, y1, x2, y2) {
@@ -320,8 +328,8 @@ class Bishop extends Piece {
 ###    ### ###    #### ########### ########  ###    ###     ###
 */
 class Knight extends Piece {
-    constructor(side) {
-        super(side)
+    constructor(side, moves = 0) {
+        super(side, moves)
     }
 
     validMove(board, x1, y1, x2, y2) {
@@ -343,8 +351,8 @@ class Knight extends Piece {
 ###    ###  ########   ########  ###    ###
 */
 class Rook extends Piece {
-    constructor(side) {
-        super(side)
+    constructor(side, moves = 0) {
+        super(side, moves)
     }
 
     validMove(board, x1, y1, x2, y2) {
@@ -500,11 +508,12 @@ function attachSocket(io) {
 
                 if (board.layout[y1][x1] && y2 <= 7 && x2 <= 7 && x2 >= 0 && y2 >= 0) {
 
-                    let foo = new classes[piece.name](piece.side)
+                    let foo = new classes[piece.name](piece.side, piece.moves)
 
                     if (board.layout[y2][x2].side != piece.side && foo.validMove(board.layout, x1, y1, x2, y2)) {
                         board.layout[y1][x1] = 0
                         board.layout[y2][x2] = foo
+                        foo.moves++
                         board.turn = board.turn == 'white' ? 'black' : 'white'
                         console.log(`Move successful, it's now ${board.turn}'s turn.`)
                     } else {

@@ -18,6 +18,8 @@
 - Fixed selection bug
 - Began queen move validation
 - Completed queen move validation
+- Added piece move count
+- Pawn can only move two spaces when it's their first move
 
 ### Kayden
 - Info box shows turns with font
