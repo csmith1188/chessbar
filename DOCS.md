@@ -13,8 +13,12 @@
 - added containers
 
 ## 10/28
-
+ 
 ### Truit
 - Fixed selection bug
 - Began queen move validation
 - Completed queen move validation
+
+### Kayden
+- Info box shows turns with font
+- 
