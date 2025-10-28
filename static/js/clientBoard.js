@@ -34,33 +34,6 @@ class Piece {
         }
 
         if (this.selected) {
-            if (!Mouse.left) {
-                this.selected = false
-                selected = null
-                if (me.side == this.side) {
-                    if (me.side == 'white') {
-                        socket.emit('move', board, me,
-                            {
-                                name: this.name,
-                                side: this.side,
-                                x: this.bx,
-                                y: this.by
-                            },
-                            Math.floor((this.x + this.w / 2) / Settings.boardSquareSize), Math.floor((this.y + this.h / 2) / Settings.boardSquareSize))
-                    } else {
-                        socket.emit('move', board, me,
-                            {
-                                name: this.name,
-                                side: this.side,
-                                x: this.bx,
-                                y: this.by
-                            },
-                            Math.floor((this.x + this.w / 2) / Settings.boardSquareSize), Math.floor((this.y + this.h / 2) / Settings.boardSquareSize))
-                    }
-                } else {
-                    socket.emit('updateBoard', board)
-                }
-            }
             this.x = Mouse.x - this.w / 2
             this.y = Mouse.y - this.h / 2
         }
@@ -76,7 +49,30 @@ class Piece {
 }
 
 function drawBoard() {
-    if (selected && !Mouse.left) {
+    if (!Mouse.left && selected) {
+        if (me.side == selected.side) {
+            if (me.side == 'white') {
+                socket.emit('move', board, me,
+                    {
+                        name: selected.name,
+                        side: selected.side,
+                        x: selected.bx,
+                        y: selected.by
+                    },
+                    Math.floor((selected.x + selected.w / 2) / Settings.boardSquareSize), Math.floor((selected.y + selected.h / 2) / Settings.boardSquareSize))
+            } else {
+                socket.emit('move', board, me,
+                    {
+                        name: selected.name,
+                        side: selected.side,
+                        x: selected.bx,
+                        y: selected.by
+                    },
+                    Math.floor((selected.x + selected.w / 2) / Settings.boardSquareSize), Math.floor((selected.y + selected.h / 2) / Settings.boardSquareSize))
+            }
+        } else {
+            socket.emit('updateBoard', board)
+        }
         selected.selected = false
         selected = null
     }
