@@ -8,6 +8,6 @@
 - Fixed bug with piece selection
 
 ### Kayden
-- did nothing
-- 
-- 
+- added css to index
+- made two boxes for captured pieces and a box for turns
+- added containers

@@ -2,15 +2,45 @@
 <html>
 
 <head>
-    <link rel="stylesheet" href="index.css">
-        
     <title>Chess</title>
+    <style>
+        #container {
+            display: flex;
+            align-items: flex-start;
+            vertical-align: top;
+        }
+
+        #sidebar {
+            display: flex;
+            gap: 10px;
+            margin-left: 10px;
+        }
+
+        .captureBox {
+            border: 5px solid black;
+            width: 75px;
+            height: 550px;
+            overflow-y: auto;
+            max-height: 550px;
+        }
+
+        #InfoBox {
+            border: 10px solid black;
+            width: 150px;
+            height: 100px;
+        }
+    </style>
 </head>
 
 <body>
-    <canvas id="canvas"></canvas>
-    <div id="pieceBar"></div>
-    <div id="infoBox"></div>
+    <div id="container">
+        <canvas id="canvas"></canvas>
+        <div id="sidebar">
+            <div id="CapturedW" class="captureBox"></div>
+            <div id="CapturedB" class="captureBox"></div>
+            <div id="InfoBox"><!-- varible for turn go here me thinks--></div>
+        </div>
+    </div>
 
     <!-- Socket.IO client (auto-served by your server) -->
     <script src="/socket.io/socket.io.js"></script>
