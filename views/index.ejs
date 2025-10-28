@@ -60,7 +60,10 @@
         const InfoBox = document.getElementById("InfoBox");
         socket.on("updateBoard", (board) => {
             InfoBox.innerHTML = board.turn
+            CapturedW.innerHTML = ""
+            CapturedB.innerHTML = ""
         })
+
     </script>
 </body>
 

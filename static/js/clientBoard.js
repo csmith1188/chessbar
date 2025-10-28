@@ -86,7 +86,7 @@ function drawBoard() {
                     Math.floor((selected.x + selected.w / 2) / Settings.boardSquareSize), Math.floor((selected.y + selected.h / 2) / Settings.boardSquareSize))
             }
         } else {
-            socket.emit('updateBoard', board)
+            // socket.emit('updateBoard', board)
         }
         selected.selected = false
         selected = null
