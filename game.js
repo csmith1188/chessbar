@@ -315,7 +315,124 @@ class Bishop extends Piece {
     }
 
     validMove(board, x1, y1, x2, y2) {
-        return true
+
+        let validMoves = []
+        let ne, se, sw, nw
+        ne = se = sw = nw = true
+
+        let ix = x1
+        let iy = y1
+
+        while (ne) {
+            iy--
+            ix++
+            if (iy < 0) {
+                ne = false
+                break
+            }
+            if (ix > 7) {
+                ne = false
+                break
+            }
+
+            if (board[iy][ix]) {
+                if (board[iy][ix].side == this.side) {
+                    ne = false
+                } else {
+                    validMoves.push({ x: ix, y: iy })
+                    ne = false
+                }
+            } else {
+                validMoves.push({ x: ix, y: iy })
+            }
+        }
+
+        ix = x1
+        iy = y1
+
+        while (se) {
+            iy++
+            ix++
+            if (iy > 7) {
+                se = false
+                break
+            }
+            if (ix > 7) {
+                se = false
+                break
+            }
+
+            if (board[iy][ix]) {
+                if (board[iy][ix].side == this.side) {
+                    se = false
+                } else {
+                    validMoves.push({ x: ix, y: iy })
+                    se = false
+                }
+            } else {
+                validMoves.push({ x: ix, y: iy })
+            }
+        }
+
+        ix = x1
+        iy = y1
+
+        while (sw) {
+            iy++
+            ix--
+            if (iy > 7) {
+                ne = false
+                break
+            }
+            if (ix < 0) {
+                ne = false
+                break
+            }
+
+            if (board[iy][ix]) {
+                if (board[iy][ix].side == this.side) {
+                    ne = false
+                } else {
+                    validMoves.push({ x: ix, y: iy })
+                    ne = false
+                }
+            } else {
+                validMoves.push({ x: ix, y: iy })
+            }
+        }
+
+        ix = x1
+        iy = y1
+
+        while (nw) {
+            iy--
+            ix--
+            if (iy < 0) {
+                nw = false
+                break
+            }
+            if (ix < 0) {
+                nw = false
+                break
+            }
+
+            if (board[iy][ix]) {
+                if (board[iy][ix].side == this.side) {
+                    nw = false
+                } else {
+                    validMoves.push({ x: ix, y: iy })
+                    nw = false
+                }
+            } else {
+                validMoves.push({ x: ix, y: iy })
+            }
+        }
+
+        for (let move of validMoves) {
+            if (move.x == x2 && move.y == y2) return true
+        }
+
+        return false
     }
 }
 /*
@@ -513,7 +630,7 @@ function attachSocket(io) {
 
                     if (board.layout[y2][x2].side != piece.side && foo.validMove(board.layout, x1, y1, x2, y2)) {
                         board.layout[y1][x1] = 0
-                        if (board.layout[y2][x2]) board.captured.push({name: board.layout[y2][x2].name, side: board.layout[y2][x2].side})
+                        if (board.layout[y2][x2]) board.captured.push({ name: board.layout[y2][x2].name, side: board.layout[y2][x2].side })
                         board.layout[y2][x2] = foo
                         foo.moves++
                         board.turn = board.turn == 'white' ? 'black' : 'white'
@@ -536,7 +653,7 @@ function attachSocket(io) {
                 console.log(`Still ${board.turn}'s turn, move failed.`)
                 socket.emit('updateBoard', board)
             }
-            
+
         })
 
     })
