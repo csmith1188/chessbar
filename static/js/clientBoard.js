@@ -30,7 +30,7 @@ class Piece {
     }
 
     update() {
-        if (!selected && this.hover() && Mouse.left) {
+        if (!selected && this.hover() && Mouse.left && this.side == me.side) {
             selected = this
             this.selected = true
         }
@@ -42,7 +42,7 @@ class Piece {
     }
 
     draw() {
-        if (this.hover()) {
+        if (this.hover() && me.side == this.side) {
             ctx.drawImage(this.img, this.x - Settings.hoverSizeIncrease / 2, this.y - Settings.hoverSizeIncrease, this.w + Settings.hoverSizeIncrease, this.h + Settings.hoverSizeIncrease)
         } else {
             ctx.drawImage(this.img, this.x, this.y, this.w, this.h)
