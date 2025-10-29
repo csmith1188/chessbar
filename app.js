@@ -2,7 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-const { Board, attachSocket } = require('./engine/board');
+const { Board, attachSocket } = require('./engine/main');
 const { User } = require('./online/user');
 
 const app = express();
