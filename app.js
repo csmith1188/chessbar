@@ -2,8 +2,8 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-const { Board, attachSocket } = require('./board');
-const { User } = require('./user');
+const { Board, attachSocket } = require('./engine/board');
+const { User } = require('./online/user');
 
 const app = express();
 app.use(express.static('static')); // serve client files from /public
