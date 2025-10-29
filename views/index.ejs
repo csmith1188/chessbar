@@ -48,6 +48,8 @@
             <div id="InfoBox"></div>
         </div>
     </div>
+    
+    <!--div for chat and siht go here later-->
 
     <!-- Socket.IO client (auto-served by your server) -->
     <script src="/socket.io/socket.io.js"></script>
@@ -56,14 +58,15 @@
 
     <script src="js/clientBoard.js"></script>
     <script src="js/main.js"></script>
+    <script src="/online/chat.js"></script>
     <script>
+        //for info box
         const InfoBox = document.getElementById("InfoBox");
         socket.on("updateBoard", (board) => {
             InfoBox.innerHTML = board.turn
             CapturedW.innerHTML = ""
             CapturedB.innerHTML = ""
         })
-
     </script>
 </body>
 
