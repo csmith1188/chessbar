@@ -29,7 +29,7 @@
 ## 10/29
  
 ### Truit
--
+- Consolidated several backend files
 
 ### Kayden
 - Bishop move validation
