@@ -24,4 +24,13 @@
 
 ### Kayden
 - Info box shows turns with font
-- 
+- made peice bar
+
+## 10/29
+ 
+### Truit
+-
+
+### Kayden
+- Bishop move validation
+-
