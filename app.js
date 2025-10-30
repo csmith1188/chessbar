@@ -35,7 +35,7 @@ io.on('connection', (socket) => {
     // socket.is = user
     users.push(user);
 
-    socket.emit('gamesList', games.map(serializeGame) )
+    socket.emit('gamesList', games.map(serializeGame))
 
     socket.on('gamesList', () => {
         socket.emit('gamesList', games.map(serializeGame))
@@ -61,9 +61,6 @@ io.on('connection', (socket) => {
 
     // socket.emit('youAre', {id: user.id, side: user.side})
 
-    socket.on('chat message', (msg) => {
-        io.emit('chat message', msg);
-    });
 
     socket.on('newGame', (visibility = 'public') => {
         console.log('newGame event received - creating board on server');
@@ -76,6 +73,11 @@ io.on('connection', (socket) => {
     socket.on('updateBoard', (board) => {
         console.log('updateBoard event received');
         io.emit('updateBoard', board)
+    });
+
+    //chat and siht
+    socket.on('chatMessage', (msg) => {
+        io.emit('chat message', msg);
     });
 });
 
