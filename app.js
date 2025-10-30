@@ -3,8 +3,8 @@ const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
 const { Board, attachSocket } = require('./engine/main');
-const { User } = require('./online/user');
-const { Game } = require('./online/game')
+const { User, takenUserIds } = require('./online/user');
+let { Game, games, takenGameIds, serializeGame } = require('./online/game')
 
 const app = express();
 app.use(express.static('static')); // serve client files from /public
@@ -29,26 +29,32 @@ server.listen(PORT, () => {
 });
 
 let users = []
-let games = []
 
 io.on('connection', (socket) => {
-    let user = new User(users.length, socket)
+    let user = new User(socket)
     // socket.is = user
-    users.push(user);    
+    users.push(user);
+
+    socket.emit('gamesList', games.map(serializeGame) )
+
+    socket.on('gamesList', () => {
+        socket.emit('gamesList', games.map(serializeGame))
+    })
 
     console.log('A user connected:', user.id);
 
-    //! Change this later!!!
-    console.log('games:\n', games, '\n')
-    if (games.length > 0) {
-        games[0].join(user)
-    }
+    socket.on('join', (gameId) => {
+        for (let game of games) {
+            if (game.id == gameId) {
+                game.join(user)
+            }
+        }
+    })
 
     socket.on('disconnect', () => {
         console.log('User disconnected')
-        const userIndex = users.findIndex(u => u.id === user.id);
-        if (userIndex !== -1) {
-            users.splice(userIndex, 1);
+        if (takenUserIds.includes(user.id)) {
+            takenUserIds.splice(takenUserIds.indexOf(user.id), 1)
         }
     });
 
@@ -58,11 +64,12 @@ io.on('connection', (socket) => {
         io.emit('chat message', msg);
     });
 
-    socket.on('newBoard', () => {
-        console.log('newBoard event received - creating board on server');
-        let game = new Game(games.length, [user])
-        games.push(game)
+    socket.on('newGame', (visibility) => {
+        console.log('newGame event received - creating board on server');
+        let game = new Game(visibility)
+        game.join(user)
         io.emit('updateBoard', game.board)
+        io.emit('gamesList', games.map(serializeGame))
     });
 
     socket.on('updateBoard', (board) => {
@@ -70,3 +77,5 @@ io.on('connection', (socket) => {
         io.emit('updateBoard', board)
     });
 });
+
+module.exports = { games }

@@ -7,6 +7,7 @@ canvas.height = Settings.boardSquareSize * 8
 if (Settings.pieceStyle == 'pixel') ctx.imageSmoothingEnabled = false
 
 let me
+let availableGames
 
 let Mouse = {
     x: 0,
@@ -57,10 +58,20 @@ document.addEventListener('mouseup', (e) => {
 let board
 
 socket.on('youAre', (foo) => {
+    console.log('youAre event:', foo)
     me = foo
 })
 
-socket.emit('newBoard')
+socket.on('gamesList', (games) => {
+    availableGames = games
+    console.log('games list:', games)
+})
+
+// if (availableGames) {
+//     socket.emit('join', availableGames[0].id)
+// } else {
+//     socket.emit('newGame', 'public')
+// }
 
 socket.on('updateBoard', (newBoard) => {
     {
