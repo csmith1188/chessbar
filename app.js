@@ -68,7 +68,8 @@ io.on('connection', (socket) => {
     })
 
     socket.on('disconnect', () => {
-        console.log('User disconnected')
+        //const name = users[socket.id];
+        //console.log(`${name} disconnected`)
         if (takenUserIds.includes(user.id)) {
             takenUserIds.splice(takenUserIds.indexOf(user.id), 1)
         }
@@ -98,8 +99,18 @@ io.on('connection', (socket) => {
     });
 
     //chat and siht
+    socket.on('setName', (name) => {
+        activeUsers[socket.id] = name;
+        console.log(`${name} joined the chat`);
+
+        // Send updated list of usernames to everyone
+        io.emit('userList', Object.values(activeUsers));
+    });
+
+    // When a message comes in
     socket.on('chatMessage', (msg) => {
-        io.emit('chat message', msg);
+        const sender = activeUsers[socket.id] || "Anonymous";
+        io.emit('chatMessage', { name: sender, message: msg });
     });
 });
 

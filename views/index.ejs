@@ -158,8 +158,26 @@
 
     <!--div for chat and siht go here later-->
 
-    <button id="send">send</button>
-    <a href="/">Back to game selection</a>
+    <!--
+    <div id="chat-container">
+        <aside id="chat-sidebar">
+            <h2>Chat Rooms</h2>
+            <p style="font-size:14px;opacity:0.8;">(coming soon)</p>
+        </aside>
+
+        <section id="chat-main">
+            <div id="messages">
+                <div class="message">Hello there 👋</div>
+                <div class="message you">Hey! Welcome to Formchat.</div>
+            </div>
+            <div id="inputBar">
+                <input id="msg" type="text" placeholder="Type a message..." />
+                <button id="send">Send</button>
+            </div>
+        </section>
+    </div>
+    -->
+
 
     <!-- Socket.IO client (auto-served by your server) -->
     <script src="/socket.io/socket.io.js"></script>
@@ -171,16 +189,7 @@
     <script src="js/clientBoard.js"></script>
     <script src="js/main.js"></script>
     <script src="js/chat.js"></script>
-
     <script>
-        const joinCode = new URLSearchParams(window.location.search).get('code')
-        console.log(joinCode)
-        if (joinCode) {
-            socket.emit('join', joinCode)
-        }
-    </script>
-
-    <script>    
         //for info box
         const InfoBox = document.getElementById("InfoBox");
         socket.on("updateBoard", (board) => {
