@@ -10,7 +10,13 @@ class User {
         this.side = 'spectating'
         this.socket = socket
 
-        socket.emit('youAre', {id: this.id, side: this.side})
+        this.game = null
+
+        this.youAre()
+    }
+
+    youAre() {
+        this.socket.emit('youAre', { id: this.id, side: this.side, game: this.game ? this.game.id : null })
     }
 }
 

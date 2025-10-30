@@ -35,3 +35,10 @@
 ### Kayden
 - Bishop move validation
 -
+
+## 10/30
+
+### Truit
+- Joining and making games works!!!
+- Players can only see moves from their active game
+- leave game function

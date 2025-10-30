@@ -21,7 +21,7 @@ const io = new Server(server, {
     cors: { origin: '*' } // adjust for production
 });
 
-attachSocket(io);
+attachSocket(io, games);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
@@ -56,7 +56,8 @@ io.on('connection', (socket) => {
         if (takenUserIds.includes(user.id)) {
             takenUserIds.splice(takenUserIds.indexOf(user.id), 1)
         }
-    });
+        if (user.game) user.game.leave(user)
+    })
 
     // socket.emit('youAre', {id: user.id, side: user.side})
 
