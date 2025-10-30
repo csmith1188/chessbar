@@ -1,4 +1,3 @@
-const socket = io();
 /*
 const username = USERNAME; // comes from the EJS variable
 socket.emit("setName", username);
