@@ -64,7 +64,7 @@ io.on('connection', (socket) => {
         io.emit('chat message', msg);
     });
 
-    socket.on('newGame', (visibility) => {
+    socket.on('newGame', (visibility = 'public') => {
         console.log('newGame event received - creating board on server');
         let game = new Game(visibility)
         game.join(user)
