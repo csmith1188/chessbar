@@ -22,35 +22,46 @@ function renderGameList() {
         li.className = 'game-item'
 
         const playersCount = Array.isArray(game.users) ? game.users.length : (Array.isArray(game.players) ? game.players.length : 0)
+        const meta = document.createElement('div')
+        meta.className = 'meta'
+
         const title = document.createElement('div')
+        title.className = 'title'
         title.textContent = `Game ID: ${game.id} | Players: ${playersCount}/2`
-        li.appendChild(title)
+        meta.appendChild(title)
 
-        const usersDiv = document.createElement('div')
-        usersDiv.className = 'game-users'
+        const sub = document.createElement('div')
+        sub.className = 'sub'
         if (Array.isArray(game.users) && game.users.length) {
-            usersDiv.textContent = 'Users: ' + game.users.map(u => `${u.id}${u.side ? ` (${u.side})` : ''}`).join(', ')
+            sub.textContent = 'Users: ' + game.users.map(u => `${u.id}${u.side ? ` (${u.side})` : ''}`).join(', ')
         } else {
-            usersDiv.textContent = 'Users: (none)'
+            sub.textContent = 'Users: (none)'
         }
-        li.appendChild(usersDiv)
+        meta.appendChild(sub)
 
-        const actionBtn = document.createElement('button')
+        li.appendChild(meta)
+
+        const actions = document.createElement('div')
+        actions.className = 'actions'
+
         if (playersCount < 2) {
-            actionBtn.textContent = 'Join Game'
-            actionBtn.onclick = () => {
-                window.location.href = `/game?code=${encodeURIComponent(game.joinCode)}`
-            }
+            const actionBtn = document.createElement('button')
+            actionBtn.className = 'join'
+            actionBtn.textContent = 'Join'
+            actionBtn.onclick = () => window.location.href = `/game?code=${encodeURIComponent(game.joinCode)}`
+            actions.appendChild(actionBtn)
         }
-        li.appendChild(actionBtn)
 
         const previewBtn = document.createElement('button')
+        previewBtn.className = 'preview'
         previewBtn.textContent = 'Preview'
         previewBtn.onclick = () => {
             const w = window.open()
             w.document.write('<pre>' + JSON.stringify(game, null, 2) + '</pre>')
         }
-        li.appendChild(previewBtn)
+        actions.appendChild(previewBtn)
+
+        li.appendChild(actions)
 
         gameListElem.appendChild(li)
     }

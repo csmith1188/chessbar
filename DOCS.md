@@ -45,6 +45,11 @@
 - Fixed incorrect initial board layout
 - Private games are joined with a code instead of an id
 - Private games are not sent with the gamesList
+- Chat and chat history
+- Began castling functionality
+- ChatGPT finished it for me
+- Lots of AI styling
+- Settings window
 
 ### Kayden
 - hit the ground too hard
