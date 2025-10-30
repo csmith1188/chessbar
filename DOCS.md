@@ -42,3 +42,4 @@
 - Joining and making games works!!!
 - Players can only see moves from their active game
 - leave game function
+- Fixed incorrect initial board layout

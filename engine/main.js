@@ -11,7 +11,7 @@ const { Pawn, King, Queen, Bishop, Knight, Rook } = require('./pieces')
 class Board {
     constructor() {
         this.layout = [
-            [new Rook('black',), new Knight('black'), new Bishop('black'), new King('black'), new Queen('black'), new Bishop('black'), new Knight('black'), new Rook('black')],
+            [new Rook('black',), new Knight('black'), new Bishop('black'), new Queen('black'), new King('black'), new Bishop('black'), new Knight('black'), new Rook('black')],
             [new Pawn('black'), new Pawn('black'), new Pawn('black'), new Pawn('black'), new Pawn('black'), new Pawn('black'), new Pawn('black'), new Pawn('black')],
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
@@ -52,8 +52,8 @@ function attachSocket(io, games) {
             let y1 = piece.y
 
             if (piece.side == 'black') {
-                x1 = 7 - x1
-                x2 = 7 - x2
+                // x1 = 7 - x1
+                // x2 = 7 - x2
                 y1 = 7 - y1
                 y2 = 7 - y2
             }

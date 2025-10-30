@@ -57,7 +57,7 @@ socket.on('updateBoard', (newBoard) => {
         } else {
             for (let y of [...layout].reverse()) {
                 x = 0
-                for (let obj of [...y].reverse()) {
+                for (let obj of y) {
                     if (obj) new Piece(x * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, y2 * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, `img/${Settings.pieceStyle}/${obj.side}_${obj.name.toLowerCase()}.png`, obj.name, obj.side, obj.moves)
                     x++
                 }
