@@ -13,7 +13,11 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.get('/', (req, res) => {
-    res.render('index');
+    res.render('selectGame');
+});
+
+app.get('/game', (req, res) => {
+    res.render('game');
 });
 
 const server = http.createServer(app);
@@ -35,17 +39,19 @@ io.on('connection', (socket) => {
     // socket.is = user
     users.push(user);
 
-    socket.emit('gamesList', games.map(serializeGame) )
+    socket.emit('gamesList', games.filter(g => g.visibility === 'public').map(serializeGame))
 
     socket.on('gamesList', () => {
-        socket.emit('gamesList', games.map(serializeGame))
+        socket.emit('gamesList', games.filter(g => g.visibility === 'public').map(serializeGame))
     })
 
     console.log('A user connected:', user.id);
 
     socket.on('join', (gameId) => {
         for (let game of games) {
-            if (game.id == gameId) {
+            if (game.joinCode == gameId) {
+                game.join(user)
+            } else if (game.id == gameId && game.visibility === 'public') {
                 game.join(user)
             }
         }
@@ -70,7 +76,7 @@ io.on('connection', (socket) => {
         let game = new Game(visibility)
         game.join(user)
         game.update()
-        io.emit('gamesList', games.map(serializeGame))
+        io.emit('gamesList', games.filter(g => g.visibility === 'public').map(serializeGame))
     });
 
     socket.on('updateBoard', (board) => {

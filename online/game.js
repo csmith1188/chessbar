@@ -1,6 +1,7 @@
 const { Board } = require('../engine/main')
 let games = []
 let takenGameIds = []
+let takenGameCodes = []
 
 /*
  ::::::::      :::     ::::    ::::  ::::::::::
@@ -25,7 +26,15 @@ class Game {
         this.users = []
         this.board = new Board()
 
-        if (this.visibility == 'public') games.push(this)
+        // generate a unique 6-digit join code
+        let code = Math.floor(Math.random() * 900000) + 100000
+        while (takenGameCodes.includes(code)) {
+            code = Math.floor(Math.random() * 900000) + 100000
+        }
+        this.joinCode = code
+        takenGameCodes.push(this.joinCode)
+
+        games.push(this)
         // console.log('\nGames:\n', games)
 
         this.update()

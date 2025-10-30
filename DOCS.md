@@ -43,3 +43,5 @@
 - Players can only see moves from their active game
 - leave game function
 - Fixed incorrect initial board layout
+- Private games are joined with a code instead of an id
+- Private games are not sent with the gamesList

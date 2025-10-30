@@ -39,6 +39,7 @@ socket.on('gamesList', (games) => {
 socket.on('updateBoard', (newBoard) => {
     {
         let layout = newBoard.layout
+        // console.log('Received board update:', newBoard)
         board = null
         pieces = []
 
@@ -70,7 +71,7 @@ socket.on('updateBoard', (newBoard) => {
 })
 
 function main() {
-    if (board) drawBoard()
+    drawBoard()
 
     if (Debug.showHoverSquare) {
         if (Mouse.x < canvas.width && Mouse.y < canvas.height) {

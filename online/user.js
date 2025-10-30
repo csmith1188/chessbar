@@ -2,7 +2,7 @@ let takenUserIds = []
 class User {
     constructor(socket) {
         this.id = 1
-        while( takenUserIds.includes(this.id)) {
+        while (takenUserIds.includes(this.id)) {
             this.id++
         }
         takenUserIds.push(this.id)
@@ -16,7 +16,11 @@ class User {
     }
 
     youAre() {
-        this.socket.emit('youAre', { id: this.id, side: this.side, game: this.game ? this.game.id : null })
+        this.socket.emit('youAre', {
+            id: this.id, 
+            side: this.side, 
+            game: this.game ? { id: this.game.id, joinCode: this.game.joinCode } : null
+        })
     }
 }
 

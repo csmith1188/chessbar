@@ -36,8 +36,7 @@ function attachSocket(io, games) {
 
         socket.on('move', (player, piece, x2, y2) => {
             // Find the player's game (client should include game id in `player.game`)
-            const gameId = player && (player.game || player.gameId)
-            const game = games.find(g => g.id == gameId)
+            const game = games.find(g => g.id == player.game.id)
 
             if (!game) {
                 console.log('Move received but no game found for player:', player)

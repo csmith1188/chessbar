@@ -60,41 +60,6 @@ class Piece {
 #########  ###    ### ###     ###   ###   ###
 */
 function drawBoard() {
-    // if (selected) console.log(selected.moves)
-
-    if (!Mouse.left && selected) {
-        if (me.side == selected.side) {
-            if (me.side == 'white') {
-                socket.emit('move', me,
-                    {
-                        name: selected.name,
-                        side: selected.side,
-                        x: selected.bx,
-                        y: selected.by,
-                        moves: selected.moves
-                    },
-                    Math.floor((selected.x + selected.w / 2) / Settings.boardSquareSize), Math.floor((selected.y + selected.h / 2) / Settings.boardSquareSize))
-            } else {
-                socket.emit('move', me,
-                    {
-                        name: selected.name,
-                        side: selected.side,
-                        x: selected.bx,
-                        y: selected.by,
-                        moves: selected.moves
-                    },
-                    Math.floor((selected.x + selected.w / 2) / Settings.boardSquareSize), Math.floor((selected.y + selected.h / 2) / Settings.boardSquareSize))
-            }
-        } else {
-            // socket.emit('updateBoard', board)
-        }
-        selected.selected = false
-        selected = null
-    }
-    for (let piece of pieces) {
-        piece.update()
-    }
-
     let color = 'light'
     for (let y = 0; y < 8; y++) {
         for (let x = 0; x < 8; x++) {
@@ -109,9 +74,45 @@ function drawBoard() {
         }
         color = (color == 'light') ? 'dark' : 'light'
     }
-    for (let piece of pieces) {
-        if (piece.img && piece.img.complete) {
-            piece.draw()
+
+    if (board) {
+        if (!Mouse.left && selected) {
+            if (me.side == selected.side) {
+                if (me.side == 'white') {
+                    socket.emit('move', me,
+                        {
+                            name: selected.name,
+                            side: selected.side,
+                            x: selected.bx,
+                            y: selected.by,
+                            moves: selected.moves
+                        },
+                        Math.floor((selected.x + selected.w / 2) / Settings.boardSquareSize), Math.floor((selected.y + selected.h / 2) / Settings.boardSquareSize))
+                } else {
+                    socket.emit('move', me,
+                        {
+                            name: selected.name,
+                            side: selected.side,
+                            x: selected.bx,
+                            y: selected.by,
+                            moves: selected.moves
+                        },
+                        Math.floor((selected.x + selected.w / 2) / Settings.boardSquareSize), Math.floor((selected.y + selected.h / 2) / Settings.boardSquareSize))
+                }
+            } else {
+                // socket.emit('updateBoard', board)
+            }
+            selected.selected = false
+            selected = null
+        }
+        for (let piece of pieces) {
+            piece.update()
+        }
+
+        for (let piece of pieces) {
+            if (piece.img && piece.img.complete) {
+                piece.draw()
+            }
         }
     }
 
