@@ -5,10 +5,19 @@
     <title>Chess</title>
     <link href="https://fonts.googleapis.com/css2?family=Lavishly+Yours&display=swap" rel="stylesheet">
     <style>
+        /* === Layout === */
+        body {
+            margin: 0;
+            background: #0d1117;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
         #container {
             display: flex;
             align-items: flex-start;
             vertical-align: top;
+            padding: 10px;
         }
 
         #sidebar {
@@ -20,30 +29,32 @@
         .captureBox {
             border: 5px solid black;
             width: 75px;
-            height: 590px;
+            height: auto;
             overflow-y: auto;
-            max-height: 590px;
+            max-height: 100%;
+            background: #111;
         }
 
         #InfoBox {
             border: 10px solid black;
             width: 175px;
-            height: 100px;
+            height: 100%;
             font-size: 90px;
             display: flex;
             justify-content: center;
             align-items: center;
             font-family: 'Lavishly Yours', cursive;
             font-weight: 400;
+            background: #222;
         }
 
-        /* === Chat stuff === */
+        /* === Chat Styles === */
         #chat-container {
             display: flex;
+            flex-direction: row;
             flex: 1;
-            margin-top: 70px;
-            height: calc(100vh - 70px);
-            overflow: hidden;
+            height: 25vh;
+            box-sizing: border-box;
         }
 
         /* Sidebar */
@@ -53,6 +64,7 @@
             border-right: 2px solid rgba(255, 255, 255, 0.1);
             padding: 20px;
             box-sizing: border-box;
+            overflow-y: auto;
         }
 
         #chat-sidebar h2 {
@@ -60,13 +72,20 @@
             margin-bottom: 15px;
         }
 
-        /* Chat area */
+        /* Chat main area */
         #chat-main {
             flex: 1;
             display: flex;
             flex-direction: column;
             padding: 15px;
             box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
         }
 
         /* Container for each message row */
@@ -77,15 +96,13 @@
 
         .message-row.you {
             justify-content: flex-end;
-            /* push to right */
         }
 
         .message-row.other {
             justify-content: flex-start;
-            /* push to left */
         }
 
-        /* Chat bubble itself */
+        /* Chat bubble */
         .message {
             max-width: 65%;
             padding: 10px 14px;
@@ -96,20 +113,18 @@
             word-wrap: break-word;
         }
 
-        /* Your messages (right side) */
         .message-row.you .message {
             background: linear-gradient(135deg, #4b00a5, #002a7a);
             border: 1px solid rgba(255, 255, 255, 0.2);
             text-align: right;
         }
 
-        /* Other people's messages (left side) */
         .message-row.other .message {
             background: rgba(255, 255, 255, 0.08);
             text-align: left;
         }
 
-        /* Chat input area */
+        /* Chat input bar */
         #inputBar {
             display: flex;
             border-radius: 12px;
@@ -124,7 +139,7 @@
             padding: 12px;
             border: none;
             background: transparent;
-            color: rgb(0, 0, 0);
+            color: white;
             font-size: 16px;
             outline: none;
         }
@@ -132,7 +147,7 @@
         #send {
             background: #132b45;
             border: 1px solid #33577b;
-            color: rgb(0, 0, 0);
+            color: white;
             font-size: 16px;
             font-weight: 600;
             padding: 12px 20px;
@@ -142,6 +157,17 @@
 
         #send:hover {
             background: linear-gradient(to right, #5e00ca, #00388f);
+        }
+
+        a {
+            color: #78a6ff;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -156,47 +182,50 @@
         </div>
     </div>
 
-    <!--div for chat and siht go here later-->
-    <div id="messages"></div>
-    <div id="chat-sidebar"></div>
+    <!-- === Chat Section === -->
+    <div id="chat-container">
+        <div id="chat-sidebar">
+            <h2>Users</h2>
+        </div>
 
-    <input type="text" id="msg" placeholder="Type your message here..." />
-    <button id="send">send</button>
+        <div id="chat-main">
+            <div id="messages"></div>
+
+            <div id="inputBar">
+                <input type="text" id="msg" placeholder="Type your message here..." />
+                <button id="send">Send</button>
+            </div>
+        </div>
+    </div>
+
     <a href="/">Back to game selection</a>
+
+    <!-- Socket.IO client -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+    </script>
+
+    <!-- Your game scripts -->
+    <script src="js/chat.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/docEvents.js"></script>
+    <script src="js/clientBoard.js"></script>
+    <script src="js/main.js"></script>
+
+    <script>
+        const joinCode = new URLSearchParams(window.location.search).get('code');
+        if (joinCode) {
+            socket.emit('join', joinCode);
+        }
+
+        const InfoBox = document.getElementById("InfoBox");
+        socket.on("updateBoard", (board) => {
+            InfoBox.innerHTML = board.turn;
+            CapturedW.innerHTML = "";
+            CapturedB.innerHTML = "";
+        });
+    </script>
 </body>
-
-<!-- Socket.IO client (auto-served by your server) -->
-<script src="/socket.io/socket.io.js"></script>
-
-<script>
-    const socket = io()
-</script>
-
-<script src="js/chat.js"></script>
-
-<script src="js/settings.js"></script>
-
-<script src="js/docEvents.js"></script>
-
-<script src="js/clientBoard.js"></script>
-<script src="js/main.js"></script>
-
-<script>
-    const joinCode = new URLSearchParams(window.location.search).get('code')
-    console.log(joinCode)
-    if (joinCode) {
-        socket.emit('join', joinCode)
-    }
-</script>
-
-<script>
-    //for info box
-    const InfoBox = document.getElementById("InfoBox");
-    socket.on("updateBoard", (board) => {
-        InfoBox.innerHTML = board.turn
-        CapturedW.innerHTML = ""
-        CapturedB.innerHTML = ""
-    })
-</script>
 
 </html>

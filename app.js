@@ -64,6 +64,7 @@ io.on('connection', (socket) => {
             } else if (game.id == gameId && game.visibility === 'public') {
                 game.join(user)
             }
+            socket.emit('messageHistory', game.messages)
         }
     })
 
@@ -78,6 +79,10 @@ io.on('connection', (socket) => {
 
     // socket.emit('youAre', {id: user.id, side: user.side})
 
+    socket.on('messageHistory', () => {
+        console.log(user)
+        if (user.game) socket.emit('messageHistory', user.game.messages)
+    })
 
     socket.on('newGame', (visibility = 'public') => {
         if (user.game) {
@@ -100,8 +105,7 @@ io.on('connection', (socket) => {
 
     // When a message comes in
     socket.on('chatMessage', (msg) => {
-        const sender = user.id
-        io.emit('chatMessage', sender, msg );
+        user.game.chatMsg(user.id, msg)
     });
 });
 

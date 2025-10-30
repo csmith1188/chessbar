@@ -26,6 +26,8 @@ class Game {
         this.users = []
         this.board = new Board()
 
+        this.messages = []
+
         // generate a unique 6-digit join code
         let code = Math.floor(Math.random() * 900000) + 100000
         while (takenGameCodes.includes(code)) {
@@ -73,14 +75,22 @@ class Game {
             user.socket.emit('updateBoard', this.board);
         }
     }
+
+    chatMsg(sender, msg) {
+        this.messages.push({sender: sender, message: msg})
+        for (let user of this.users) {
+            user.socket.emit('chatMessage', sender, msg)
+        }
+    }
 }
 
 function serializeGame(game) {
     return {
         id: game.id,
         users: game.users.map(u => ({ id: u.id, side: u.side })),
-        board: game.board, // make sure board itself is serializable
+        board: game.board,
         joinCode: game.joinCode,
+        messages: game.messages
     }
 }
 
