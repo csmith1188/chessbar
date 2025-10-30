@@ -68,7 +68,7 @@ io.on('connection', (socket) => {
         console.log('newGame event received - creating board on server');
         let game = new Game(visibility)
         game.join(user)
-        io.emit('updateBoard', game.board)
+        game.update()
         io.emit('gamesList', games.map(serializeGame))
     });
 
