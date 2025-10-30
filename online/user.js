@@ -1,9 +1,17 @@
+let takenUserIds = []
 class User {
-    constructor(id, side, socket) {
-        this.id = id
-        this.side = side
+    constructor(socket) {
+        this.id = 1
+        while( takenUserIds.includes(this.id)) {
+            this.id++
+        }
+        takenUserIds.push(this.id)
+
+        this.side = 'spectating'
         this.socket = socket
+
+        socket.emit('youAre', {id: this.id, side: this.side})
     }
 }
 
-module.exports = { User }
+module.exports = { User, takenUserIds }

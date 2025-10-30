@@ -3,7 +3,8 @@ const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
 const { Board, attachSocket } = require('./engine/main');
-const { User } = require('./online/user');
+const { User, takenUserIds } = require('./online/user');
+let { Game, games, takenGameIds, serializeGame } = require('./online/game')
 
 const app = express();
 app.use(express.static('static')); // serve client files from /public
@@ -27,48 +28,48 @@ server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
 
-let users = [];
+let users = []
 
 io.on('connection', (socket) => {
-    let currentUser;
-    
-    // Find the next available user ID
-    let nextId = 1;
-    while (users.find(user => user.id === nextId)) {
-        nextId++;
-    }
-    
-    // Determine user side based on existing users
-    let userSide;
-    if (nextId === 1) {
-        userSide = 'white';
-    } else if (nextId === 2) {
-        userSide = 'black';
-    } else {
-        userSide = 'spectating';
-    }
+    let user = new User(socket)
+    // socket.is = user
+    users.push(user);
 
-    currentUser = new User(nextId, userSide, socket);
-    users.push(currentUser);    console.log('A user connected:', currentUser.id, currentUser.side);
+    socket.emit('gamesList', games.map(serializeGame) )
+
+    socket.on('gamesList', () => {
+        socket.emit('gamesList', games.map(serializeGame))
+    })
+
+    console.log('A user connected:', user.id);
+
+    socket.on('join', (gameId) => {
+        for (let game of games) {
+            if (game.id == gameId) {
+                game.join(user)
+            }
+        }
+    })
 
     socket.on('disconnect', () => {
-        console.log('User disconnected');
-        const userIndex = users.findIndex(user => user.id === currentUser.id);
-        if (userIndex !== -1) {
-            users.splice(userIndex, 1);
+        console.log('User disconnected')
+        if (takenUserIds.includes(user.id)) {
+            takenUserIds.splice(takenUserIds.indexOf(user.id), 1)
         }
     });
 
-    socket.emit('youAre', {id: currentUser.id, side: currentUser.side})
+    // socket.emit('youAre', {id: user.id, side: user.side})
 
     socket.on('chat message', (msg) => {
         io.emit('chat message', msg);
     });
 
-    socket.on('newBoard', () => {
-        console.log('newBoard event received - creating board on server');
-        let board = new Board();
-        io.emit('updateBoard', board);
+    socket.on('newGame', (visibility = 'public') => {
+        console.log('newGame event received - creating board on server');
+        let game = new Game(visibility)
+        game.join(user)
+        game.update()
+        io.emit('gamesList', games.map(serializeGame))
     });
 
     socket.on('updateBoard', (board) => {
@@ -76,3 +77,5 @@ io.on('connection', (socket) => {
         io.emit('updateBoard', board)
     });
 });
+
+module.exports = { games }

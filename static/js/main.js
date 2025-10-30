@@ -7,6 +7,7 @@ canvas.height = Settings.boardSquareSize * 8
 if (Settings.pieceStyle == 'pixel') ctx.imageSmoothingEnabled = false
 
 let me
+let availableGames
 
 let Mouse = {
     x: 0,
@@ -17,50 +18,23 @@ let Mouse = {
 
 let keys = {}
 
-document.addEventListener('contextmenu', (e) => {
-    e.preventDefault()
-
-    if (Debug.logMouseEvents) console.log(e, Mouse)
-})
-
-document.addEventListener('mousemove', (e) => {
-    Mouse.x = e.clientX - canvas.getBoundingClientRect().left
-    Mouse.y = e.clientY - canvas.getBoundingClientRect().top
-
-    if (Debug.logMouseEvents) console.log(e, Mouse)
-})
-document.addEventListener('keydown', (e) => {
-    keys[e.key] = true
-})
-document.addEventListener('keyup', (e) => {
-    keys[e.key] = false
-})
-document.addEventListener('mousedown', (e) => {
-    if (e.button == 0) {
-        Mouse.left = true
-    } else if (e.button == 2) {
-        Mouse.right = true
-    }
-
-    if (Debug.logMouseEvents) console.log(e, Mouse)
-})
-document.addEventListener('mouseup', (e) => {
-    if (e.button == 0) {
-        Mouse.left = false
-    } else if (e.button == 2) {
-        Mouse.right = false
-    }
-
-    if (Debug.logMouseEvents) console.log(e, Mouse)
-})
-
 let board
 
 socket.on('youAre', (foo) => {
+    console.log('youAre event:', foo)
     me = foo
 })
 
-socket.emit('newBoard')
+socket.on('gamesList', (games) => {
+    availableGames = games
+    console.log('games list:', games)
+})
+
+// if (availableGames) {
+//     socket.emit('join', availableGames[0].id)
+// } else {
+//     socket.emit('newGame', 'public')
+// }
 
 socket.on('updateBoard', (newBoard) => {
     {

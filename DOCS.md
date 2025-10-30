@@ -30,6 +30,7 @@
  
 ### Truit
 - Consolidated several backend files
+- Began work on Game class (broke everything)
 
 ### Kayden
 - Bishop move validation
