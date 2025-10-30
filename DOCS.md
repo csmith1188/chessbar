@@ -44,12 +44,18 @@
 - leave game function
 - Fixed incorrect initial board layout
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 - Private games are joined with a code instead of an id
 - Private games are not sent with the gamesList
 =======
+=======
+>>>>>>> Stashed changes
 
 ### Kayden
 - hit the ground too hard
 - tried to swim in lava
 - was slain by socket io
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
