@@ -1,7 +1,9 @@
-/*
+
 const username = USERNAME; // comes from the EJS variable
 socket.emit("setName", username);
-for later */
+
+
+socket.emit("setName", username);
 
 const msgInput = document.getElementById("msg");
 const sendBtn = document.getElementById("send");

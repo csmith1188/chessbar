@@ -34,7 +34,7 @@
 
 ### Kayden
 - Bishop move validation
--
+- worked on front end
 
 ## 10/30
 
@@ -43,5 +43,13 @@
 - Players can only see moves from their active game
 - leave game function
 - Fixed incorrect initial board layout
+<<<<<<< Updated upstream
 - Private games are joined with a code instead of an id
 - Private games are not sent with the gamesList
+=======
+
+### Kayden
+- hit the ground too hard
+- tried to swim in lava
+- was slain by socket io
+>>>>>>> Stashed changes
