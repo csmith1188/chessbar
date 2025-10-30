@@ -79,7 +79,8 @@ function serializeGame(game) {
     return {
         id: game.id,
         users: game.users.map(u => ({ id: u.id, side: u.side })),
-        board: game.board // make sure board itself is serializable
+        board: game.board, // make sure board itself is serializable
+        joinCode: game.joinCode,
     }
 }
 

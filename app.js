@@ -39,10 +39,20 @@ io.on('connection', (socket) => {
     // socket.is = user
     users.push(user);
 
-    socket.emit('gamesList', games.filter(g => g.visibility === 'public').map(serializeGame))
+    function getVisibleGames() {
+        // console.log(games)
+        return games.filter(g => {
+            if (g.visibility === 'public') return true;
+            if (Array.isArray(g.players) && g.players.some(p => p && p.id === user.id)) return true;
+            if (Array.isArray(g.users) && g.users.some(u => u && u.id === user.id)) return true;
+            return false;
+        }).map(serializeGame);
+    }
+
+    socket.emit('gamesList', getVisibleGames());
 
     socket.on('gamesList', () => {
-        socket.emit('gamesList', games.filter(g => g.visibility === 'public').map(serializeGame))
+        socket.emit('gamesList', getVisibleGames());
     })
 
     console.log('A user connected:', user.id);
@@ -69,11 +79,17 @@ io.on('connection', (socket) => {
 
 
     socket.on('newGame', (visibility = 'public') => {
+        if (user.game) {
+            user.game.leave(user)
+        }
         console.log('newGame event received - creating board on server');
         let game = new Game(visibility)
         game.join(user)
         game.update()
+        // broadcast public games to everyone
         io.emit('gamesList', games.filter(g => g.visibility === 'public').map(serializeGame))
+        // send the updated visible-games list (including any private games the creator is in) to the creator only
+        socket.emit('gamesList', getVisibleGames())
     });
 
     socket.on('updateBoard', (board) => {

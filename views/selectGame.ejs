@@ -7,5 +7,33 @@
 </head>
 <body>
     <a href="/game">Game page</a>
+
+    <div id="games">
+        <h2>Available Games</h2>
+        <ul id="gameList"></ul>
+    </div>
+
+    <button id="newPublicGame" onclick="newGame('public')">Create New Public Game</button>
+    <button id="newPrivateGame" onclick="newGame('private')">Create New Private Game</button>
+    <input type="text" id="joinCodeInput" placeholder="Enter Join Code">
+    <button id="joinGameButton" onclick="joinGame()">Join Game</button>
 </body>
+<script src="/socket.io/socket.io.js"></script>
+
+<script src="js/gameList.js"></script>
+
+<script>
+    const joinCodeInput = document.getElementById('joinCodeInput');
+    function newGame(visibility) {
+        socket.emit('newGame', visibility)
+    }
+
+    function joinGame() {
+        const code = joinCodeInput.value.trim();
+        if (code) {
+            window.location.href = `/game?code=${encodeURIComponent(code)}`;
+        }
+    }
+</script>
+
 </html>

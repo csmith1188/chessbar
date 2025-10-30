@@ -52,6 +52,7 @@
     <!--div for chat and siht go here later-->
 
     <button id="send">send</button>
+    <a href="/">Back to game selection</a>
 
     <!-- Socket.IO client (auto-served by your server) -->
     <script src="/socket.io/socket.io.js"></script>
@@ -63,7 +64,16 @@
     <script src="js/clientBoard.js"></script>
     <script src="js/main.js"></script>
     <script src="js/chat.js"></script>
+
     <script>
+        const joinCode = new URLSearchParams(window.location.search).get('code')
+        console.log(joinCode)
+        if (joinCode) {
+            socket.emit('join', joinCode)
+        }
+    </script>
+
+    <script>    
         //for info box
         const InfoBox = document.getElementById("InfoBox");
         socket.on("updateBoard", (board) => {
