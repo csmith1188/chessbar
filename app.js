@@ -98,19 +98,10 @@ io.on('connection', (socket) => {
         io.emit('updateBoard', board)
     });
 
-    //chat and siht
-    socket.on('setName', (name) => {
-        activeUsers[socket.id] = name;
-        console.log(`${name} joined the chat`);
-
-        // Send updated list of usernames to everyone
-        io.emit('userList', Object.values(activeUsers));
-    });
-
     // When a message comes in
     socket.on('chatMessage', (msg) => {
-        const sender = activeUsers[socket.id] || "Anonymous";
-        io.emit('chatMessage', { name: sender, message: msg });
+        const sender = user.id
+        io.emit('chatMessage', sender, msg );
     });
 });
 

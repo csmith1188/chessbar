@@ -1,4 +1,3 @@
-const socket = io()
 const canvas = document.getElementById('canvas')
 /** @type {CanvasRenderingContext2D} */
 const ctx = /** @type {CanvasRenderingContext2D} */ (canvas.getContext('2d'))

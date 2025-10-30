@@ -1,29 +1,23 @@
-
-const username = USERNAME; // comes from the EJS variable
-socket.emit("setName", username);
-
-
-socket.emit("setName", username);
-
 const msgInput = document.getElementById("msg");
 const sendBtn = document.getElementById("send");
 const messages = document.getElementById("messages");
 const sidebar = document.getElementById("chat-sidebar");
 
 // Send message
-sendBtn.addEventListener("click", () => {
+sendBtn.onclick = () => {
     const text = msgInput.value.trim();
     if (text !== "") {
         socket.emit("chatMessage", text);
         msgInput.value = "";
     }
-});
+}
+
 
 // Receive new messages
-socket.on("chatMessage", ({ name, message }) => {
+socket.on("chatMessage", (name, message) => {
     const row = document.createElement("div");
     row.classList.add("message-row");
-    row.classList.add(name === username ? "you" : "other");
+    row.classList.add(name === me.id ? "you" : "other");
 
     const bubble = document.createElement("div");
     bubble.classList.add("message");

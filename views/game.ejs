@@ -157,39 +157,46 @@
     </div>
 
     <!--div for chat and siht go here later-->
+    <div id="messages"></div>
+    <div id="chat-sidebar"></div>
 
+    <input type="text" id="msg" placeholder="Type your message here..." />
     <button id="send">send</button>
     <a href="/">Back to game selection</a>
-
-    <!-- Socket.IO client (auto-served by your server) -->
-    <script src="/socket.io/socket.io.js"></script>
-
-    <script src="js/settings.js"></script>
-
-    <script src="js/docEvents.js"></script>
-
-    <script src="js/clientBoard.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/chat.js"></script>
-
-    <script>
-        const joinCode = new URLSearchParams(window.location.search).get('code')
-        console.log(joinCode)
-        if (joinCode) {
-            socket.emit('join', joinCode)
-        }
-    </script>
-
-    <script>    
-        //for info box
-        const InfoBox = document.getElementById("InfoBox");
-        socket.on("updateBoard", (board) => {
-            InfoBox.innerHTML = board.turn
-            CapturedW.innerHTML = ""
-            CapturedB.innerHTML = ""
-        })
-        const USERNAME = "<%= username %>";
-    </script>
 </body>
+
+<!-- Socket.IO client (auto-served by your server) -->
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+    const socket = io()
+</script>
+
+<script src="js/chat.js"></script>
+
+<script src="js/settings.js"></script>
+
+<script src="js/docEvents.js"></script>
+
+<script src="js/clientBoard.js"></script>
+<script src="js/main.js"></script>
+
+<script>
+    const joinCode = new URLSearchParams(window.location.search).get('code')
+    console.log(joinCode)
+    if (joinCode) {
+        socket.emit('join', joinCode)
+    }
+</script>
+
+<script>
+    //for info box
+    const InfoBox = document.getElementById("InfoBox");
+    socket.on("updateBoard", (board) => {
+        InfoBox.innerHTML = board.turn
+        CapturedW.innerHTML = ""
+        CapturedB.innerHTML = ""
+    })
+</script>
 
 </html>
