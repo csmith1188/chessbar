@@ -65,7 +65,7 @@ function drawBoard() {
     if (!Mouse.left && selected) {
         if (me.side == selected.side) {
             if (me.side == 'white') {
-                socket.emit('move', board, me,
+                socket.emit('move', me,
                     {
                         name: selected.name,
                         side: selected.side,
@@ -75,7 +75,7 @@ function drawBoard() {
                     },
                     Math.floor((selected.x + selected.w / 2) / Settings.boardSquareSize), Math.floor((selected.y + selected.h / 2) / Settings.boardSquareSize))
             } else {
-                socket.emit('move', board, me,
+                socket.emit('move', me,
                     {
                         name: selected.name,
                         side: selected.side,

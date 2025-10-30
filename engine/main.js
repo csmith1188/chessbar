@@ -31,10 +31,23 @@ class Board {
 
 const classes = { Pawn, Rook, Knight, Bishop, Queen, King }
 
-function attachSocket(io) {
+function attachSocket(io, games) {
     io.on('connection', (socket) => {
 
-        socket.on('move', (board, player, piece, x2, y2) => {
+        socket.on('move', (player, piece, x2, y2) => {
+            // Find the player's game (client should include game id in `player.game`)
+            const gameId = player && (player.game || player.gameId)
+            const game = games.find(g => g.id == gameId)
+
+            if (!game) {
+                console.log('Move received but no game found for player:', player)
+                // send back a no-op board to the requesting socket so client can re-sync
+                socket.emit('updateBoard', {})
+                return
+            }
+
+            const board = game.board
+
             let x1 = piece.x
             let y1 = piece.y
 
@@ -50,18 +63,26 @@ function attachSocket(io) {
 
             if (board.turn == player.side && !(x1 == x2 && y1 == y2)) {
 
-                if (board.layout[y1][x1] && y2 <= 7 && x2 <= 7 && x2 >= 0 && y2 >= 0) {
+                if (board.layout[y1] && board.layout[y1][x1] && y2 <= 7 && x2 <= 7 && x2 >= 0 && y2 >= 0) {
 
                     let foo = new classes[piece.name](piece.side, piece.moves)
 
-                    if (board.layout[y2][x2].side != piece.side && foo.validMove(board.layout, x1, y1, x2, y2)) {
+                    // destination may be empty (0) or occupied by opponent
+                    const dest = board.layout[y2][x2]
+                    const destIsOpponent = !dest || dest.side != piece.side
+
+                    if (destIsOpponent && foo.validMove(board.layout, x1, y1, x2, y2)) {
                         board.layout[y1][x1] = 0
-                        if (board.layout[y2][x2]) board.captured.push({ name: board.layout[y2][x2].name, side: board.layout[y2][x2].side })
+                        if (dest) board.captured.push({ name: dest.name, side: dest.side })
                         board.layout[y2][x2] = foo
                         foo.moves++
                         board.turn = board.turn == 'white' ? 'black' : 'white'
                         console.log(`Move successful, it's now ${board.turn}'s turn.`)
-                        io.emit('updateBoard', board)
+
+                        // Only emit update to users in this game
+                        for (let u of game.users) {
+                            if (u && u.socket) u.socket.emit('updateBoard', board)
+                        }
                     } else {
                         console.log(`Still ${board.turn}'s turn, move failed (Invalid).`)
                         socket.emit('updateBoard', board)

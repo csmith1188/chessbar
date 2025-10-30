@@ -27,20 +27,16 @@ class Game {
 
         if (this.visibility == 'public') games.push(this)
         // console.log('\nGames:\n', games)
-        
+
         this.update()
     }
 
     assignSides() {
-        // console.log('Users:', this.users)
-
-        this.users[0].side = 'white'
-        // console.log('First user:', this.users[0])
-
+        if (this.users[0]) this.users[0].side = 'white'
         if (this.users[1]) this.users[1].side = 'black'
 
         for (let user of this.users) {
-            user.socket.emit('youAre', {id: user.id, side: user.side})
+            user.youAre()
         }
     }
 
@@ -48,21 +44,26 @@ class Game {
         console.log(`User ${user.id} is joining game ${this.id}.`)
         user.side = 'spectating'
         this.users.push(user)
+        user.game = this
+        this.assignSides()
+        this.update()
+    }
+
+    leave(user) {
+        console.log(`User ${user.id} is leaving game ${this.id}.`)
+        this.users = this.users.filter(u => u.id !== user.id)
         this.assignSides()
         this.update()
     }
 
     update() {
         console.log(`Updating for ${this.users.length} user(s).`);
-    
+
         for (let user of this.users) {
-            user.socket.emit('youAre', { id: user.id, side: user.side });
-            // console.log(user.socket, this.board)
+            user.youAre()
             user.socket.emit('updateBoard', this.board);
         }
     }
-    
-
 }
 
 function serializeGame(game) {
