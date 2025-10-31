@@ -78,6 +78,7 @@
     const gameName = document.getElementById('gameName')
     function newGame(visibility) {
         socket.emit('newGame', visibility, gameName.value.trim())
+        closeNav()
     }
 
     function joinGame() {

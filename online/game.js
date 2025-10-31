@@ -98,7 +98,8 @@ function serializeGame(game) {
         joinCode: game.joinCode,
         messages: game.messages,
         name: game.name,
-        owner: game.owner.id
+        owner: game.owner.id,
+        visibility: game.visibility
     }
 }
 

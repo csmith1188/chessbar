@@ -38,7 +38,7 @@ function renderGameList() {
 
         const title = document.createElement('div')
         title.className = 'title'
-        title.textContent = `Game name: ${game.name} | Players: ${playersCount}/2`
+        title.textContent = `Game name: ${game.name} | Players: ${playersCount}/2 | ( ${game.visibility} )`
         meta.appendChild(title)
 
         const sub = document.createElement('div')
@@ -52,7 +52,7 @@ function renderGameList() {
 
         const owner = document.createElement('div')
         owner.clasName = 'sub'
-        owner.textContent = me.id == game.owner ? `Owner: you` : `Owner: ${game.owner}`
+        owner.textContent = me.id == game.owner ? `Owner: You` : `Owner: ${game.owner}`
         meta.appendChild(owner)
 
         li.appendChild(meta)

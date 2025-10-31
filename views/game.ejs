@@ -8,6 +8,8 @@
 </head>
 
 <body>
+    <!-- Join code badge (top-left) -->
+    <div id="join-code-badge" role="button" tabindex="0" aria-live="polite" aria-label="Copy join code" title="Click to copy join code" style="display:none"></div>
     <div id="container">
         <canvas id="canvas"></canvas>
         <div id="sidebar">
@@ -112,11 +114,84 @@
             socket.emit('join', joinCode);
         }
 
+    // Join-code badge element (will be populated from server `youAre` or the URL)
+    const joinBadge = document.getElementById('join-code-badge');
+
         const InfoBox = document.getElementById("InfoBox");
         socket.on("updateBoard", (board) => {
             InfoBox.innerHTML = board.turn;
             CapturedW.innerHTML = "";
             CapturedB.innerHTML = "";
+        });
+
+        // Listen for server-sent identity info which includes game joinCode when in a game
+        socket.on('youAre', (me) => {
+            try {
+                let code = null;
+                if (me && me.game && me.game.joinCode) {
+                    code = String(me.game.joinCode);
+                } else if (joinCode) {
+                    code = String(joinCode);
+                }
+
+                if (code) {
+                    joinBadge.textContent = `Join code: ${code}`;
+                    joinBadge.dataset.code = code;
+                    joinBadge.style.display = 'block';
+                } else {
+                    joinBadge.dataset.code = '';
+                    joinBadge.style.display = 'none';
+                }
+            } catch (e) {
+                // Ignore errors and hide badge
+                joinBadge.dataset.code = '';
+                joinBadge.style.display = 'none';
+            }
+        });
+
+        // Copy-to-clipboard helper with fallback
+        async function copyJoinCode(code) {
+            if (!code) return;
+            const prev = joinBadge.textContent;
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(code);
+                } else {
+                    // Fallback for older browsers
+                    const ta = document.createElement('textarea');
+                    ta.value = code;
+                    ta.style.position = 'fixed';
+                    ta.style.left = '-9999px';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                }
+                // show visual confirmation
+                joinBadge.textContent = 'Copied!';
+                setTimeout(() => {
+                    joinBadge.textContent = prev;
+                }, 1400);
+            } catch (err) {
+                console.error('Copy failed', err);
+                // brief error feedback
+                joinBadge.textContent = 'Copy failed';
+                setTimeout(() => {
+                    joinBadge.textContent = prev;
+                }, 1400);
+            }
+        }
+
+        // Click and keyboard handlers for accessibility
+        joinBadge.addEventListener('click', () => {
+            copyJoinCode(joinBadge.dataset.code);
+        });
+
+        joinBadge.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+                e.preventDefault();
+                copyJoinCode(joinBadge.dataset.code);
+            }
         });
     </script>
 </body>
