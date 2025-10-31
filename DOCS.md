@@ -50,3 +50,4 @@
 - hit the ground too hard
 - tried to swim in lava
 - was slain by socket io
+- socket io was slain by truit while escaping kayden
