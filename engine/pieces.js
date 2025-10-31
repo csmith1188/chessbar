@@ -73,7 +73,34 @@ class King extends Piece {
             ((Math.abs(x2 - x1) == 1 && Math.abs(y2 - y1) == 1) && board[y2][x2].side != this.side)
         ) {
             return true
+        } else if (y1 == y2 && this.moves == 0) {
+            if (Math.abs(x2 - x1) == 2) {
+                // Castling attempt: determine side (kingside if x2>x1, queenside if x2<x1)
+                const dir = x2 - x1 > 0 ? 1 : -1
+                const rookX = dir > 0 ? 7 : 0
+                const rook = board[y1][rookX]
+
+                // rook must exist, be a rook, same side, and not have moved
+                if (!rook || rook.name !== 'Rook' || rook.side !== this.side || rook.moves !== 0) {
+                    return false
+                }
+
+                // squares between king and rook must be empty
+                const start = Math.min(x1, rookX) + 1
+                const end = Math.max(x1, rookX) - 1
+                for (let x = start; x <= end; x++) {
+                    if (board[y1][x]) return false
+                }
+
+                // Move the rook to its castled square (next to the king's destination)
+                const newRookX = x1 + dir
+                board[y1][newRookX] = rook
+                board[y1][rookX] = 0
+
+                return true
+            }
         }
+
         return false
     }
 }

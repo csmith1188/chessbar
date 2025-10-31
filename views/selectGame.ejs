@@ -4,19 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chess</title>
+    <link rel="stylesheet" href="/css/selectGame.css">
 </head>
 <body>
-    <a href="/game">Game page</a>
+    <div class="page-wrap">
+        <header class="header">
+            <div class="brand">
+                <img src="/img/basic/white_rook.png" alt="logo">
+                <h1>Chessbar — Select a Game</h1>
+            </div>
+            <div class="controls">
+                <!-- <a class="small" href="/game">Open last game</a> -->
+                <button id="newPublicGame" class="btn" onclick="newGame('public')">New Public</button>
+                <button id="newPrivateGame" class="btn secondary" onclick="newGame('private')">New Private</button>
+            </div>
+        </header>
 
-    <div id="games">
-        <h2>Available Games</h2>
-        <ul id="gameList"></ul>
+        <main class="main">
+            <section class="panel" id="games">
+                <h2>Available Games</h2>
+                <ul id="gameList"></ul>
+            </section>
+
+            <aside class="sidebar">
+                <div class="panel">
+                    <label for="joinCodeInput" class="small">Join by code</label>
+                    <input class="input" type="text" id="joinCodeInput" placeholder="Enter Join Code">
+                    <div style="display:flex;gap:8px">
+                        <button id="joinGameButton" class="btn" onclick="joinGame()">Join</button>
+                        <button class="btn secondary" onclick="location.reload()">Refresh</button>
+                    </div>
+                    <div class="footer-note">Public games are visible to everyone. Private games require the join code.</div>
+                </div>
+            </aside>
+        </main>
     </div>
-
-    <button id="newPublicGame" onclick="newGame('public')">Create New Public Game</button>
-    <button id="newPrivateGame" onclick="newGame('private')">Create New Private Game</button>
-    <input type="text" id="joinCodeInput" placeholder="Enter Join Code">
-    <button id="joinGameButton" onclick="joinGame()">Join Game</button>
 </body>
 <script src="/socket.io/socket.io.js"></script>
 

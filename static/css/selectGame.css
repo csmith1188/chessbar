@@ -1,0 +1,228 @@
+/* Redesigned select-game page styles */
+:root {
+    --bg-1: #020613; /* very dark navy */
+    --bg-2: #07121a; /* deep navy */
+    --card: #0c1a24; /* dark panel */
+    --muted: #7f8a95; /* subdued text */
+    --accent: #c78d2f; /* muted amber */
+    --accent-2: #362380; /* muted purple */
+    --glass: rgba(255, 255, 255, 0.02);
+    --radius: 12px;
+    --max-width: 1100px;
+}
+
+* {
+    box-sizing: border-box
+}
+
+html,
+body {
+    height: 100%
+}
+
+body {
+    margin: 0;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+    color: #eaf4fb;
+    -webkit-font-smoothing: antialiased;
+    padding: 28px 18px;
+    display: flex;
+    justify-content: center;
+}
+
+.page-wrap {
+    width: 100%;
+    max-width: var(--max-width)
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px
+}
+
+.brand img {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.6))
+}
+
+.brand h1 {
+    font-size: 18px;
+    margin: 0;
+    font-weight: 700
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    align-items: center
+}
+
+.small {
+    font-size: 13px;
+    color: var(--muted)
+}
+
+.btn {
+    background: var(--accent);
+    border-radius: 10px;
+    padding: 10px 14px;
+    border: 0;
+    color: #042628;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45)
+}
+
+.btn.secondary {
+    background: linear-gradient(90deg, var(--accent-2), #5a1996);
+    color: #e2e7eb
+}
+
+.input {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--muted);
+    min-width: 180px
+}
+
+.main {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 18px;
+    align-items: start
+}
+
+@media (max-width:920px) {
+    .main {
+        grid-template-columns: 1fr
+    }
+
+    .controls {
+        flex-wrap: wrap
+    }
+}
+
+.panel {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(3, 8, 18, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.03)
+}
+
+#games h2 {
+    margin: 0 0 10px 0;
+    font-size: 16px
+}
+
+#gameList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 12px
+}
+
+.game-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.005));
+    border: 1px solid rgba(255, 255, 255, 0.03)
+}
+
+.game-item .meta {
+    flex: 1;
+    min-width: 0
+}
+
+.game-item .meta .title {
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis
+}
+
+.game-item .meta .sub {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis
+}
+
+.game-item .actions {
+    display: flex;
+    gap: 8px;
+    align-items: center
+}
+
+.game-item button {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 0;
+    background: transparent;
+    color: var(--accent-2);
+    cursor: pointer
+}
+
+.game-item button.join {
+    background: var(--accent);
+    color: #002827;
+    font-weight: 700
+}
+
+.game-item button.preview {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--muted)
+}
+
+.game-item button:hover {
+    transform: translateY(-2px);
+    transition: transform 120ms ease
+}
+
+.empty {
+    color: var(--muted);
+    padding: 18px;
+    text-align: center
+}
+
+.sidebar .panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px
+}
+
+.footer-note {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 13px
+}
+
+/* small visual tweaks for accessibility */
+button:focus,
+.input:focus {
+    outline: 3px solid rgba(94, 234, 212, 0.12);
+    outline-offset: 2px
+}
+
+/* end */
