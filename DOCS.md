@@ -63,3 +63,6 @@
 - Make games have a name and an owner
 - More styling
 - Create game window
+- Added visibility to sterelized game object
+- Game code is shown in corner of screen
+- Click to copy join code

@@ -148,6 +148,14 @@ body {
     color: #eaf5fb
 }
 
+/* Ensure long words / unbroken text wrap inside chat bubbles */
+.message {
+    /* allow breaking long words and force wrap when necessary */
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
+}
+
 .message-row.you .message {
     background: var(--accent-2);
     color: white

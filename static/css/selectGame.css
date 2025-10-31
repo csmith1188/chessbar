@@ -190,6 +190,12 @@ body {
     font-weight: 700
 }
 
+.game-item button.delete {
+    background: #a21313;
+    color: #d5d5d5;
+    font-weight: 700
+}
+
 .game-item button.preview {
     background: rgba(255, 255, 255, 0.03);
     color: var(--muted)

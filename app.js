@@ -88,9 +88,10 @@ io.on('connection', (socket) => {
         if (user.game) {
             user.game.leave(user)
         }
-        console.log('newGame event received - creating board on server');
+        console.log('newGame event received');
         let game = new Game(visibility, name)
         game.owner = user
+        // console.log(game.id, game.joinCode, game.owner)
         game.update()
         // send the updated visible-games list (including any private games the creator is in) to the creator only
         socket.emit('gamesList', getVisibleGames())
@@ -105,6 +106,18 @@ io.on('connection', (socket) => {
     // When a message comes in
     socket.on('chatMessage', (msg) => {
         user.game.chatMsg(user.id, msg)
+    });
+
+    socket.on('deleteGame', (gameId) => {
+        const game = games.find(g => g.id === gameId);
+
+        if (game && game.owner.id === user.id) {
+            // mutate the shared array instead of reassigning the variable
+            const idx = games.findIndex(g => g.id === gameId);
+            if (idx !== -1) games.splice(idx, 1);
+            console.log(`Game ${gameId} deleted by owner ${user.id}.`);
+            io.emit('refreshGames');
+        }
     });
 });
 

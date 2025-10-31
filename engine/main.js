@@ -154,7 +154,7 @@ function attachSocket(io, games) {
             const game = games.find(g => g.id == player.game.id)
 
             if (!game) {
-                console.log('Move received but no game found for player:', player)
+                // console.log('Move received but no game found for player:', player)
                 // send back a no-op board to the requesting socket so client can re-sync
                 socket.emit('updateBoard', {})
                 return
@@ -172,8 +172,8 @@ function attachSocket(io, games) {
                 y2 = 7 - y2
             }
 
-            console.log(`\n${board.turn}'s turn.`)
-            console.log(`${piece.side} ${piece.name.toLowerCase()} (${x1}, ${y1}) is attempting to move to (${x2}, ${y2})`)
+            // console.log(`\n${board.turn}'s turn.`)
+            // console.log(`${piece.side} ${piece.name.toLowerCase()} (${x1}, ${y1}) is attempting to move to (${x2}, ${y2})`)
 
             if (board.turn == player.side && !(x1 == x2 && y1 == y2)) {
 
@@ -188,7 +188,7 @@ function attachSocket(io, games) {
                     if (destIsOpponent && foo.validMove(board.layout, x1, y1, x2, y2)) {
                         // Reject moves that leave your own king in check
                         if (board.wouldBeInCheckAfterMove(x1, y1, x2, y2)) {
-                            console.log(`Still ${board.turn}'s turn, move failed (Would leave king in check).`)
+                            // console.log(`Still ${board.turn}'s turn, move failed (Would leave king in check).`)
                             socket.emit('updateBoard', board)
                             return
                         }
@@ -198,15 +198,15 @@ function attachSocket(io, games) {
                         board.layout[y2][x2] = foo
                         foo.moves++
                         board.turn = board.turn == 'white' ? 'black' : 'white'
-                        console.log(`Move successful, it's now ${board.turn}'s turn.`)
+                        // console.log(`Move successful, it's now ${board.turn}'s turn.`)
 
                         // After move, check for check or mate against the side to move
                         const opponent = board.turn
                         const inCheck = board.inCheck(opponent)
                         const isMate = inCheck && !board.hasLegalMoves(opponent)
                         // Log check / mate to server console
-                        if (inCheck) console.log(`${opponent} is in check.`)
-                        if (isMate) console.log(`Checkmate! ${foo.side} wins.`)
+                        // if (inCheck) console.log(`${opponent} is in check.`)
+                        // if (isMate) console.log(`Checkmate! ${foo.side} wins.`)
 
                         // Only emit update to users in this game, plus check/mate events
                         for (let u of game.users) {
@@ -215,20 +215,20 @@ function attachSocket(io, games) {
                             if (isMate && u && u.socket) u.socket.emit('mate', { winner: foo.side })
                         }
                     } else {
-                        console.log(`Still ${board.turn}'s turn, move failed (Invalid).`)
+                        // console.log(`Still ${board.turn}'s turn, move failed (Invalid).`)
                         socket.emit('updateBoard', board)
                     }
                 } else {
-                    console.log(`Still ${board.turn}'s turn, move failed (Off screen).`)
+                    // console.log(`Still ${board.turn}'s turn, move failed (Off screen).`)
                     socket.emit('updateBoard', board)
                 }
             } else if (player.side == 'spectating') {
 
-                console.log(`Spectators can't play, move failed.`)
+                // console.log(`Spectators can't play, move failed.`)
                 socket.emit('updateBoard', board)
 
             } else {
-                console.log(`Still ${board.turn}'s turn, move failed.`)
+                // console.log(`Still ${board.turn}'s turn, move failed.`)
                 socket.emit('updateBoard', board)
             }
 

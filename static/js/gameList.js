@@ -1,6 +1,7 @@
 const socket = io()
 
 let availableGames = []
+let me = null
 
 socket.on('refreshGames', () => {
     socket.emit('gamesList')
@@ -50,9 +51,9 @@ function renderGameList() {
         }
         meta.appendChild(sub)
 
-        const owner = document.createElement('div')
-        owner.clasName = 'sub'
-        owner.textContent = me.id == game.owner ? `Owner: You` : `Owner: ${game.owner}`
+    const owner = document.createElement('div')
+    owner.className = 'sub'
+    owner.textContent = (me && me.id == game.owner) ? `Owner: You` : `Owner: ${game.owner}`
         meta.appendChild(owner)
 
         li.appendChild(meta)
@@ -66,6 +67,12 @@ function renderGameList() {
             actionBtn.textContent = 'Join'
             actionBtn.onclick = () => window.location.href = `/game?code=${encodeURIComponent(game.joinCode)}`
             actions.appendChild(actionBtn)
+        } else {
+            const actionBtn = document.createElement('button')
+            actionBtn.className = 'join'
+            actionBtn.textContent = 'Spectate'
+            actionBtn.onclick = () => window.location.href = `/game?code=${encodeURIComponent(game.joinCode)}`
+            actions.appendChild(actionBtn)
         }
 
         const previewBtn = document.createElement('button')
@@ -76,6 +83,14 @@ function renderGameList() {
             w.document.write('<pre>' + JSON.stringify(game, null, 2) + '</pre>')
         }
         actions.appendChild(previewBtn)
+
+        if (game.owner == me.id) {
+            const actionBtn = document.createElement('button')
+            actionBtn.className = 'delete'
+            actionBtn.textContent = 'Delete'
+            actionBtn.onclick = () => socket.emit('deleteGame', game.id)
+            actions.appendChild(actionBtn)
+        }
 
         li.appendChild(actions)
 
