@@ -1,0 +1,190 @@
+/* === Overlay Background === */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    /* Dim background */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+    z-index: 1000;
+}
+
+/* Show overlay when active */
+.overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* === Modal Box === */
+.overlay-content {
+    position: relative;
+    background: #111;
+    color: white;
+    width: 400px;
+    max-width: 90%;
+    padding: 40px 30px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    /* Stack elements vertically */
+    align-items: stretch;
+    /* Make children full width */
+    gap: 15px;
+    /* Space between elements */
+}
+
+/* Animate scale on open */
+.overlay.active .overlay-content {
+    transform: scale(1);
+}
+
+/* === Close Button === */
+.overlay .closebtn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 26px;
+    color: #fff;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.overlay .closebtn:hover {
+    color: #f1f1f1;
+}
+
+/* === Text Input === */
+.overlay-content input[type="text"] {
+    padding: 10px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    background-color: #222;
+    color: #fff;
+    outline: none;
+}
+
+.overlay-content input[type="text"]::placeholder {
+    color: #aaa;
+}
+
+/* === Checkbox Group === */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    /* space between each checkbox row */
+}
+
+.checkbox-item {
+    display: flex;
+    /* puts checkbox and label on same line */
+    align-items: center;
+    /* vertically center label with checkbox */
+    gap: 8px;
+    /* space between checkbox and label */
+}
+
+/* Default label color (unchecked) */
+.checkbox-item label {
+    font-size: 16px;
+    cursor: pointer;
+    color: #aaa;
+    /* gray when unchecked */
+    transition: color 0.2s ease;
+}
+
+/* Checkbox styling */
+.checkbox-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    appearance: none;
+    border: 2px solid #888;
+    border-radius: 4px;
+    background-color: #555;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+/* Checked state */
+.checkbox-item input[type="checkbox"]:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+/* Checkmark for checked boxes */
+.checkbox-item input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Change label color when checkbox is checked */
+.checkbox-item input[type="checkbox"]:checked+label {
+    color: #fff;
+}
+
+
+/* === Buttons === */
+.overlay-content .btn {
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    background: #007bff;
+    color: white;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.overlay-content .btn:hover {
+    background: #0069d9;
+    transform: scale(1.02);
+}
+
+.overlay-content .btn.secondary {
+    background: #444;
+}
+
+.overlay-content .btn.secondary:hover {
+    background: #555;
+}
+
+/* === Responsive adjustments === */
+@media screen and (max-width: 450px) {
+    .overlay-content {
+        width: 90%;
+        padding: 25px 20px;
+    }
+
+    .overlay .closebtn {
+        font-size: 22px;
+        top: 8px;
+        right: 10px;
+    }
+
+    .overlay-content input[type="text"],
+    .overlay-content .btn {
+        font-size: 14px;
+    }
+}

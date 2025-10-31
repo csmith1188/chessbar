@@ -14,17 +14,22 @@ let takenGameCodes = []
 */
 
 class Game {
-    constructor(visibility) {
+    constructor(visibility, name = null) {
         this.visibility = visibility
-        this.id = 1
+        this.id = 1        
 
         while (takenGameIds.includes(this.id)) {
             this.id++
         }
+
+        this.name = name ? name : this.id
+        
         takenGameIds.push(this.id)
 
         this.users = []
         this.board = new Board()
+
+        this.owner = null
 
         this.messages = []
 
@@ -55,6 +60,7 @@ class Game {
         console.log(`User ${user.id} is joining game ${this.id}.`)
         user.side = 'spectating'
         this.users.push(user)
+        // if (this.users.length == 1) this.owner = user
         user.game = this
         this.assignSides()
         this.update()
@@ -90,7 +96,9 @@ function serializeGame(game) {
         users: game.users.map(u => ({ id: u.id, side: u.side })),
         board: game.board,
         joinCode: game.joinCode,
-        messages: game.messages
+        messages: game.messages,
+        name: game.name,
+        owner: game.owner.id
     }
 }
 

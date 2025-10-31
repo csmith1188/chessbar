@@ -55,3 +55,10 @@
 - hit the ground too hard
 - tried to swim in lava
 - was slain by socket io
+
+## Halloween AAAH SPOOKY
+
+### Truit
+- Make games have a name and an owner
+- More styling
+- Create game window

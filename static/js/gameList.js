@@ -2,9 +2,20 @@ const socket = io()
 
 let availableGames = []
 
+socket.on('refreshGames', () => {
+    socket.emit('gamesList')
+})
+
+socket.emit('gamesList')
+
 socket.on('gamesList', (games) => {
     availableGames = games
     renderGameList()
+})
+
+socket.on('youAre', (foo) => {
+    // console.log('youAre event:', foo)
+    me = foo
 })
 
 function renderGameList() {
@@ -27,7 +38,7 @@ function renderGameList() {
 
         const title = document.createElement('div')
         title.className = 'title'
-        title.textContent = `Game ID: ${game.id} | Players: ${playersCount}/2`
+        title.textContent = `Game name: ${game.name} | Players: ${playersCount}/2`
         meta.appendChild(title)
 
         const sub = document.createElement('div')
@@ -38,6 +49,11 @@ function renderGameList() {
             sub.textContent = 'Users: (none)'
         }
         meta.appendChild(sub)
+
+        const owner = document.createElement('div')
+        owner.clasName = 'sub'
+        owner.textContent = me.id == game.owner ? `Owner: you` : `Owner: ${game.owner}`
+        meta.appendChild(owner)
 
         li.appendChild(meta)
 

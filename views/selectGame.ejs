@@ -1,12 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chess</title>
     <link rel="stylesheet" href="/css/selectGame.css">
+    <link rel="stylesheet" href="/css/newGame.css">
 </head>
+
 <body>
+    <div id="newGameOverlay" class="overlay">
+        <div class="overlay-content">
+            <button class="closebtn" onclick="closeNav()">&times;</button>
+
+            
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="chatOn" name="chat" checked>
+                    <label for="chatOn">Chat enabled</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="startWhite" name="white" checked>
+                    <label for="startWhite">Start as white</label>
+                </div>
+            </div>
+
+            <input type="text" class="input" id="gameName" placeholder="Enter Room Name...">
+
+            <button id="newPublicGame" class="btn" onclick="newGame('public')">New Public Game</button>
+            <button id="newPrivateGame" class="btn secondary" onclick="newGame('private')">New Private Game</button>
+        </div>
+    </div>
+
+    <!-- <span onclick="openNav()">open</span> -->
+
     <div class="page-wrap">
         <header class="header">
             <div class="brand">
@@ -15,8 +43,8 @@
             </div>
             <div class="controls">
                 <!-- <a class="small" href="/game">Open last game</a> -->
-                <button id="newPublicGame" class="btn" onclick="newGame('public')">New Public</button>
-                <button id="newPrivateGame" class="btn secondary" onclick="newGame('private')">New Private</button>
+                <button id="newPublicGame" class="btn" onclick="openNav()">New Game</button>
+                <!-- <button id="newPrivateGame" class="btn secondary" onclick="newGame('private')">New Private</button> -->
             </div>
         </header>
 
@@ -34,7 +62,8 @@
                         <button id="joinGameButton" class="btn" onclick="joinGame()">Join</button>
                         <button class="btn secondary" onclick="location.reload()">Refresh</button>
                     </div>
-                    <div class="footer-note">Public games are visible to everyone. Private games require the join code.</div>
+                    <div class="footer-note">Public games are visible to everyone. Private games require the join code.
+                    </div>
                 </div>
             </aside>
         </main>
@@ -46,8 +75,9 @@
 
 <script>
     const joinCodeInput = document.getElementById('joinCodeInput');
+    const gameName = document.getElementById('gameName')
     function newGame(visibility) {
-        socket.emit('newGame', visibility)
+        socket.emit('newGame', visibility, gameName.value.trim())
     }
 
     function joinGame() {
@@ -56,6 +86,17 @@
             window.location.href = `/game?code=${encodeURIComponent(code)}`;
         }
     }
+</script>
+
+<script>
+    function openNav() {
+        document.getElementById("newGameOverlay").classList.add("active");
+    }
+
+    function closeNav() {
+        document.getElementById("newGameOverlay").classList.remove("active");
+    }
+
 </script>
 
 </html>
