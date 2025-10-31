@@ -45,10 +45,10 @@
 - Fixed incorrect initial board layout
 - Private games are joined with a code instead of an id
 - Private games are not sent with the gamesList
-- Chat and chat history
+- Chat and chat history -which i made -kayden
 - Began castling functionality
 - ChatGPT finished it for me
-- Lots of AI styling
+- Lots of AI styling -made by me - kayden
 - Settings window
 
 ### Kayden
@@ -66,3 +66,7 @@
 - Added visibility to sterelized game object
 - Game code is shown in corner of screen
 - Click to copy join code
+
+### Kayden
+- tested chess
+- actually did CIW
