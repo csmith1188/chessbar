@@ -58,6 +58,10 @@ socket.on('updateBoard', (newBoard) => {
 })
 
 function main() {
+    if (keys['Enter'] && msgInput.value) {
+        sendBtn.click()
+    }
+
     drawBoard()
 
     if (Debug.showHoverSquare) {

@@ -60,7 +60,7 @@ class Piece {
 #########  ###    ### ###     ###   ###   ###
 */
 function drawBoard() {
-    let color = 'light'
+    let color = (me && me.side == 'white') ? 'dark' : 'light'
     for (let y = 0; y < 8; y++) {
         for (let x = 0; x < 8; x++) {
             if (color == 'light') {

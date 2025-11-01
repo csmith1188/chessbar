@@ -39,7 +39,7 @@ function renderGameList() {
 
         const title = document.createElement('div')
         title.className = 'title'
-        title.textContent = `Game name: ${game.name} | Players: ${playersCount}/2 | ( ${game.visibility} )`
+        title.innerHTML = `<h2><strong>${game.name}</strong> (${game.visibility})</h2> <p>Players: ${playersCount}/2</p>`
         meta.appendChild(title)
 
         const sub = document.createElement('div')

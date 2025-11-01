@@ -74,7 +74,7 @@ class Game {
     }
 
     update() {
-        console.log(`Updating for ${this.users.length} user(s).`);
+        // console.log(`Updating for ${this.users.length} user(s).`);
 
         for (let user of this.users) {
             user.youAre()
