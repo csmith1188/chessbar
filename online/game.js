@@ -16,14 +16,14 @@ let takenGameCodes = []
 class Game {
     constructor(visibility, name = null) {
         this.visibility = visibility
-        this.id = 1        
+        this.id = 1
 
         while (takenGameIds.includes(this.id)) {
             this.id++
         }
 
         this.name = name ? name : this.id
-        
+
         takenGameIds.push(this.id)
 
         this.users = []
@@ -48,8 +48,16 @@ class Game {
     }
 
     assignSides() {
-        if (this.users[0]) this.users[0].side = 'white'
-        if (this.users[1]) this.users[1].side = 'black'
+
+        if (!this.users.some(user => user.side == 'white')) {
+            let foo = this.users.find(u => u.side == 'spectating')
+            if (foo) foo.side = 'white'
+        }
+
+        if (!this.users.some(user => user.side == 'black')) {
+            let foo = this.users.find(u => u.side == 'spectating')
+            if (foo) foo.side = 'black'
+        }
 
         for (let user of this.users) {
             user.youAre()
@@ -83,7 +91,7 @@ class Game {
     }
 
     chatMsg(sender, msg) {
-        this.messages.push({sender: sender, message: msg})
+        this.messages.push({ sender: sender, message: msg })
         for (let user of this.users) {
             user.socket.emit('chatMessage', sender, msg)
         }
