@@ -37,6 +37,7 @@ class Piece {
         if (this.selected) {
             this.x = Mouse.x - this.w / 2
             this.y = Mouse.y - this.h / 2
+            prevMove = {x1: this.bx, y1: this.by, x2: null, y2: null}
         }
     }
 
@@ -50,7 +51,11 @@ class Piece {
 }
 
 class MovePiece extends Piece {
-    constructor (x1, y1, x2, y2, img, name, side) {
+    constructor (x1, y1, x2, y2, img, name, side, createdTick) {
+        this.createdTick = createdTick
+
+        this.x1 = x1
+        this.y1 = y1
         this.x = x1
         this.y = y1
 
@@ -95,7 +100,7 @@ function drawBoard() {
                     ctx.fillStyle = Settings.moveColor
                     ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
                 }
-                if (prevMove && prevMove.x2 == x && prevMove.y2 == y) {
+                if (prevMove && prevMove.x2 !== null && prevMove.x2 == x && prevMove.y2 == y) {
                     ctx.fillStyle = Settings.moveColor
                     ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
                 }
@@ -104,7 +109,7 @@ function drawBoard() {
                     ctx.fillStyle = Settings.moveColor
                     ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
                 }
-                if (prevMove && prevMove.x2 == x && 7 - prevMove.y2 == y) {
+                if (prevMove && prevMove.x2 !== null && prevMove.x2 == x && 7 - prevMove.y2 == y) {
                     ctx.fillStyle = Settings.moveColor
                     ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
                 }

@@ -105,7 +105,7 @@ io.on('connection', (socket) => {
 
     // When a message comes in
     socket.on('chatMessage', (msg) => {
-        user.game.chatMsg(user.id, msg)
+        if(user && user.game) user.game.chatMsg(user.id, msg)
     });
 
     socket.on('deleteGame', (gameId) => {
