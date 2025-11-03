@@ -206,7 +206,7 @@ function attachSocket(io, games) {
                         const isMate = inCheck && !board.hasLegalMoves(opponent)
 
                         // Only emit update to users in this game, plus check/mate events
-                        game.update({x1: x1, y1: y1, x2: x2, y2: y2}, inCheck, isMate)
+                        game.update({x1: x1, y1: y1, x2: x2, y2: y2}, inCheck, isMate, opponent, foo.side)
                     } else {
                         // console.log(`Still ${board.turn}'s turn, move failed (Invalid).`)
                         socket.emit('updateBoard', { board: board, move: {} })

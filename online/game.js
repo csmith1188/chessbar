@@ -81,14 +81,14 @@ class Game {
         this.update()
     }
 
-    update(move = {}, check = false, mate = false) {
+    update(move = {}, check = false, mate = false, opponent = null, winner = null) {
         // console.log(`Updating for ${this.users.length} user(s).`);
 
         for (let user of this.users) {
             user.youAre()
             user.socket.emit('updateBoard', { board: this.board, move: move })
             if (check) user.socket.emit('check', { side: opponent })
-            if (mate) user.socket.emit('mate', { winner: foo.side })
+            if (mate) user.socket.emit('mate', { winner: winner })
         }
     }
 

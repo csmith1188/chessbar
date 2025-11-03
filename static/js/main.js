@@ -6,6 +6,7 @@ canvas.height = Settings.boardSquareSize * 8
 if (Settings.pieceStyle == 'pixel') ctx.imageSmoothingEnabled = false
 
 let me
+let moveAnimationDuration = 60
 
 let prevMove = {}
 
@@ -25,42 +26,45 @@ socket.on('youAre', (foo) => {
     me = foo
 })
 
+let freshBoard = false
+
 socket.on('updateBoard', (data) => {
+    freshBoard = true
     newBoard = data.board
-    console.log(data)
+    // console.log(data)
     prevMove = data.move
-    {
-        let layout = data.board.layout
-        // console.log('Received board update:', newBoard)
-        board = null
-        pieces = []
+    let layout = data.board.layout
+    // console.log('Received board update:', newBoard)
+    board = null
+    pieces = []
 
-        let x = 0
-        let y2 = 0
+    let x = 0
+    let y2 = 0
 
-        if (me.side == 'white') {
-            for (let y of layout) {
-                x = 0
-                for (let obj of y) {
-                    if (obj) new Piece(x * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, y2 * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, `img/${Settings.pieceStyle}/${obj.side}_${obj.name.toLowerCase()}.png`, obj.name, obj.side, obj.moves)
-                    x++
-                }
-                y2++
+    if (me.side == 'white') {
+        for (let y of layout) {
+            x = 0
+            for (let obj of y) {
+                if (obj) new Piece(x * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, y2 * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, `img/${Settings.pieceStyle}/${obj.side}_${obj.name.toLowerCase()}.png`, obj.name, obj.side, obj.moves)
+                x++
             }
-        } else {
-            for (let y of [...layout].reverse()) {
-                x = 0
-                for (let obj of y) {
-                    if (obj) new Piece(x * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, y2 * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, `img/${Settings.pieceStyle}/${obj.side}_${obj.name.toLowerCase()}.png`, obj.name, obj.side, obj.moves)
-                    x++
-                }
-                y2++
-            }
+            y2++
         }
-
-        board = newBoard
+    } else {
+        for (let y of [...layout].reverse()) {
+            x = 0
+            for (let obj of y) {
+                if (obj) new Piece(x * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, y2 * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, `img/${Settings.pieceStyle}/${obj.side}_${obj.name.toLowerCase()}.png`, obj.name, obj.side, obj.moves)
+                x++
+            }
+            y2++
+        }
     }
+
+    board = newBoard
 })
+
+let tick = 0
 
 function main() {
     if (keys['Enter'] && msgInput.value) {
@@ -89,7 +93,9 @@ function main() {
         }
     }
 
+    if (freshBoard) freshBoard = false
 
+    tick++
     requestAnimationFrame(main)
 }
 

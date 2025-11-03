@@ -19,7 +19,6 @@ class Piece {
         this.img = new Image()
         this.img.src = img
 
-
         this.selected = false
 
         pieces.push(this)
@@ -47,6 +46,25 @@ class Piece {
         } else {
             ctx.drawImage(this.img, this.x, this.y, this.w, this.h)
         }
+    }
+}
+
+class MovePiece extends Piece {
+    constructor (x1, y1, x2, y2, img, name, side) {
+        this.x = x1
+        this.y = y1
+
+        this.x2 = x2
+        this.y2 = y2
+
+        this.w = Settings.boardSquareSize - Settings.defaultPieceMargin
+        this.h = Settings.boardSquareSize - Settings.defaultPieceMargin
+
+        this.name = name
+        this.side = side
+
+        this.img = new Image()
+        this.img.src = img
     }
 }
 
