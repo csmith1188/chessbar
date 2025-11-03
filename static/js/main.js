@@ -5,8 +5,9 @@ canvas.width = Settings.boardSquareSize * 8
 canvas.height = Settings.boardSquareSize * 8
 if (Settings.pieceStyle == 'pixel') ctx.imageSmoothingEnabled = false
 
+let moveAnimation = null
 let me
-let moveAnimationDuration = 60
+let moveAnimationDuration = 120
 
 let prevMove = {}
 
@@ -33,6 +34,10 @@ socket.on('updateBoard', (data) => {
     newBoard = data.board
     // console.log(data)
     prevMove = data.move
+    if (prevMove && prevMove.x2 !== null && prevMove.y2 !== null && prevMove.name && prevMove.side && me.side != prevMove.side) {
+        const pieceImg = `img/${Settings.pieceStyle}/${prevMove.side}_${prevMove.name.toLowerCase()}.png`
+        moveAnimation = me.side == 'white' ? new MovePiece(prevMove.x1, prevMove.y1, prevMove.x2, prevMove.y2, pieceImg, prevMove.name, prevMove.side) : new MovePiece(prevMove.x1, 7 - prevMove.y1, prevMove.x2, 7 - prevMove.y2, pieceImg, prevMove.name, prevMove.side)
+    }
     let layout = data.board.layout
     // console.log('Received board update:', newBoard)
     board = null
@@ -67,11 +72,21 @@ socket.on('updateBoard', (data) => {
 let tick = 0
 
 function main() {
+
+    if (freshBoard && prevMove && prevMove.x2 !== null && prevMove.y2 !== null) {
+        new MovePiece(prevMove.x1, prevMove.y1, prevMove.x2, prevMove.y2)
+    }
     if (keys['Enter'] && msgInput.value) {
         sendBtn.click()
     }
 
     drawBoard()
+
+    if (moveAnimation) {
+        moveAnimation.updateAndDraw()
+        if (moveAnimation.done) moveAnimation = null
+    }
+
 
     if (Debug.showHoverSquare) {
         if (Mouse.x < canvas.width && Mouse.y < canvas.height) {

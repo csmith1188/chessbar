@@ -37,7 +37,7 @@ class Piece {
         if (this.selected) {
             this.x = Mouse.x - this.w / 2
             this.y = Mouse.y - this.h / 2
-            prevMove = {x1: this.bx, y1: this.by, x2: null, y2: null}
+            prevMove = this.side == 'white' ? {x1: this.bx, y1: this.by, x2: null, y2: null} : {x1: this.bx, y1: 7 - this.by, x2: null, y2: null}
         }
     }
 
@@ -50,28 +50,44 @@ class Piece {
     }
 }
 
-class MovePiece extends Piece {
-    constructor (x1, y1, x2, y2, img, name, side, createdTick) {
-        this.createdTick = createdTick
-
-        this.x1 = x1
-        this.y1 = y1
-        this.x = x1
-        this.y = y1
-
-        this.x2 = x2
-        this.y2 = y2
-
-        this.w = Settings.boardSquareSize - Settings.defaultPieceMargin
-        this.h = Settings.boardSquareSize - Settings.defaultPieceMargin
+class MovePiece {
+    constructor(x1, y1, x2, y2, img, name, side) {
+        this.x1 = x1 * Settings.boardSquareSize
+        this.y1 = y1 * Settings.boardSquareSize
+        this.x2 = x2 * Settings.boardSquareSize
+        this.y2 = y2 * Settings.boardSquareSize
 
         this.name = name
         this.side = side
 
         this.img = new Image()
         this.img.src = img
+
+        this.startTime = performance.now()
+        this.duration = moveAnimationDuration // ms
+        this.done = false
+    }
+
+    updateAndDraw() {
+        const elapsed = performance.now() - this.startTime
+        const t = Math.min(elapsed / this.duration, 1) // 0→1
+
+        // easeOutQuad for smooth slide
+        const ease = 1 - Math.pow(1 - t, 2)
+
+        const x = this.x1 + (this.x2 - this.x1) * ease
+        const y = this.y1 + (this.y2 - this.y1) * ease
+
+        const w = Settings.boardSquareSize - Settings.defaultPieceMargin
+        const h = Settings.boardSquareSize - Settings.defaultPieceMargin
+
+        ctx.drawImage(this.img, x + Settings.defaultPieceMargin / 2, y + Settings.defaultPieceMargin / 2, w, h)
+
+        if (t >= 1) this.done = true
     }
 }
+
+
 
 /*
 :::::::::  :::::::::      :::     :::       :::
