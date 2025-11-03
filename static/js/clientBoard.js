@@ -71,6 +71,26 @@ function drawBoard() {
                 color = 'light'
             }
             ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
+
+            if (me && me.side == 'white') {
+                if (prevMove && prevMove.x1 == x && prevMove.y1 == y) {
+                    ctx.fillStyle = Settings.moveColor
+                    ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
+                }
+                if (prevMove && prevMove.x2 == x && prevMove.y2 == y) {
+                    ctx.fillStyle = Settings.moveColor
+                    ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
+                }
+            } else {
+                if (prevMove && prevMove.x1 == x && 7- prevMove.y1 == y) {
+                    ctx.fillStyle = Settings.moveColor
+                    ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
+                }
+                if (prevMove && prevMove.x2 == x && 7 - prevMove.y2 == y) {
+                    ctx.fillStyle = Settings.moveColor
+                    ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
+                }
+            }
         }
         color = (color == 'light') ? 'dark' : 'light'
     }
@@ -100,7 +120,7 @@ function drawBoard() {
                         Math.floor((selected.x + selected.w / 2) / Settings.boardSquareSize), Math.floor((selected.y + selected.h / 2) / Settings.boardSquareSize))
                 }
             } else {
-                // socket.emit('updateBoard', board)
+                // socket.emit('updateBoard', {board: board, move: {}})
             }
             selected.selected = false
             selected = null

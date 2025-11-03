@@ -7,6 +7,8 @@ if (Settings.pieceStyle == 'pixel') ctx.imageSmoothingEnabled = false
 
 let me
 
+let prevMove = {}
+
 let Mouse = {
     x: 0,
     y: 0,
@@ -23,9 +25,12 @@ socket.on('youAre', (foo) => {
     me = foo
 })
 
-socket.on('updateBoard', (newBoard) => {
+socket.on('updateBoard', (data) => {
+    newBoard = data.board
+    console.log(data)
+    prevMove = data.move
     {
-        let layout = newBoard.layout
+        let layout = data.board.layout
         // console.log('Received board update:', newBoard)
         board = null
         pieces = []

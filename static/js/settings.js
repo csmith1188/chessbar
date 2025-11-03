@@ -5,7 +5,8 @@ const DEFAULT_SETTINGS = {
     lightSquareColor: 'rgba(187, 123, 62, 1)',
     defaultPieceMargin: 0,
     pieceStyle: 'basic',
-    hoverSizeIncrease: 5
+    hoverSizeIncrease: 5,
+    moveColor: 'rgba(255, 230, 0, 0.39)'
 }
 
 const DEFAULT_DEBUG = {
@@ -64,10 +65,8 @@ function openSettingsUI() {
     const modal = document.getElementById('settings-modal')
     if (modal) {
         modal.classList.remove('hidden')
-        // also set inline style and aria for robustness
         try { modal.style.display = 'grid' } catch (e) { }
         modal.setAttribute('aria-hidden', 'false')
-        // focus first focusable element for accessibility
         const closeBtn = document.getElementById('close-settings')
         if (closeBtn) closeBtn.focus()
     }
@@ -79,7 +78,6 @@ function closeSettingsUI() {
         modal.classList.add('hidden')
         try { modal.style.display = 'none' } catch (e) { }
         modal.setAttribute('aria-hidden', 'true')
-        // return focus to settings button
         const btn = document.getElementById('settings-btn')
         if (btn) btn.focus()
     }
@@ -90,7 +88,6 @@ function populateUI() {
     const el = (id) => document.getElementById(id)
     if (!el('boardSquareSize')) return
 
-    // Set both value and placeholder so saved values are visible after reload
     el('boardSquareSize').value = Settings.boardSquareSize
     el('boardSquareSize').placeholder = Settings.boardSquareSize
 
@@ -102,11 +99,19 @@ function populateUI() {
     el('darkSquareColor').value = darkHex
     el('darkSquareColor').placeholder = darkHex
 
+    const moveHex = rgbaToHex(Settings.moveColor)
+    el('moveColor').value = moveHex
+    el('moveColor').placeholder = moveHex
+
+    // also show alpha slider if you add one
+    const moveAlpha = parseFloat(Settings.moveColor.match(/rgba\([^,]+,[^,]+,[^,]+,([^)]+)\)/)?.[1] || 1)
+    const moveAlphaInput = el('moveAlpha')
+    if (moveAlphaInput) moveAlphaInput.value = moveAlpha
+
     el('defaultPieceMargin').value = Settings.defaultPieceMargin
     el('defaultPieceMargin').placeholder = Settings.defaultPieceMargin
 
     el('pieceStyle').value = Settings.pieceStyle
-    // set a data-placeholder on select (selects don't have placeholders)
     el('pieceStyle').setAttribute('data-placeholder', Settings.pieceStyle)
 
     el('hoverSizeIncrease').value = Settings.hoverSizeIncrease
@@ -123,6 +128,11 @@ function readUIToSettings() {
     Settings.boardSquareSize = parseInt(el('boardSquareSize').value || Settings.boardSquareSize, 10)
     Settings.lightSquareColor = hexToRgba(el('lightSquareColor').value, 1)
     Settings.darkSquareColor = hexToRgba(el('darkSquareColor').value, 1)
+
+    // read RGBA (with adjustable alpha)
+    const moveAlpha = el('moveAlpha') ? parseFloat(el('moveAlpha').value || 0.31) : 0.31
+    Settings.moveColor = hexToRgba(el('moveColor').value, moveAlpha)
+
     Settings.defaultPieceMargin = parseInt(el('defaultPieceMargin').value || 0, 10)
     Settings.pieceStyle = el('pieceStyle').value
     Settings.hoverSizeIncrease = parseInt(el('hoverSizeIncrease').value || 0, 10)
@@ -143,13 +153,11 @@ function resetToDefaults() {
 function initSettingsUI() {
     loadSettingsFromStorage()
 
-    // wire buttons
     const btn = document.getElementById('settings-btn')
     if (btn) btn.addEventListener('click', () => { populateUI(); openSettingsUI() })
 
     const close = document.getElementById('close-settings')
     if (close) {
-        // attach both bubble and capture listeners to be extra robust
         close.addEventListener('click', () => closeSettingsUI())
         close.addEventListener('click', () => closeSettingsUI(), { capture: true })
     }
@@ -158,7 +166,6 @@ function initSettingsUI() {
     if (save) save.addEventListener('click', () => {
         readUIToSettings()
         saveSettingsToStorage()
-        // Reload to apply changes (canvas size, piece images etc.)
         location.reload()
     })
 
@@ -167,20 +174,17 @@ function initSettingsUI() {
         resetToDefaults()
     })
 
-    // close when clicking backdrop
     const modal = document.getElementById('settings-modal')
     if (modal) modal.addEventListener('click', (e) => {
         if (e.target === modal) closeSettingsUI()
     })
 
-    // Delegated click handler (robust if elements are re-rendered)
     document.addEventListener('click', (e) => {
         const t = e.target
         if (!t) return
         if (t.id === 'close-settings') closeSettingsUI()
     })
 
-    // Close on Escape key for accessibility
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             const modalEl = document.getElementById('settings-modal')
@@ -190,7 +194,6 @@ function initSettingsUI() {
         }
     })
 
-    // Populate UI immediately so saved values appear as placeholders/values after reload
     populateUI()
 }
 
@@ -199,13 +202,10 @@ function initSettingsUI() {
 loadSettingsFromStorage()
 
 // initialize UI wiring when DOM ready
-// (initSettingsUI will call loadSettingsFromStorage again — that's fine)
-// initialize when DOM ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => { initSettingsUI(); closeSettingsUI(); })
 } else {
     initSettingsUI()
-    // ensure modal is closed on immediate init
     closeSettingsUI()
 }
 

@@ -98,9 +98,9 @@ io.on('connection', (socket) => {
         io.emit('refreshGames')
     });
 
-    socket.on('updateBoard', (board) => {
+    socket.on('updateBoard', (data) => {
         console.log('updateBoard event received');
-        io.emit('updateBoard', board)
+        io.emit('updateBoard', data)
     });
 
     // When a message comes in

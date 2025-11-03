@@ -189,7 +189,7 @@ function attachSocket(io, games) {
                         // Reject moves that leave your own king in check
                         if (board.wouldBeInCheckAfterMove(x1, y1, x2, y2)) {
                             // console.log(`Still ${board.turn}'s turn, move failed (Would leave king in check).`)
-                            socket.emit('updateBoard', board)
+                            socket.emit('updateBoard', { board: board, move: {} })
                             return
                         }
 
@@ -204,32 +204,25 @@ function attachSocket(io, games) {
                         const opponent = board.turn
                         const inCheck = board.inCheck(opponent)
                         const isMate = inCheck && !board.hasLegalMoves(opponent)
-                        // Log check / mate to server console
-                        // if (inCheck) console.log(`${opponent} is in check.`)
-                        // if (isMate) console.log(`Checkmate! ${foo.side} wins.`)
 
                         // Only emit update to users in this game, plus check/mate events
-                        for (let u of game.users) {
-                            if (u && u.socket) u.socket.emit('updateBoard', board)
-                            if (inCheck && u && u.socket) u.socket.emit('check', { side: opponent })
-                            if (isMate && u && u.socket) u.socket.emit('mate', { winner: foo.side })
-                        }
+                        game.update({x1: x1, y1: y1, x2: x2, y2: y2}, inCheck, isMate)
                     } else {
                         // console.log(`Still ${board.turn}'s turn, move failed (Invalid).`)
-                        socket.emit('updateBoard', board)
+                        socket.emit('updateBoard', { board: board, move: {} })
                     }
                 } else {
                     // console.log(`Still ${board.turn}'s turn, move failed (Off screen).`)
-                    socket.emit('updateBoard', board)
+                    socket.emit('updateBoard', { board: board, move: {} })
                 }
             } else if (player.side == 'spectating') {
 
                 // console.log(`Spectators can't play, move failed.`)
-                socket.emit('updateBoard', board)
+                socket.emit('updateBoard', { board: board, move: {} })
 
             } else {
                 // console.log(`Still ${board.turn}'s turn, move failed.`)
-                socket.emit('updateBoard', board)
+                socket.emit('updateBoard', { board: board, move: {} })
             }
 
         })
