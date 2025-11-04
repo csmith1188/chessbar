@@ -87,8 +87,6 @@ class MovePiece {
     }
 }
 
-
-
 /*
 :::::::::  :::::::::      :::     :::       :::
 :+:    :+: :+:    :+:   :+: :+:   :+:       :+:
@@ -98,10 +96,20 @@ class MovePiece {
 #+#    #+# #+#    #+# #+#     #+#  #+#+# #+#+#
 #########  ###    ### ###     ###   ###   ###
 */
+
 function drawBoard() {
+
+    for (let piece of pieces) {
+        piece.update()
+    }
+
+    // Draw the board
     let color = (me && me.side == 'white') ? 'dark' : 'light'
+    // Loop through 8x8 board
     for (let y = 0; y < 8; y++) {
         for (let x = 0; x < 8; x++) {
+
+            // Set alternating board square colors
             if (color == 'light') {
                 ctx.fillStyle = Settings.lightSquareColor
                 color = 'dark'
@@ -109,36 +117,54 @@ function drawBoard() {
                 ctx.fillStyle = Settings.darkSquareColor
                 color = 'light'
             }
+            // Draw the square
             ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
 
+            // Draw the prevmove yellow highlight
             if (me && me.side == 'white') {
+                // Make sure prevmove exists and has the properties we need
+
+                // From square
                 if (prevMove && prevMove.x1 == x && prevMove.y1 == y) {
                     ctx.fillStyle = Settings.moveColor
                     ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
                 }
+
+                // To square
                 if (prevMove && prevMove.x2 !== null && prevMove.x2 == x && prevMove.y2 == y) {
                     ctx.fillStyle = Settings.moveColor
                     ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
                 }
+
             } else {
-                if (prevMove && prevMove.x1 == x && 7- prevMove.y1 == y) {
+                // If me is black, draw on the opposite side of the board
+
+                // From
+                if (prevMove && prevMove.x1 == x && 7 - prevMove.y1 == y) {
                     ctx.fillStyle = Settings.moveColor
                     ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
                 }
+
+                // To
                 if (prevMove && prevMove.x2 !== null && prevMove.x2 == x && 7 - prevMove.y2 == y) {
                     ctx.fillStyle = Settings.moveColor
                     ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
                 }
             }
         }
+        // Alternate colors at the edge of the board
         color = (color == 'light') ? 'dark' : 'light'
     }
 
     if (board) {
+        // If the mouse is up and there IS a selected piece, (dragged, then dropped), then emit the move
         if (!Mouse.left && selected) {
+            // Make sure the piece I'm moving is one of mine
             if (me.side == selected.side) {
+                // If I'm playing as black, make the move on the opposite side of the board.
                 if (me.side == 'white') {
                     socket.emit('move', me,
+                    // Piece
                         {
                             name: selected.name,
                             side: selected.side,
@@ -161,13 +187,13 @@ function drawBoard() {
             } else {
                 // socket.emit('updateBoard', {board: board, move: {}})
             }
+
+            // Nullify selected
             selected.selected = false
             selected = null
         }
-        for (let piece of pieces) {
-            piece.update()
-        }
 
+        // Draw the pieces
         for (let piece of pieces) {
             if (piece.img && piece.img.complete) {
                 piece.draw()
