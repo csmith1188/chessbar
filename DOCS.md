@@ -71,4 +71,7 @@
 - tested chess
 - actually did CIW
 
-## 
+## 11/4
+
+### Truit
+- Fixed chat history bug
