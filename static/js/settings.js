@@ -133,6 +133,10 @@ function readUIToSettings() {
     const moveAlpha = el('moveAlpha') ? parseFloat(el('moveAlpha').value || 0.31) : 0.31
     Settings.moveColor = hexToRgba(el('moveColor').value, moveAlpha)
 
+    //ooooof
+    const checkAlpha = el('moveAlpha') ? parseFloat(el('checkAlpha').value || 0.31) : 0.31
+    Settings.checkColor = hexToRgba(el('checkColor').value, checkAlpha)
+
     Settings.defaultPieceMargin = parseInt(el('defaultPieceMargin').value || 0, 10)
     Settings.pieceStyle = el('pieceStyle').value
     Settings.hoverSizeIncrease = parseInt(el('hoverSizeIncrease').value || 0, 10)

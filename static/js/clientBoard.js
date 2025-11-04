@@ -157,8 +157,9 @@ function drawBoard() {
             if (me && me.side == 'white') {
 
                 //king cant move into a space
-                if ()
-                    //flash red and move back
+                if (inCheck('white'))
+                    ctx.fillStyle = Settings.checkColor
+                    ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
 
                     //king is going to be attacked
                     if ()
