@@ -37,7 +37,7 @@ class Piece {
         if (this.selected) {
             this.x = Mouse.x - this.w / 2
             this.y = Mouse.y - this.h / 2
-            prevMove = this.side == 'white' ? {x1: this.bx, y1: this.by, x2: null, y2: null} : {x1: this.bx, y1: 7 - this.by, x2: null, y2: null}
+            prevMove = this.side == 'white' ? { x1: this.bx, y1: this.by, x2: null, y2: null } : { x1: this.bx, y1: 7 - this.by, x2: null, y2: null }
         }
     }
 
@@ -151,6 +151,30 @@ function drawBoard() {
                     ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
                 }
             }
+
+            //check go here
+            /*
+            if (me && me.side == 'white') {
+
+                //king cant move into a space
+                if ()
+                    //flash red and move back
+
+                    //king is going to be attacked
+                    if ()
+                    //highlight or flash red
+            
+            } else {
+                //king cant move into a space
+                if ()
+                    //flash red and move back
+
+                    //king is going to be attacked
+                    if ()
+                    //highlight or flash red
+            
+            }
+            */
         }
         // Alternate colors at the edge of the board
         color = (color == 'light') ? 'dark' : 'light'
@@ -164,7 +188,7 @@ function drawBoard() {
                 // If I'm playing as black, make the move on the opposite side of the board.
                 if (me.side == 'white') {
                     socket.emit('move', me,
-                    // Piece
+                        // Piece
                         {
                             name: selected.name,
                             side: selected.side,

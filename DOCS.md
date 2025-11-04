@@ -71,7 +71,16 @@
 - tested chess
 - actually did CIW
 
-## 11/4
+## 11/3
+
+-tested and found bugs
+
+## 11/4 
+
+### Kayden
+-checking
+-issues
 
 ### Truit
 - Fixed chat history bug
+
