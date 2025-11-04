@@ -71,4 +71,17 @@
 - tested chess
 - actually did CIW
 
-## 
+## 11/3
+
+-tested and found bugs
+
+## 11/4 
+
+### Truit
+
+
+
+### Kayden
+
+-checking
+-issues
