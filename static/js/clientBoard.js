@@ -151,31 +151,6 @@ function drawBoard() {
                     ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
                 }
             }
-
-            //check go here
-            /*
-            if (me && me.side == 'white') {
-
-                //king cant move into a space
-                if (inCheck('white'))
-                    ctx.fillStyle = Settings.checkColor
-                    ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
-
-                    //king is going to be attacked
-                    if ()
-                    //highlight or flash red
-            
-            } else {
-                //king cant move into a space
-                if ()
-                    //flash red and move back
-
-                    //king is going to be attacked
-                    if ()
-                    //highlight or flash red
-            
-            }
-            */
         }
         // Alternate colors at the edge of the board
         color = (color == 'light') ? 'dark' : 'light'
