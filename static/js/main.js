@@ -106,10 +106,7 @@ socket.on('check', (d) => {
 let tick = 0
 
 function main() {
-
-    if (freshBoard && prevMove && prevMove.x2 !== null && prevMove.y2 !== null) {
-        new MovePiece(prevMove.x1, prevMove.y1, prevMove.x2, prevMove.y2)
-    }
+    
     if (keys['Enter'] && msgInput.value) {
         sendBtn.click()
     }
@@ -120,7 +117,6 @@ function main() {
         moveAnimation.updateAndDraw()
         if (moveAnimation.done) moveAnimation = null
     }
-
 
     if (Debug.showHoverSquare) {
         if (Mouse.x < canvas.width && Mouse.y < canvas.height) {

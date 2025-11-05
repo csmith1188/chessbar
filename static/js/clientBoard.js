@@ -42,10 +42,12 @@ class Piece {
     }
 
     draw() {
-        if (this.hover() && me.side == this.side) {
-            ctx.drawImage(this.img, this.x - Settings.hoverSizeIncrease / 2, this.y - Settings.hoverSizeIncrease, this.w + Settings.hoverSizeIncrease, this.h + Settings.hoverSizeIncrease)
-        } else {
-            ctx.drawImage(this.img, this.x, this.y, this.w, this.h)
+        if (!moveAnimation || (moveAnimation.bx2 !== this.bx || moveAnimation.by2 !== this.by) || moveAnimation.side !== this.side) {
+            if (this.hover() && me.side == this.side) {
+                ctx.drawImage(this.img, this.x - Settings.hoverSizeIncrease / 2, this.y - Settings.hoverSizeIncrease, this.w + Settings.hoverSizeIncrease, this.h + Settings.hoverSizeIncrease)
+            } else {
+                ctx.drawImage(this.img, this.x, this.y, this.w, this.h)
+            }
         }
     }
 }
@@ -56,6 +58,9 @@ class MovePiece {
         this.y1 = y1 * Settings.boardSquareSize
         this.x2 = x2 * Settings.boardSquareSize
         this.y2 = y2 * Settings.boardSquareSize
+
+        this.bx2 = x2
+        this.by2 = y2
 
         this.name = name
         this.side = side
@@ -151,6 +156,7 @@ function drawBoard() {
                     ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
                 }
             }
+
         }
         // Alternate colors at the edge of the board
         color = (color == 'light') ? 'dark' : 'light'

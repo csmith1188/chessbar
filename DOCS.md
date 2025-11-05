@@ -77,11 +77,15 @@
 
 ## 11/4 
 
-### Truit
-
-
-
 ### Kayden
-
 -check warning
 -issues
+
+### Truit
+- Fixed chat history bug
+
+## 11/5
+
+### Truit
+- Did piece move animation bug
+- Make en passant

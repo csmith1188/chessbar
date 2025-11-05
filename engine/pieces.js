@@ -31,27 +31,60 @@ class Pawn extends Piece {
     }
 
     validMove(board, x1, y1, x2, y2) {
+        // Make sure that the pawn moves the right direction
         if ((this.side == 'white' && y2 < y1) || (this.side == 'black' && y2 > y1)) {
+
+            // One space foreward
             if (x1 == x2 && Math.abs(y2 - y1) == 1) {
+
                 if (y1 - y2 > 0 && !board[y1 - 1][x1] && !board[y2][x2]) {
-                    return true
+                    this.move(y2)
                 }
+
                 if (y1 - y2 < 0 && !board[y1 + 1][x1] && !board[y2][x2]) {
-                    return true
+                    this.move(y2)
                 }
-            } else if (Math.abs(x2 - x1) == 1 && Math.abs(y2 - y1) == 1 && board[y2][x2] && board[y2][x2].side != this.side) {
-                return true
+
+                // Capturing a piece
+            } else if (Math.abs(x2 - x1) == 1 && Math.abs(y2 - y1) == 1) {
+
+                if (board[y2][x2] && board[y2][x2].side != this.side) {
+                    this.move(y2)
+
+                    // En-passant
+                } else if (!board[y2][x2] && board[y1][x2] && !board[x2][y2] &&
+                    board[y1][x2].constructor.name == 'Pawn' &&
+                    board[y2][x1].side !== this.side && board[y1][x2].moves == 1 &&
+                    (y1 + 2 == 6 && board[y1][x2].side == 'white') || (y1 - 2 == 1)) {
+
+                    board[y1][x2] = 0
+                    this.move(y2)
+                }
+
+                // Moving two spaces foreward
             } else if (x1 == x2 && Math.abs(y2 - y1) == 2 && this.moves == 0) {
+
                 if (y1 - y2 > 0 && !board[y1 - 1][x1] && !board[y2][x2]) {
-                    return true
+                    this.move(y2)
                 }
+
                 if (y1 - y2 < 0 && !board[y1 + 1][x1] && !board[y2][x2]) {
-                    return true
+                    this.move(y2)
                 }
             }
         }
-
         return false
+    }
+
+    promotion(x, y) {
+        if (y == 0 || y == 7) {
+            // emit promotion at (x, y)
+        }
+    }
+
+    move(x, y) {
+        this.promotion(y)
+        return true
     }
 }
 /*
