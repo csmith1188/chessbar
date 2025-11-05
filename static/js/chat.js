@@ -39,7 +39,7 @@ sendBtn.onclick = () => {
 
 // Receive new messages
 socket.on("chatMessage", (name, message) => {
-    console.log('message recieved:', name, message)
+    // console.log('message recieved:', name, message)
     const row = document.createElement("div");
     row.classList.add("message-row");
     row.classList.add(name === me.id ? "you" : "other");
