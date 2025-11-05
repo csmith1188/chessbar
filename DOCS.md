@@ -88,3 +88,4 @@
 
 ### Truit
 - Did piece move animation bug
+- Make en passant
