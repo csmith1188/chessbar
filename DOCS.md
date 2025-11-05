@@ -83,3 +83,8 @@
 
 ### Truit
 - Fixed chat history bug
+
+## 11/5
+
+### Truit
+- Did piece move animation bug
