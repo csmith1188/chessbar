@@ -78,9 +78,8 @@
 ## 11/4 
 
 ### Kayden
--checking
+-check warning
 -issues
 
 ### Truit
 - Fixed chat history bug
-
