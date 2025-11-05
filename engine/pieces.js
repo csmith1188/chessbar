@@ -31,20 +31,31 @@ class Pawn extends Piece {
     }
 
     validMove(board, x1, y1, x2, y2) {
+        // Make sure that the pawn moves the right direction
         if ((this.side == 'white' && y2 < y1) || (this.side == 'black' && y2 > y1)) {
+
+            // One space foreward
             if (x1 == x2 && Math.abs(y2 - y1) == 1) {
+
                 if (y1 - y2 > 0 && !board[y1 - 1][x1] && !board[y2][x2]) {
                     return true
                 }
+
                 if (y1 - y2 < 0 && !board[y1 + 1][x1] && !board[y2][x2]) {
                     return true
                 }
+
+            // Capturing a piece
             } else if (Math.abs(x2 - x1) == 1 && Math.abs(y2 - y1) == 1 && board[y2][x2] && board[y2][x2].side != this.side) {
                 return true
+
+            // Moving two spaces foreward
             } else if (x1 == x2 && Math.abs(y2 - y1) == 2 && this.moves == 0) {
+
                 if (y1 - y2 > 0 && !board[y1 - 1][x1] && !board[y2][x2]) {
                     return true
                 }
+
                 if (y1 - y2 < 0 && !board[y1 + 1][x1] && !board[y2][x2]) {
                     return true
                 }
