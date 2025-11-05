@@ -45,11 +45,30 @@ class Pawn extends Piece {
                     return true
                 }
 
-            // Capturing a piece
-            } else if (Math.abs(x2 - x1) == 1 && Math.abs(y2 - y1) == 1 && board[y2][x2] && board[y2][x2].side != this.side) {
-                return true
+                // Capturing a piece
+            } else if (Math.abs(x2 - x1) == 1 && Math.abs(y2 - y1) == 1) {
 
-            // Moving two spaces foreward
+                if (board[y2][x2] && board[y2][x2].side != this.side) {
+                    return true
+
+                    // En-passant
+                } else if (!board[y2][x2] && board[y1][x2] && !board[x2][y2] &&
+                    board[y1][x2].constructor.name == 'Pawn' &&
+                    board[y2][x1].side !== this.side && board[y1][x2].moves == 1 &&
+                    (y1 + 2 == 6 && board[y1][x2].side == 'white') || (y1 - 2 == 1)) {
+
+                    // console.log(board[y1][x2])
+                    board[y1][x2] = 0
+                    return true
+                }
+                // } else {
+                //     console.log(!board[y2][x2], board[y1][x2], !board[x2][y2],
+                //         board[y1][x2].constructor.name == 'Pawn',
+                //         board[y2][x1].side !== this.side, board[y1][x2].moves == 1,
+                //         (y1 + 2 == 6, board[y1][x2].side == 'white'), (y1 - 2 == 1))
+                // }
+
+                // Moving two spaces foreward
             } else if (x1 == x2 && Math.abs(y2 - y1) == 2 && this.moves == 0) {
 
                 if (y1 - y2 > 0 && !board[y1 - 1][x1] && !board[y2][x2]) {
