@@ -38,12 +38,10 @@ class Pawn extends Piece {
             if (x1 == x2 && Math.abs(y2 - y1) == 1) {
 
                 if (y1 - y2 > 0 && !board[y1 - 1][x1] && !board[y2][x2]) {
-                    this.promotion(x2, y2)
                     return true
                 }
 
                 if (y1 - y2 < 0 && !board[y1 + 1][x1] && !board[y2][x2]) {
-                    this.promotion(x2, y2)
                     return true
                 }
 
@@ -51,7 +49,6 @@ class Pawn extends Piece {
             } else if (Math.abs(x2 - x1) == 1 && Math.abs(y2 - y1) == 1) {
 
                 if (board[y2][x2] && board[y2][x2].side != this.side) {
-                    this.promotion(x2, y2)
                     return true
 
                     // En-passant
@@ -61,7 +58,6 @@ class Pawn extends Piece {
                     (y1 + 2 == 6 && board[y1][x2].side == 'white') || (y1 - 2 == 1)) {
 
                     board[y1][x2] = 0
-                    this.promotion(x2, y2)
                     return true
                 }
 
@@ -69,24 +65,15 @@ class Pawn extends Piece {
             } else if (x1 == x2 && Math.abs(y2 - y1) == 2 && this.moves == 0) {
 
                 if (y1 - y2 > 0 && !board[y1 - 1][x1] && !board[y2][x2]) {
-                    this.promotion(x2, y2)
                     return true
                 }
 
                 if (y1 - y2 < 0 && !board[y1 + 1][x1] && !board[y2][x2]) {
-                    this.promotion(x2, y2)
                     return true
                 }
             }
         }
         return false
-    }
-
-    promotion(x, y) {
-        if (y == 0 || y == 7) {
-            console.log('Promotion')
-            // emit promotion at (x, y)
-        }
     }
 }
 /*

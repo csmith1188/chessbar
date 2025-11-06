@@ -75,17 +75,19 @@ class Game {
     }
 
     leave(user) {
-        console.log(`User ${user.id} is leaving game ${this.id}.`)
+        // console.log(`User ${user.id} is leaving game ${this.id}.`)
         this.users = this.users.filter(u => u.id !== user.id)
         this.assignSides()
         this.update()
     }
 
     update(move = {}, check = false, mate = false, opponent = null, winner = null) {
-        // console.log(`Updating for ${this.users.length} user(s).`);
-
         for (let user of this.users) {
             user.youAre()
+            if (move && move.side == user.side && (move.y2 == 7 || move.y2 === 0) && move.name == 'Pawn') {
+                user.socket.emit('promotion', move.x2, move.y2)
+            }
+
             user.socket.emit('updateBoard', { board: this.board, move: move })
             if (check) user.socket.emit('check', { side: opponent })
             if (mate) user.socket.emit('mate', { winner: winner })

@@ -154,7 +154,6 @@ function attachSocket(io, games) {
             const game = games.find(g => g.id == player.game.id)
 
             if (!game) {
-                // console.log('Move received but no game found for player:', player)
                 // send back a no-op board to the requesting socket so client can re-sync
                 socket.emit('updateBoard', {})
                 return
@@ -230,4 +229,4 @@ function attachSocket(io, games) {
     })
 }
 
-module.exports = { Board, attachSocket };
+module.exports = { Board, attachSocket, classes };

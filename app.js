@@ -2,7 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-const { Board, attachSocket } = require('./engine/main');
+const { Board, attachSocket, classes } = require('./engine/main');
 const { User, takenUserIds } = require('./online/user');
 let { Game, games, takenGameIds, serializeGame } = require('./online/game')
 
@@ -44,7 +44,7 @@ io.on('connection', (socket) => {
         return games.filter(g => {
             if (g.visibility === 'public') return true;
             if (g.owner == user) return true;
-            if (g.owner.id == user.id) return true; 
+            if (g.owner.id == user.id) return true;
             return false;
         }).map(serializeGame);
     }
@@ -84,6 +84,13 @@ io.on('connection', (socket) => {
         if (user.game && user.game.messages) socket.emit('messageHistory', user.game.messages)
     })
 
+    socket.on('promotion', (x, y, newPiece) => {
+        if (user.game.board.layout[y][x].constructor.name == 'Pawn') {
+            user.game.board.layout[y][x] = new classes[newPiece](user.side, 0)
+            user.game.update()
+        }
+    })
+
     socket.on('newGame', (visibility = 'public', name = '') => {
         if (user.game) {
             user.game.leave(user)
@@ -106,7 +113,7 @@ io.on('connection', (socket) => {
 
     // When a message comes in
     socket.on('chatMessage', (msg) => {
-        if(user && user.game) user.game.chatMsg(user.id, msg)
+        if (user && user.game) user.game.chatMsg(user.id, msg)
     });
 
     socket.on('deleteGame', (gameId) => {

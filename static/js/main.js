@@ -24,6 +24,16 @@ let board
 
 let freshBoard = false
 
+socket.on('promotion', (x, y) => {
+    let piece = ''
+
+    while (!(piece == 'Knight' || piece == 'Queen' || piece == 'Rook' || piece == 'Bishop')) {
+        piece = prompt("Queen Rook Bishop Knight (capitol letter to start)", 'Queen')
+    }
+
+    socket.emit('promotion', x, y, piece)
+})
+
 socket.on('updateBoard', (data) => {
     //kayden added this
     me.incheck = false
