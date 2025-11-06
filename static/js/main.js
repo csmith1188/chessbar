@@ -30,6 +30,8 @@ socket.on('youAre', (foo) => {
 let freshBoard = false
 
 socket.on('updateBoard', (data) => {
+    //kayden added this
+    me.incheck = false
     freshBoard = true
     newBoard = data.board
     // console.log(data)
@@ -68,45 +70,19 @@ socket.on('updateBoard', (data) => {
 
     board = newBoard
 })
-/*
-//kayden check socket go here
-socket.on('check', (d) => {
-    if (d.side == me.side) {
+
+// check socket go here
+socket.on('check', (data) => {
+    if (data.side == me.side) {
         me.incheck = true
-    }
-    //check go here
-    if (me && me.side == 'white') {
-
-        //king cant move into a space
-        if (wouldBeInCheckAfterMove(x1, y1, x2, y2))
-            ctx.fillStyle = Settings.checkColor
-            ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
-
-        //king is going to be attacked
-        if (inCheck('white'))
-            ctx.fillStyle = Settings.checkColor
-            ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
-
-    }
-
-    if (me && me.side == 'black') {
-
-        //king cant move into a space
-        if (wouldBeInCheckAfterMove(x1, y1, x2, y2))
-            ctx.fillStyle = Settings.checkColor
-            ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
-
-        //king is going to be attacked
-        if (inCheck('white'))
-            ctx.fillStyle = Settings.checkColor
-            ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
+        console.log(check)
     }
 })
-*/
+
 let tick = 0
 
 function main() {
-    
+
     if (keys['Enter'] && msgInput.value) {
         sendBtn.click()
     }
@@ -147,4 +123,4 @@ function main() {
 requestAnimationFrame(main)
 
 //Kayden should drop out of programming
-
+//bro

@@ -156,7 +156,18 @@ function drawBoard() {
                     ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
                 }
             }
-
+            //check
+            if (me && me.incheck == 'true' && me.side == 'white') {
+                //find white king ???
+                pieces.find()//idk maybe const king and then king x and y
+                ctx.fillStyle = Settings.checkColor
+                ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
+            }
+            if (me && me.incheck == 'true' && me.side == 'black') {
+                //find black king
+                ctx.fillStyle = Settings.checkColor
+                ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
+            }
         }
         // Alternate colors at the edge of the board
         color = (color == 'light') ? 'dark' : 'light'
