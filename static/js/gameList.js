@@ -1,5 +1,3 @@
-const socket = io()
-
 let availableGames = []
 let me = null
 
@@ -12,11 +10,6 @@ socket.emit('gamesList')
 socket.on('gamesList', (games) => {
     availableGames = games
     renderGameList()
-})
-
-socket.on('youAre', (foo) => {
-    // console.log('youAre event:', foo)
-    me = foo
 })
 
 function renderGameList() {

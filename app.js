@@ -88,7 +88,7 @@ io.on('connection', (socket) => {
         if (user.game) {
             user.game.leave(user)
         }
-        console.log('newGame event received');
+        // console.log('newGame event received');
         let game = new Game(visibility, name)
         game.owner = user
         // console.log(game.id, game.joinCode, game.owner)
@@ -96,6 +96,7 @@ io.on('connection', (socket) => {
         // send the updated visible-games list (including any private games the creator is in) to the creator only
         socket.emit('gamesList', getVisibleGames())
         io.emit('refreshGames')
+        socket.emit('redirect', `/game?code=${game.joinCode}`)
     });
 
     socket.on('updateBoard', (data) => {
