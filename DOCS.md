@@ -93,3 +93,15 @@
 ## Kayden
 -check warning
 -died 
+
+## 11/6
+
+### Truit
+
+-
+-
+
+### Kayden
+
+-
+-
