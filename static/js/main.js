@@ -25,6 +25,8 @@ let board
 let freshBoard = false
 
 socket.on('updateBoard', (data) => {
+    //kayden added this
+    me.incheck = false
     freshBoard = true
     newBoard = data.board
     // console.log(data)
@@ -64,10 +66,18 @@ socket.on('updateBoard', (data) => {
     board = newBoard
 })
 
+// check socket go here
+socket.on('check', (data) => {
+    if (data.side == me.side) {
+        me.incheck = true
+        console.log(check)
+    }
+})
+
 let tick = 0
 
 function main() {
-    
+
     if (keys['Enter'] && msgInput.value) {
         sendBtn.click()
     }
@@ -107,3 +117,5 @@ function main() {
 
 requestAnimationFrame(main)
 
+//Kayden should drop out of programming
+//bro

@@ -6,7 +6,8 @@ const DEFAULT_SETTINGS = {
     defaultPieceMargin: 0,
     pieceStyle: 'basic',
     hoverSizeIncrease: 5,
-    moveColor: 'rgba(255, 230, 0, 0.39)'
+    moveColor: 'rgba(255, 230, 0, 0.39)',
+    checkColor: 'rgba(255, 0, 0, 0.39)'
 }
 
 const DEFAULT_DEBUG = {
@@ -134,7 +135,7 @@ function readUIToSettings() {
     Settings.moveColor = hexToRgba(el('moveColor').value, moveAlpha)
 
     //ooooof
-    const checkAlpha = el('moveAlpha') ? parseFloat(el('checkAlpha').value || 0.31) : 0.31
+    const checkAlpha = el('checkAlpha') ? parseFloat(el('checkAlpha').value || 0.31) : 0.31
     Settings.checkColor = hexToRgba(el('checkColor').value, checkAlpha)
 
     Settings.defaultPieceMargin = parseInt(el('defaultPieceMargin').value || 0, 10)
