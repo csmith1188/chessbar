@@ -22,11 +22,6 @@ let keys = {}
 
 let board
 
-socket.on('youAre', (foo) => {
-    // console.log('youAre event:', foo)
-    me = foo
-})
-
 let freshBoard = false
 
 socket.on('updateBoard', (data) => {
