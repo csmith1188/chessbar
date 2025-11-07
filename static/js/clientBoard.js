@@ -1,5 +1,5 @@
 let pieces = []
-selected = null
+let selected = null
 
 function findKing() {
     let king
