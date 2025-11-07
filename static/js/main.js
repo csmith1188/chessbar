@@ -24,6 +24,10 @@ let board
 
 let freshBoard = false
 
+socket.on('mate', (d) => {
+    alert(`Checkmate. ${d.winner} wins!`)
+})
+
 socket.on('promotion', (x, y) => {
     let piece = ''
 
