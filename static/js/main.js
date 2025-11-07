@@ -90,8 +90,13 @@ socket.on('check', (data) => {
 })
 
 let tick = 0
+let on = false
 
 function main() {
+
+    if (tick % 60 == 0) {
+        on = !on
+    }
 
     if (keys['Enter'] && msgInput.value) {
         sendBtn.click()

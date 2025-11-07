@@ -50,14 +50,16 @@ class Game {
     assignSides() {
 
         if (!this.users.some(user => user.side == 'white')) {
-            let foo = this.users.find(u => u.side == 'spectating')
+            let foo = this.users.find(u => u.side == 'unassigned')
             if (foo) foo.side = 'white'
         }
 
         if (!this.users.some(user => user.side == 'black')) {
-            let foo = this.users.find(u => u.side == 'spectating')
+            let foo = this.users.find(u => u.side == 'unassigned')
             if (foo) foo.side = 'black'
         }
+
+        this.users.filter(u => u.side === 'unassigned').forEach(u => { u.side = 'spectator' })
 
         for (let user of this.activeUsers()) {
             user.youAre()
@@ -66,7 +68,7 @@ class Game {
 
     join(user) {
         // console.log(`User ${user.id} is joining game ${this.id}.`)
-        user.side = 'spectating'
+        user.side = 'unassigned'
         this.users.push(user)
         // if (this.users.length == 1) this.owner = user
         user.game = this
@@ -92,7 +94,7 @@ class Game {
             console.log('reconnection')
             return true
         }
-        
+
         return false
 
     }
