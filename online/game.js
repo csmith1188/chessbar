@@ -65,7 +65,7 @@ class Game {
     }
 
     join(user) {
-        console.log(`User ${user.id} is joining game ${this.id}.`)
+        // console.log(`User ${user.id} is joining game ${this.id}.`)
         user.side = 'spectating'
         this.users.push(user)
         // if (this.users.length == 1) this.owner = user

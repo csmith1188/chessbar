@@ -123,7 +123,7 @@ io.on('connection', (socket) => {
             // mutate the shared array instead of reassigning the variable
             const idx = games.findIndex(g => g.id === gameId);
             if (idx !== -1) games.splice(idx, 1);
-            console.log(`Game ${gameId} deleted by owner ${user.id}.`);
+            // console.log(`Game ${gameId} deleted by owner ${user.id}.`);
             io.emit('refreshGames');
         }
     });

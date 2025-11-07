@@ -1,5 +1,5 @@
 let pieces = []
-selected = null
+let selected = null
 
 class Piece {
     constructor(x, y, img, name, side, moves) {
