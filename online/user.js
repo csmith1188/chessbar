@@ -11,6 +11,7 @@ class User {
         this.socket = socket
 
         this.game = null
+        this.active = true
 
         this.youAre()
     }

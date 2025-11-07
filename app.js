@@ -6,6 +6,13 @@ const { Board, attachSocket, classes } = require('./engine/main');
 const { User, takenUserIds } = require('./online/user');
 let { Game, games, takenGameIds, serializeGame } = require('./online/game')
 
+// FORMBAR!!!!
+const jwt = require('jsonwebtoken');
+const session = require('express-session');
+
+const AUTH_URL = 'https://formbeta.yorktechapps.com';
+const THIS_URL = 'http://localhost:3000'
+
 const app = express();
 app.use(express.static('static')); // serve client files from /public
 

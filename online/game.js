@@ -59,7 +59,7 @@ class Game {
             if (foo) foo.side = 'black'
         }
 
-        for (let user of this.users) {
+        for (let user of this.activeUsers()) {
             user.youAre()
         }
     }
@@ -75,14 +75,30 @@ class Game {
     }
 
     leave(user) {
-        // console.log(`User ${user.id} is leaving game ${this.id}.`)
         this.users = this.users.filter(u => u.id !== user.id)
         this.assignSides()
         this.update()
     }
 
+    disconnect(user) {
+        let leaving = this.users.find(u => u.id == user.id)
+        leaving.active = false
+    }
+
+    reconnect(user) {
+        let foo = this.users.find(u => u.id == user.id)
+        if (foo) {
+            foo.active = true
+            console.log('reconnection')
+            return true
+        }
+        
+        return false
+
+    }
+
     update(move = {}, check = false, mate = false, opponent = null, winner = null) {
-        for (let user of this.users) {
+        for (let user of this.activeUsers()) {
             user.youAre()
             if (move && move.side == user.side && (move.y2 == 7 || move.y2 === 0) && move.name == 'Pawn') {
                 user.socket.emit('promotion', move.x2, move.y2)
@@ -94,9 +110,13 @@ class Game {
         }
     }
 
+    activeUsers() {
+        return this.users.filter(u => u.active == true)
+    }
+
     chatMsg(sender, msg) {
         this.messages.push({ sender: sender, message: msg })
-        for (let user of this.users) {
+        for (let user of this.activeUsers()) {
             user.socket.emit('chatMessage', sender, msg)
         }
     }
