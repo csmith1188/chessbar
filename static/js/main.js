@@ -41,7 +41,7 @@ socket.on('promotion', (x, y) => {
 socket.on('updateBoard', (data) => {
     selected = null
     //kayden added this
-    me.incheck = false
+    
     freshBoard = true
     newBoard = data.board
     // console.log(data)
@@ -85,7 +85,7 @@ socket.on('updateBoard', (data) => {
 socket.on('check', (data) => {
     if (data.side == me.side) {
         me.incheck = true
-        console.log(check)
+        console.log("me in check")
     }
 })
 
