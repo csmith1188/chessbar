@@ -6,7 +6,7 @@
 
 ## maybe every piece have abiliy
 -pawn move 2 every turn
--queen can pull (rizz a piece)
+-queen can pull (rizz(control) a piece)
 -knight can double move or move twice as big (bigger l shape or move twice)
 -bishop can backstab
 -rook can move though or block or 1 turn invinclbe
