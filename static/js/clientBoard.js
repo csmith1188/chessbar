@@ -1,6 +1,13 @@
 let pieces = []
 selected = null
 
+function findKing() {
+    let king
+    king = pieces.find(piece => piece.name == 'King' && piece.side == me.side)
+    console.log(king)
+    if (king) return king
+}
+
 class Piece {
     constructor(x, y, img, name, side, moves) {
         this.x = x
@@ -156,18 +163,6 @@ function drawBoard() {
                     ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
                 }
             }
-            //check
-            if (me && me.incheck == 'true' && me.side == 'white') {
-                //find white king ???
-                
-                ctx.fillStyle = Settings.checkColor
-                ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
-            }
-            if (me && me.incheck == 'true' && me.side == 'black') {
-                //find black king
-                ctx.fillStyle = Settings.checkColor
-                ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
-            }
         }
         // Alternate colors at the edge of the board
         color = (color == 'light') ? 'dark' : 'light'
@@ -210,6 +205,23 @@ function drawBoard() {
             selected = null
         }
 
+        //check
+        if (me && me.incheck == true && me.side == 'white') {
+            let king = findKing()
+            console.log(king)
+            ctx.fillStyle = Settings.checkColor
+            ctx.fillRect(king.bx * Settings.boardSquareSize, king.by * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
+            console.log("white check")
+        }
+       
+        if (me && me.incheck == true && me.side == 'black') {
+            let king = findKing()
+            console.log(king)
+            ctx.fillStyle = Settings.checkColor
+            ctx.fillRect(king.bx * Settings.boardSquareSize, king.by * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
+            console.log("black check")
+        }
+        
         // Draw the pieces
         for (let piece of pieces) {
             if (piece.img && piece.img.complete) {
@@ -219,3 +231,4 @@ function drawBoard() {
     }
 
 }
+
