@@ -23,6 +23,10 @@ app.get('/', (req, res) => {
     res.render('selectGame');
 });
 
+app.get('/testing', (req, res) => {
+    res.render('testing');
+});
+
 app.get('/game', (req, res) => {
     res.render('game');
 });

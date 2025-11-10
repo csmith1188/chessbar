@@ -97,11 +97,20 @@
 ## 11/6
 
 ### Truit
-
 -
 -
 
 ### Kayden
+-finished check warning
+-tested for bugs
+-enlightened truit 
 
+## 11/10
+
+### Truit
+-
+-
+
+### Kayden
 -
 -
