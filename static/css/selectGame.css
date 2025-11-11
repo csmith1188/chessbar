@@ -84,6 +84,13 @@ body {
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45)
 }
 
+/* Ensure anchor-styled buttons don't show link underline and have breathing room */
+.btn {
+    text-decoration: none;
+    display: inline-block;
+    margin: 18px 0;
+}
+
 .btn.secondary {
     background: linear-gradient(90deg, var(--accent-2), #5a1996);
     color: #e2e7eb

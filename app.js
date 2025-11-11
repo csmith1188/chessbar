@@ -11,24 +11,76 @@ const jwt = require('jsonwebtoken');
 const session = require('express-session');
 
 const AUTH_URL = 'https://formbeta.yorktechapps.com';
-const THIS_URL = 'http://localhost:3000'
+// callback URL that Formbar should redirect back to with ?token=JWT
+const THIS_URL = 'http://localhost:3000/login'
 
 const app = express();
 app.use(express.static('static')); // serve client files from /public
+
+// session for Formbar login
+app.use(session({
+    secret: 'idekWhatToPutHere!@#$%^&*',
+    resave: false,
+    saveUninitialized: false
+}));
+
+// make the session user available to all templates via res.locals
+app.use((req, res, next) => {
+    res.locals.user = req.session ? req.session.user : null;
+    next();
+});
+
+// simple JSON endpoint to get the current signed-in user from session
+app.get('/me', (req, res) => {
+    if (req.session && req.session.user) return res.json({ user: req.session.user, token: req.session.token || null });
+    return res.status(200).json({ user: null });
+});
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.get('/', (req, res) => {
+    // If the user is not signed in, send them to the login page.
+    if (!req.session || !req.session.user) {
+        return res.redirect('/login');
+    }
+
+    // signed in — render the game selection page
     res.render('selectGame');
 });
 
-app.get('/testing', (req, res) => {
-    res.render('testing');
-});
+// app.get('/testing', (req, res) => {
+//     res.redirect('/login');
+// });
 
 app.get('/game', (req, res) => {
     res.render('game');
+});
+
+// Login route for Formbar
+app.get('/login', (req, res) => {
+    if (req.session && req.session.user) {
+        return res.redirect('/');
+    }
+    
+    // If Formbar redirected back with a token, decode it and store in session
+    if (req.query && req.query.token) {
+        try {
+            let tokenData = jwt.decode(req.query.token);
+            req.session.token = tokenData;
+            // prefer displayName, fall back to name or email
+            req.session.user = tokenData.displayName || tokenData.name || tokenData.email || 'unknown';
+            console.log('User signed in via Formbar:', req.session.user);
+            console.log(req.session.token.id)
+            return res.redirect('/');
+        } catch (err) {
+            console.error('Invalid token on /login callback', err);
+            return res.status(400).send('Invalid token');
+        }
+    }
+
+    // otherwise render a simple login page with a link to Formbar's OAuth
+    res.render('login', { authUrl: AUTH_URL, thisUrl: THIS_URL });
 });
 
 const server = http.createServer(app);

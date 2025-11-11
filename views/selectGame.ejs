@@ -44,7 +44,14 @@
             <div class="controls">
                 <!-- <a class="small" href="/game">Open last game</a> -->
                 <button id="newPublicGame" class="btn" onclick="openNav()">New Game</button>
-                <!-- <button id="newPrivateGame" class="btn secondary" onclick="newGame('private')">New Private</button> -->
+                <!-- show signed-in user or link to sign in -->
+                <div style="display:inline-block;margin-left:12px;vertical-align:middle">
+                    <% if (user) { %>
+                        <span class="small">Signed in as <strong><%= user %></strong></span>
+                    <% } else { %>
+                        <a class="small" href="/login">Sign in</a>
+                    <% } %>
+                </div>
             </div>
         </header>
 
