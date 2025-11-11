@@ -8,16 +8,38 @@ function findKing() {
     if (king) return king
 }
 
+function drawArrow(ctx, startX, startY, endX, endY) {
+    // Convert board coordinates to pixel coordinates
+    const pixelStartX = startX * Settings.boardSquareSize + Settings.boardSquareSize / 2;
+    const pixelStartY = startY * Settings.boardSquareSize + Settings.boardSquareSize / 2;
+    const pixelEndX = endX * Settings.boardSquareSize + Settings.boardSquareSize / 2;
+    const pixelEndY = endY * Settings.boardSquareSize + Settings.boardSquareSize / 2;
+
+    // Calculate the angle for the arrowhead
+    const angle = Math.atan2(pixelEndY - pixelStartY, pixelEndX - pixelStartX);
+
+    // Draw the line
+    ctx.strokeStyle = 'black'; // Set the line color
+    ctx.lineWidth = 2; // Set the line width
+    ctx.beginPath();
+    ctx.moveTo(pixelStartX, pixelStartY);
+    ctx.lineTo(pixelEndX, pixelEndY);
+    ctx.stroke();
+
+    // Draw the arrowhead
+    drawArrowhead(ctx, pixelEndX, pixelEndY, angle, Settings.boardSquareSize / 4);
+}
+
 function drawArrowhead(ctx, x, y, angle, size) {
     ctx.save();
-    ctx.translate(x, y);
+    ctx.translate(x, y); // Use pixel coordinates directly
     ctx.rotate(angle);
     ctx.beginPath();
-    ctx.moveTo(size, 0);
-    ctx.lineTo(0, -size / 2);
-    ctx.lineTo(0, size / 2);
+    ctx.moveTo(size, 0); // Tip of the arrowhead
+    ctx.lineTo(0, -size / 2); // Left corner of the arrowhead
+    ctx.lineTo(0, size / 2); // Right corner of the arrowhead
     ctx.closePath();
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = 'black'; // Arrowhead color
     ctx.fill();
     ctx.restore();
 }
@@ -161,6 +183,9 @@ function drawBoard() {
                     ctx.fillStyle = Settings.moveColor
                     ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
                 }
+                //draw arrow
+                
+                drawArrow(ctx, 2, 3 , 4, 5); 
 
             } else {
                 // If me is black, draw on the opposite side of the board

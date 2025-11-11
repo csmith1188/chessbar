@@ -7,7 +7,8 @@ const DEFAULT_SETTINGS = {
     pieceStyle: 'basic',
     hoverSizeIncrease: 5,
     moveColor: 'rgba(255, 230, 0, 0.39)',
-    checkColor: 'rgba(255, 0, 0, 0.39)'
+    checkColor: 'rgba(255, 0, 0, 0.39)',
+    arrowColor: 'rgba(0, 0, 0, 0.6)'
 }
 
 const DEFAULT_DEBUG = {
@@ -109,6 +110,16 @@ function populateUI() {
     const moveAlphaInput = el('moveAlpha')
     if (moveAlphaInput) moveAlphaInput.value = moveAlpha
 
+    //copy for arrow color
+    const arrowHex = rgbaToHex(Settings.arrowColor)
+    el('arrowColor').value = arrowHex
+    el('arrowColor').placeholder = arrowHex
+
+    const arrowAlpha = parseFloat(Settings.arrowColor.match(/rgba\([^,]+,[^,]+,[^,]+,([^)]+)\)/)?.[1] || 1)
+    const arrowAlphaInput = el('arrowAlpha')
+    if (arrowAlphaInput) arrowAlphaInput.value = arrowAlpha
+
+
     el('defaultPieceMargin').value = Settings.defaultPieceMargin
     el('defaultPieceMargin').placeholder = Settings.defaultPieceMargin
 
@@ -134,9 +145,11 @@ function readUIToSettings() {
     const moveAlpha = el('moveAlpha') ? parseFloat(el('moveAlpha').value || 0.31) : 0.31
     Settings.moveColor = hexToRgba(el('moveColor').value, moveAlpha)
 
-    //ooooof
     const checkAlpha = el('checkAlpha') ? parseFloat(el('checkAlpha').value || 0.31) : 0.31
     Settings.checkColor = hexToRgba(el('checkColor').value, checkAlpha)
+
+    const arrowAlpha = el('arrowAlpha') ? parseFloat(el('arrowAlpha').value || 0.6) : 0.6
+    Settings.arrowColor = hexToRgba(el('arrowColor').value, arrowAlpha)
 
     Settings.defaultPieceMargin = parseInt(el('defaultPieceMargin').value || 0, 10)
     Settings.pieceStyle = el('pieceStyle').value
