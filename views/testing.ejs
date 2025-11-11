@@ -18,10 +18,10 @@
 
       
 
-        const startX = 50;
-        const startY = 50;
-        const endX = 200;
-        const endY = 200;
+        const startX = 200;
+        const startY = 200;
+        const endX = 20;
+        const endY = 20;
 
         // Draw a line with arrowhead
         function drawArrowhead(ctx, x, y, angle, size) {
@@ -29,9 +29,9 @@
             ctx.translate(x, y);
             ctx.rotate(angle);
             ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(-size, -size / 2);
-            ctx.lineTo(-size, size / 2);
+            ctx.moveTo(size, 0);
+            ctx.lineTo(0, -size / 2);
+            ctx.lineTo(0, size / 2);
             ctx.closePath();
             ctx.fillStyle = 'black';
             ctx.fill();
@@ -40,12 +40,12 @@
 
         const angle = Math.atan2(endY - startY, endX - startX);
         ctx.strokeStyle = 'black';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 10;
         ctx.beginPath();
         ctx.moveTo(startX, startY);
         ctx.lineTo(endX, endY);
         ctx.stroke();
-        drawArrowhead(ctx, endX, endY, angle, 10);
+        drawArrowhead(ctx, endX, endY, angle, 25);
     </script>
 
 </body>

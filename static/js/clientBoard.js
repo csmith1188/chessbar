@@ -8,6 +8,20 @@ function findKing() {
     if (king) return king
 }
 
+function drawArrowhead(ctx, x, y, angle, size) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.beginPath();
+    ctx.moveTo(size, 0);
+    ctx.lineTo(0, -size / 2);
+    ctx.lineTo(0, size / 2);
+    ctx.closePath();
+    ctx.fillStyle = 'black';
+    ctx.fill();
+    ctx.restore();
+}
+
 class Piece {
     constructor(x, y, img, name, side, moves) {
         this.x = x
