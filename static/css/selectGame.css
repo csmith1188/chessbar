@@ -88,7 +88,6 @@ body {
 .btn {
     text-decoration: none;
     display: inline-block;
-    margin: 18px 0;
 }
 
 .btn.secondary {

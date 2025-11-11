@@ -7,6 +7,15 @@
     <title>Chess</title>
     <link rel="stylesheet" href="/css/selectGame.css">
     <link rel="stylesheet" href="/css/newGame.css">
+    <style>
+        /* Simple nav message (appears when transfers fail) */
+        .nav-message{display:none;margin-left:12px;padding:6px 10px;background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;border-radius:4px;font-size:0.9rem}
+        .nav-message.visible{display:inline-block}
+
+        /* Message inside the new-game overlay */
+        .overlay-message{display:none;margin-top:8px;padding:8px 10px;background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;border-radius:4px;font-size:0.95rem}
+        .overlay-message.visible{display:block}
+    </style>
 </head>
 
 <body>
@@ -14,7 +23,6 @@
         <div class="overlay-content">
             <button class="closebtn" onclick="closeNav()">&times;</button>
 
-            
             <div class="checkbox-group">
                 <div class="checkbox-item">
                     <input type="checkbox" id="chatOn" name="chat" checked>
@@ -27,6 +35,8 @@
             </div>
 
             <input type="text" class="input" id="gameName" placeholder="Enter Room Name...">
+            <input type="text" class="input" id="payPin" placeholder="Enter your Formbar payment PIN...">
+            <div id="overlayMessage" class="overlay-message" aria-live="polite" role="status"></div>
 
             <button id="newPublicGame" class="btn" onclick="newGame('public')">New Public Game</button>
             <button id="newPrivateGame" class="btn secondary" onclick="newGame('private')">New Private Game</button>
@@ -45,12 +55,15 @@
                 <!-- <a class="small" href="/game">Open last game</a> -->
                 <button id="newPublicGame" class="btn" onclick="openNav()">New Game</button>
                 <!-- show signed-in user or link to sign in -->
+                <div id="navMessage" class="nav-message" aria-live="polite" role="status" style="display:none"></div>
                 <div style="display:inline-block;margin-left:12px;vertical-align:middle">
-                    <% if (user) { %>
-                        <span class="small">Signed in as <strong><%= user %></strong></span>
-                    <% } else { %>
-                        <a class="small" href="/login">Sign in</a>
-                    <% } %>
+                    <% if (user.displayName) { %>
+                        <span class="small">Signed in as <strong>
+                                <%= user.displayName %>
+                            </strong></span>
+                        <% } else { %>
+                            <a class="small" href="/login">Sign in</a>
+                            <% } %>
                 </div>
             </div>
         </header>
@@ -82,11 +95,42 @@
 <script src="js/gameList.js"></script>
 
 <script>
+    const payPin = document.getElementById('payPin')
     const joinCodeInput = document.getElementById('joinCodeInput');
     const gameName = document.getElementById('gameName')
+
+    socket.on('transferResponse', (res) => {
+        // prefer showing the message inside the new-game overlay if present
+        const overlayMsg = document.getElementById('overlayMessage');
+        const navMsg = document.getElementById('navMessage');
+
+        if (res.success === true) {
+            // close overlay and clear messages
+            closeNav();
+            if (overlayMsg) { overlayMsg.classList.remove('visible'); overlayMsg.style.display = 'none'; overlayMsg.textContent = ''; }
+            if (navMsg) { navMsg.classList.remove('visible'); navMsg.style.display = 'none'; navMsg.textContent = ''; }
+        } else {
+            const messageText = res.message || 'Transfer failed';
+            if (overlayMsg) {
+                overlayMsg.textContent = messageText;
+                overlayMsg.classList.add('visible');
+                overlayMsg.style.display = 'block';
+                // auto-hide after 5s
+                setTimeout(() => { overlayMsg.classList.remove('visible'); overlayMsg.style.display = 'none'; overlayMsg.textContent = ''; }, 5000);
+            } else if (navMsg) {
+                navMsg.textContent = messageText;
+                navMsg.classList.add('visible');
+                navMsg.style.display = 'inline-block';
+                setTimeout(() => { navMsg.classList.remove('visible'); navMsg.style.display = 'none'; navMsg.textContent = ''; }, 5000);
+            }
+        }
+    })
+
+
     function newGame(visibility) {
-        socket.emit('newGame', visibility, gameName.value.trim())
-        closeNav()
+        if (payPin.value) {
+            socket.emit('newGame', visibility, gameName.value.trim(), payPin.value)
+        }
     }
 
     function joinGame() {

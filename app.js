@@ -6,7 +6,31 @@ const { Board, attachSocket, classes } = require('./engine/main');
 const { User, takenUserIds } = require('./online/user');
 let { Game, games, takenGameIds, serializeGame } = require('./online/game')
 
-// FORMBAR!!!!
+//! For digipogs
+
+// Connect to Formbar WS API
+const fbIo = require('socket.io-client');
+// Replace this address with the address of the Formbar you want to use.
+const fbSocket = fbIo("https://formbeta.yorktechapps.com/", {
+    extraHeaders: {
+        api: "f5ce8558b3f929c31efe3e975c129be8a35cd36b56d249041ffb191fecab2bf6"
+    }
+});
+
+// Wait for successful connection
+fbSocket.on("connect", () => {
+    console.log("Connected to formbar server");
+    // Send the transfer
+    // fbSocket.emit("transferDigipogs", data);
+});
+
+fbSocket.on("transferResponse", (response) => {
+    console.log("Transfer Response:", response);
+    // response will be: { success: true/false, message: "..." }
+});
+
+//! End digipogs
+
 const jwt = require('jsonwebtoken');
 const session = require('express-session');
 
@@ -18,11 +42,13 @@ const app = express();
 app.use(express.static('static')); // serve client files from /public
 
 // session for Formbar login
-app.use(session({
+const sessionMiddleware = session({
     secret: 'idekWhatToPutHere!@#$%^&*',
     resave: false,
     saveUninitialized: false
-}));
+});
+
+app.use(sessionMiddleware);
 
 // make the session user available to all templates via res.locals
 app.use((req, res, next) => {
@@ -49,10 +75,6 @@ app.get('/', (req, res) => {
     res.render('selectGame');
 });
 
-// app.get('/testing', (req, res) => {
-//     res.redirect('/login');
-// });
-
 app.get('/game', (req, res) => {
     res.render('game');
 });
@@ -62,16 +84,16 @@ app.get('/login', (req, res) => {
     if (req.session && req.session.user) {
         return res.redirect('/');
     }
-    
+
     // If Formbar redirected back with a token, decode it and store in session
     if (req.query && req.query.token) {
         try {
             let tokenData = jwt.decode(req.query.token);
             req.session.token = tokenData;
             // prefer displayName, fall back to name or email
-            req.session.user = tokenData.displayName || tokenData.name || tokenData.email || 'unknown';
-            console.log('User signed in via Formbar:', req.session.user);
-            console.log(req.session.token.id)
+            req.session.user = tokenData
+            // console.log('User signed in via Formbar:', req.session.user);
+            // console.log(req.session.token.id)
             return res.redirect('/');
         } catch (err) {
             console.error('Invalid token on /login callback', err);
@@ -88,6 +110,12 @@ const io = new Server(server, {
     cors: { origin: '*' } // adjust for production
 });
 
+// Attach express session to socket.io so we can access req.session in socket handlers
+io.use((socket, next) => {
+    // sessionMiddleware will populate socket.request.session
+    sessionMiddleware(socket.request, socket.request.res || {}, next);
+});
+
 attachSocket(io, games);
 
 const PORT = process.env.PORT || 3000;
@@ -98,7 +126,10 @@ server.listen(PORT, () => {
 let users = []
 
 io.on('connection', (socket) => {
-    let user = new User(socket)
+    // if the HTTP session had a Formbar user stored on it, pass that along so the User object
+    // can use the Formbar id instead of a generated numeric id.
+    const sessionUser = socket.request && socket.request.session ? socket.request.session.user : null;
+    let user = new User(socket, sessionUser)
     // socket.is = user
     users.push(user);
 
@@ -113,6 +144,24 @@ io.on('connection', (socket) => {
     }
 
     socket.emit('gamesList', getVisibleGames());
+
+    socket.on('playPayment', (pin) => {
+        if (user.id) {
+            const data = {
+                from: user.id,
+                to: 23,
+                amount: 1,
+                reason: "Chess Payment",
+                pin: pin,
+                pool: true
+            }
+            fbSocket.emit("transferDigipogs", data)
+
+            fbSocket.on('transferResponse', res => {
+                socket.emit('transferResponse', res)
+            })
+        }
+    })
 
     socket.on('gamesList', () => {
         socket.emit('gamesList', getVisibleGames());
@@ -154,19 +203,39 @@ io.on('connection', (socket) => {
         }
     })
 
-    socket.on('newGame', (visibility = 'public', name = '') => {
-        if (user.game) {
-            user.game.leave(user)
+    socket.on('newGame', (visibility = 'public', name = '', pin) => {
+        if (!!Number(pin)) {
+            // Pay to play
+            if (user.id) {
+                const data = {
+                    from: user.id,
+                    to: 23,
+                    amount: 1,
+                    reason: "Chess Payment",
+                    pin: pin,
+                    pool: true
+                }
+                fbSocket.emit("transferDigipogs", data)
+
+                fbSocket.once('transferResponse', res => {
+                    socket.emit('transferResponse', res)
+                    if (res.success === true) {
+                        if (user.game) {
+                            user.game.leave(user)
+                        }
+                        // console.log('newGame event received');
+                        let game = new Game(visibility, name)
+                        game.owner = user
+                        // console.log(game.id, game.joinCode, game.owner)
+                        game.update()
+                        // send the updated visible-games list (including any private games the creator is in) to the creator only
+                        socket.emit('gamesList', getVisibleGames())
+                        io.emit('refreshGames')
+                        socket.emit('redirect', `/game?code=${game.joinCode}`)
+                    }
+                })
+            }
         }
-        // console.log('newGame event received');
-        let game = new Game(visibility, name)
-        game.owner = user
-        // console.log(game.id, game.joinCode, game.owner)
-        game.update()
-        // send the updated visible-games list (including any private games the creator is in) to the creator only
-        socket.emit('gamesList', getVisibleGames())
-        io.emit('refreshGames')
-        socket.emit('redirect', `/game?code=${game.joinCode}`)
     });
 
     socket.on('updateBoard', (data) => {
@@ -176,7 +245,7 @@ io.on('connection', (socket) => {
 
     // When a message comes in
     socket.on('chatMessage', (msg) => {
-        if (user && user.game) user.game.chatMsg(user.id, msg)
+        if (user && user.game) user.game.chatMsg(user.displayName, msg)
     });
 
     socket.on('deleteGame', (gameId) => {
