@@ -10,32 +10,21 @@
 
 
 <body>
-<canvas id="screen" width="800" height="400"></canvas>
-
-<svg width="200" height="200">
-    <defs>
-        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
-            <polygon points="0 0, 10 3.5, 0 7" />
-        </marker>
-    </defs>
-    <line x1="10" y1="10" x2="100" y2="50" stroke="black" stroke-width="2" marker-end="url(#arrowhead)" />
-</svg>
-
+    <canvas id="screen" width="800" height="400"></canvas>
 
     <script>
         const canvas = document.getElementById('screen');
         const ctx = canvas.getContext('2d');
 
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
 
         const startX = 50;
         const startY = 50;
         const endX = 200;
         const endY = 200;
 
-       // Draw a line with an arrowhead
-       function drawArrowhead(ctx, x, y, angle, size) {
+        // Draw a line with arrowhead
+        function drawArrowhead(ctx, x, y, angle, size) {
             ctx.save();
             ctx.translate(x, y);
             ctx.rotate(angle);
@@ -44,13 +33,14 @@
             ctx.lineTo(-size, -size / 2);
             ctx.lineTo(-size, size / 2);
             ctx.closePath();
-            ctx.fillStyle = 'white';
+            ctx.fillStyle = 'black';
             ctx.fill();
             ctx.restore();
         }
 
         const angle = Math.atan2(endY - startY, endX - startX);
-        ctx.strokeStyle = 'white';
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(startX, startY);
         ctx.lineTo(endX, endY);

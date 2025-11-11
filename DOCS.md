@@ -108,9 +108,15 @@
 ## 11/10
 
 ### Truit
--
--
+-died
 
 ### Kayden
 -played with arrow on canvas
+
+## 11/11
+
+### Truit
+-
+
+### Kayden
 -
