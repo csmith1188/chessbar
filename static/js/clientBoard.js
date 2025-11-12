@@ -8,7 +8,7 @@ function findKing() {
     if (king) return king
 }
 
-function drawArrow(ctx, startX, startY, endX, endY) {
+function drawArrow(ctx, startX, startY, endX, endY, color) {
     // Convert board coordinates to pixel coordinates
     const pixelStartX = startX * Settings.boardSquareSize + Settings.boardSquareSize / 2;
     const pixelStartY = startY * Settings.boardSquareSize + Settings.boardSquareSize / 2;
@@ -19,7 +19,7 @@ function drawArrow(ctx, startX, startY, endX, endY) {
     const angle = Math.atan2(pixelEndY - pixelStartY, pixelEndX - pixelStartX);
 
     // Draw the line
-    ctx.strokeStyle = 'black'; // Set the line color
+    ctx.strokeStyle = color; // Set the line color
     ctx.lineWidth = 2; // Set the line width
     ctx.beginPath();
     ctx.moveTo(pixelStartX, pixelStartY);
@@ -27,10 +27,10 @@ function drawArrow(ctx, startX, startY, endX, endY) {
     ctx.stroke();
 
     // Draw the arrowhead
-    drawArrowhead(ctx, pixelEndX, pixelEndY, angle, Settings.boardSquareSize / 4);
+    drawArrowhead(ctx, pixelEndX, pixelEndY, angle, Settings.boardSquareSize / 4, color);
 }
 
-function drawArrowhead(ctx, x, y, angle, size) {
+function drawArrowhead(ctx, x, y, angle, size, color) {
     ctx.save();
     ctx.translate(x, y); // Use pixel coordinates directly
     ctx.rotate(angle);
@@ -39,7 +39,7 @@ function drawArrowhead(ctx, x, y, angle, size) {
     ctx.lineTo(0, -size / 2); // Left corner of the arrowhead
     ctx.lineTo(0, size / 2); // Right corner of the arrowhead
     ctx.closePath();
-    ctx.fillStyle = 'black'; // Arrowhead color
+    ctx.fillStyle = color; // Arrowhead color
     ctx.fill();
     ctx.restore();
 }
@@ -183,9 +183,6 @@ function drawBoard() {
                     ctx.fillStyle = Settings.moveColor
                     ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
                 }
-                //draw arrow
-                
-                drawArrow(ctx, 2, 3 , 4, 5); 
 
             } else {
                 // If me is black, draw on the opposite side of the board
@@ -267,6 +264,15 @@ function drawBoard() {
         for (let piece of pieces) {
             if (piece.img && piece.img.complete) {
                 piece.draw()
+            }
+        }
+
+        if (prevMove && prevMove.x2 !== null && (prevMove.x1 !== prevMove.x2 || prevMove.y1 !== prevMove.y2)) {
+            if (me.side === 'white') {
+                drawArrow(ctx, prevMove.x1, prevMove.y1, prevMove.x2, prevMove.y2, "black");
+            }
+            if (me.side === 'black') {
+                drawArrow(ctx, prevMove.x1, 7 - prevMove.y1, prevMove.x2, 7 - prevMove.y2, "black");
             }
         }
     }
