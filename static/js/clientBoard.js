@@ -269,10 +269,10 @@ function drawBoard() {
 
         if (prevMove && prevMove.x2 !== null && (prevMove.x1 !== prevMove.x2 || prevMove.y1 !== prevMove.y2)) {
             if (me.side === 'white') {
-                drawArrow(ctx, prevMove.x1, prevMove.y1, prevMove.x2, prevMove.y2, "black");
+                drawArrow(ctx, prevMove.x1, prevMove.y1, prevMove.x2, prevMove.y2, Settings.arrowColor);
             }
             if (me.side === 'black') {
-                drawArrow(ctx, prevMove.x1, 7 - prevMove.y1, prevMove.x2, 7 - prevMove.y2, "black");
+                drawArrow(ctx, prevMove.x1, 7 - prevMove.y1, prevMove.x2, 7 - prevMove.y2, Settings.arrowColor);
             }
         }
     }
