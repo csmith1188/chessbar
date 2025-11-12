@@ -21,13 +21,12 @@ const fbSocket = fbIo("https://formbeta.yorktechapps.com/", {
 fbSocket.on("connect", () => {
     console.log("Connected to formbar server")
     // Send the transfer
-    // fbSocket.emit("transferDigipogs", data)
 })
 
-fbSocket.on("transferResponse", (response) => {
-    console.log("Transfer Response:", response)
+// fbSocket.on("transferResponse", (response) => {
+    // console.log("Transfer Response:", response)
     // response will be: { success: true/false, message: "..." }
-})
+// })
 
 //! End digipogs
 
@@ -189,8 +188,6 @@ io.on('connection', (socket) => {
         if (user.game) user.game.leave(user)
     })
 
-    // socket.emit('youAre', {id: user.id, side: user.side})
-
     socket.on('messageHistory', () => {
         // console.log(user)
         if (user.game && user.game.messages) socket.emit('messageHistory', user.game.messages)
@@ -203,7 +200,7 @@ io.on('connection', (socket) => {
         }
     })
 
-    socket.on('newGame', (visibility = 'public', name = '', pin) => {
+    socket.on('newGame', (visibility = 'public', name = '', pin = 0) => {
         if (!!Number(pin)) {
             // Pay to play
             if (user.id) {
@@ -215,7 +212,7 @@ io.on('connection', (socket) => {
                     pin: pin,
                     pool: true
                 }
-                
+
                 fbSocket.emit("transferDigipogs", data)
 
                 fbSocket.once('transferResponse', res => {

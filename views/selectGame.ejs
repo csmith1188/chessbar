@@ -9,12 +9,36 @@
     <link rel="stylesheet" href="/css/newGame.css">
     <style>
         /* Simple nav message (appears when transfers fail) */
-        .nav-message{display:none;margin-left:12px;padding:6px 10px;background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;border-radius:4px;font-size:0.9rem}
-        .nav-message.visible{display:inline-block}
+        .nav-message {
+            display: none;
+            margin-left: 12px;
+            padding: 6px 10px;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            font-size: 0.9rem
+        }
+
+        .nav-message.visible {
+            display: inline-block
+        }
 
         /* Message inside the new-game overlay */
-        .overlay-message{display:none;margin-top:8px;padding:8px 10px;background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;border-radius:4px;font-size:0.95rem}
-        .overlay-message.visible{display:block}
+        .overlay-message {
+            display: none;
+            margin-top: 8px;
+            padding: 8px 10px;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            font-size: 0.95rem
+        }
+
+        .overlay-message.visible {
+            display: block
+        }
     </style>
 </head>
 
@@ -75,6 +99,18 @@
             </section>
 
             <aside class="sidebar">
+                <div class="panel" style="margin-bottom: 10px">
+                    <label for="joinCodeInput" class="small">Formbar payment PIN</label>
+                    <input class="input" type="text" id="pinInput" placeholder="Enter PIN">
+                    <div style="display:flex;gap:8px">
+                        <button id="pinInput" class="btn" onclick="savePin()">Enter</button>
+                    </div>
+
+                    <div class="footer-note">Saving your pin to cookies WILL take your digipogs without prompting you.
+                        We are not stealing your digipogs.
+                    </div>
+                </div>
+
                 <div class="panel">
                     <label for="joinCodeInput" class="small">Join by code</label>
                     <input class="input" type="text" id="joinCodeInput" placeholder="Enter Join Code">
@@ -137,6 +173,19 @@
         const code = joinCodeInput.value.trim();
         if (code) {
             window.location.href = `/game?code=${encodeURIComponent(code)}`;
+        }
+    }
+
+    const pinInput = document.getElementById('pinInput')
+
+    function savePin() {
+        let d = new Date()
+        d.setTime(d.getTime() + (365*24*60*60*1000))
+        let expires = "expires="+ d.toUTCString()
+
+        const PIN = pinInput.value
+        if (!!Number(PIN)) {
+            document.cookie = `pin=${PIN};${expires};path=/`
         }
     }
 </script>
