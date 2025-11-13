@@ -2,5 +2,6 @@
 copy PINStemplate.js PINS.js
 echo Created PINS.js file
 cd database
-@REM node init-db
-copy databaseTemplate.db database.db
+@REM echo. > database.db
+node init-db
+cd ../

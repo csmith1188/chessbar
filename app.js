@@ -6,6 +6,16 @@ const { Board, attachSocket, classes } = require('./engine/main')
 const { User, takenUserIds } = require('./online/user')
 let { Game, games, takenGameIds, serializeGame } = require('./online/game')
 const { EMPLOYEE_ID_1, EMPLOYEE_ID_2, EMPLOYEE_PIN_1, EMPLOYEE_PIN_2, POOL_ID } = require('./PINS.js')
+const sqlite3 = require('sqlite3')
+let sql
+
+const db = new sqlite3.Database('database/database.db', sqlite3.OPEN_READWRITE, (err) => {
+    if (err) return console.error(err.message)
+})
+
+db.all('SELECT * FROM users', (err, rows) => {
+    console.log(rows)
+})
 
 const PLAY_PRICE = 100
 const WIN_AMOUNT = 110
@@ -23,7 +33,7 @@ const fbSocket = fbIo("https://formbeta.yorktechapps.com/", {
 
 // Wait for successful connection
 fbSocket.on("connect", () => {
-    console.log("Connected to formbar server")
+    console.log("Connected to Formbar server")
     // Send the transfer
 })
 
@@ -37,10 +47,10 @@ fbSocket.on("connect", () => {
 const jwt = require('jsonwebtoken')
 const session = require('express-session')
 
-const AUTH_URL = 'https://formbeta.yorktechapps.com'
+const AUTH_URL = 'http://localhost:420'
 // callback URL that Formbar should redirect back to with ?token=JWT
 
-const THIS_URL = 'http://172.16.3.233:3000/login' //! CHANGE IP WHEN RUNNING A SEPERATE INSTANCE
+const THIS_URL = 'http://localhost:3000/login' //! CHANGE IP WHEN RUNNING A SEPARATE INSTANCE
 
 const app = express()
 app.use(express.static('static')) // serve client files from /public
@@ -182,6 +192,10 @@ io.on('connection', (socket) => {
     // can use the Formbar id instead of a generated numeric id.
     const sessionUser = socket.request && socket.request.session ? socket.request.session.user : null
     let user = new User(socket, sessionUser)
+    user.addToDb(db)
+    user.getTokens(db)
+    user.addTokens(db, 2)
+    user.getTokens(db)
     // socket.is = user
     users.push(user)
 
@@ -197,12 +211,12 @@ io.on('connection', (socket) => {
 
     socket.emit('gamesList', getVisibleGames())
 
-    socket.on('playPayment', (pin) => {
+    socket.on('purchaseToken', (pin) => {
         if (user.id) {
             const data = {
                 from: user.id,
-                to: 23,
-                amount: 1,
+                to: POOL_ID,
+                amount: 1, //! CHANGE TO PLAY AMOUNT
                 reason: "Chess Payment",
                 pin: pin,
                 pool: true
@@ -211,6 +225,10 @@ io.on('connection', (socket) => {
 
             fbSocket.on('transferResponse', res => {
                 socket.emit('transferResponse', res)
+
+                if (res.success === true) {
+                    db.run(`UPDATE users SET tokens = ${user.tokens + 1} WHERE id = ${user.id} `)
+                }
             })
         }
     })
@@ -294,7 +312,7 @@ io.on('connection', (socket) => {
         io.emit('updateBoard', data)
     })
 
-    //kaydens chat limiter
+    // kayden's chat limiter
     const chatLimit = {
         count: 0,
         lastReset: Date.now()
@@ -312,7 +330,7 @@ io.on('connection', (socket) => {
         }
 
         if (chatLimit.count >= CHAT_LIMIT) {
-            socket.emit('errorMessage', 'Youre sending messages too fast. Please wait a few seconds.')
+            socket.emit('errorMessage', 'You\'re sending messages too fast. Please wait a few seconds.')
             return
         }
         chatLimit.count++
