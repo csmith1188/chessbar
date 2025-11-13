@@ -5,7 +5,10 @@ const path = require('path')
 const { Board, attachSocket, classes } = require('./engine/main')
 const { User, takenUserIds } = require('./online/user')
 let { Game, games, takenGameIds, serializeGame } = require('./online/game')
-const { EMPLOYEE_ID_1, EMPLOYEE_ID_2, EMPLOYEE_PIN_1, EMPLOYEE_PIN_2 } = require('./PINS.js')
+const { EMPLOYEE_ID_1, EMPLOYEE_ID_2, EMPLOYEE_PIN_1, EMPLOYEE_PIN_2, POOL_ID } = require('./PINS.js')
+
+const PLAY_PRICE = 100
+const WIN_AMOUNT = 110
 
 //! For digipogs
 
@@ -25,8 +28,8 @@ fbSocket.on("connect", () => {
 })
 
 // fbSocket.on("transferResponse", (response) => {
-    // console.log("Transfer Response:", response)
-    // response will be: { success: true/false, message: "..." }
+// console.log("Transfer Response:", response)
+// response will be: { success: true/false, message: "..." }
 // })
 
 //! End digipogs
@@ -36,7 +39,8 @@ const session = require('express-session')
 
 const AUTH_URL = 'https://formbeta.yorktechapps.com'
 // callback URL that Formbar should redirect back to with ?token=JWT
-const THIS_URL = 'http://172.16.3.233:3000/login'
+
+const THIS_URL = 'http://172.16.3.233:3000/login' //! CHANGE IP WHEN RUNNING A SEPERATE INSTANCE
 
 const app = express()
 app.use(express.static('static')) // serve client files from /public
@@ -47,6 +51,30 @@ const sessionMiddleware = session({
     resave: false,
     saveUninitialized: false
 })
+
+//! Pay to play and get paid when win
+function playPayment(player) {
+    const data = {
+        from: player.id,
+        to: POOL_ID,
+        amount: PLAY_PRICE,
+        reason: "Chessbar payment",
+        pin: player.pin,
+        pool: true
+    }
+
+    fbSocket.once('transferResponse', (r) => { console.log(r) })
+
+    fbSocket.emit('transferDigipogs', data)
+
+    fbSocket.emit('poolPayout', {
+        poolId: POOL_ID
+    })
+}
+
+function payOut() {
+    const payoutAmount = 0
+}
 
 app.use(sessionMiddleware)
 
