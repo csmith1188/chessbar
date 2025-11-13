@@ -5,6 +5,7 @@ const path = require('path')
 const { Board, attachSocket, classes } = require('./engine/main')
 const { User, takenUserIds } = require('./online/user')
 let { Game, games, takenGameIds, serializeGame } = require('./online/game')
+const { EMPLOYEE_ID_1, EMPLOYEE_ID_2, EMPLOYEE_PIN_1, EMPLOYEE_PIN_2 } = require('./PINS.js')
 
 //! For digipogs
 
@@ -35,7 +36,7 @@ const session = require('express-session')
 
 const AUTH_URL = 'https://formbeta.yorktechapps.com'
 // callback URL that Formbar should redirect back to with ?token=JWT
-const THIS_URL = 'http://localhost:3000/login'
+const THIS_URL = 'http://172.16.3.233:3000/login'
 
 const app = express()
 app.use(express.static('static')) // serve client files from /public
