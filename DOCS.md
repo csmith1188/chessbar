@@ -116,7 +116,23 @@
 ## 11/11
 
 ### Truit
--
+-died again
 
 ### Kayden
 -added arrows
+
+## 11/12
+
+### Truit
+-
+
+### Kayden
+-
+
+## 11/13
+
+### Truit
+-
+
+### Kayden
+-
