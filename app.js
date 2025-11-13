@@ -270,8 +270,34 @@ io.on('connection', (socket) => {
         io.emit('updateBoard', data)
     })
 
+    //kaydens chat limiter
+    const chatLimit = {
+        count: 0,
+        lastReset: Date.now()
+    }
+    const CHAT_LIMIT = 5      // max messages
+    const CHAT_WINDOW = 10_000
+
     // When a message comes in
     socket.on('chatMessage', (msg) => {
+        const now = Date.now()
+
+        if (now - chatLimit.lastReset > CHAT_WINDOW) {
+            chatLimit.count = 0
+            chatLimit.lastReset = now
+        }
+
+        if (chatLimit.count >= CHAT_LIMIT) {
+            socket.emit('errorMessage', 'Youre sending messages too fast. Please wait a few seconds.')
+            return
+        }
+        chatLimit.count++
+
+        if (chatLimit.count >= CHAT_LIMIT) {
+            socket.emit('errorMessage', 'Muted for 10 seconds for spamming.')
+            socket.mutedUntil = Date.now() + 10_000
+            return
+        }
         if (user && user.game) user.game.chatMsg(user.displayName, msg)
     })
 
@@ -287,5 +313,6 @@ io.on('connection', (socket) => {
         }
     })
 })
+
 
 module.exports = { games }
