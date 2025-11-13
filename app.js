@@ -72,8 +72,32 @@ function playPayment(player) {
     })
 }
 
-function payOut() {
-    const payoutAmount = 0
+function payOut(player) {
+    const payoutAmount = (WIN_AMOUNT / 2) / .9
+
+    fbSocket.once('transferResponse', (r) => { console.log(r) })
+
+    const data = {
+        from: EMPLOYEE_ID_1,
+        to: player.id,
+        amount: payoutAmount,
+        reason: "Chessbar payout",
+        pin: EMPLOYEE_PIN_1
+    }
+
+    fbSocket.emit('transferDigipogs', data)
+
+    fbSocket.once('transferResponse', (r) => { console.log(r) })
+
+    const data2 = {
+        from: EMPLOYEE_ID_2,
+        to: player.id,
+        amount: payoutAmount,
+        reason: "Chessbar payout",
+        pin: EMPLOYEE_PIN_2
+    }
+
+    fbSocket.emit('transferDigipogs', data2)
 }
 
 app.use(sessionMiddleware)
