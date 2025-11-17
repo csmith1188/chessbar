@@ -41,7 +41,7 @@ class User {
     }
 
     getTokens(db) {
-        db.get(`SELECT * FROM users WHERE id = ${this.id}`, (err, user) => {
+        db.get(`SELECT * FROM users WHERE formbar_id = ${this.id}`, (err, user) => {
             if (user) this.tokens = user.tokens
         })
         // console.log(this.tokens)
@@ -49,8 +49,8 @@ class User {
     }
     addTokens(db, amount = 1) {
         this.getTokens(db)
-        db.get(`SELECT * FROM users WHERE id = ${this.id}`, (err, user) => {
-            if(user) db.run(`UPDATE users SET tokens = ${this.tokens + amount} WHERE id = ${this.id}`)
+        db.get(`SELECT * FROM users WHERE formbar_id = ${this.id}`, (err, user) => {
+            if(user) db.run(`UPDATE users SET tokens = ${this.tokens + amount} WHERE formbar_id = ${this.id}`)
             this.tokens += amount
         })
     }
@@ -58,7 +58,7 @@ class User {
     addToDb(db) {
         if (this.id > 0) {
             db.get(
-                `SELECT * FROM users WHERE id = ?`,
+                `SELECT * FROM users WHERE formbar_id = ?`,
                 [this.id],
                 (err, user) => {
                     if (err) return console.error(err);

@@ -225,7 +225,7 @@ io.on('connection', (socket) => {
                 socket.emit('transferResponse', res)
 
                 if (res.success === true) {
-                    db.run(`UPDATE users SET tokens = ${user.tokens + 1} WHERE id = ${user.id} `)
+                    db.run(`UPDATE users SET tokens = ${user.tokens + 1} WHERE formbar_id = ${user.id} `)
                 }
             })
         }
