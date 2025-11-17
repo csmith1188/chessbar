@@ -50,8 +50,6 @@ const session = require('express-session')
 const AUTH_URL = FORMBAR_URL
 // callback URL that Formbar should redirect back to with ?token=JWT
 
-const THIS_URL = `${THIS_URL}/login`
-
 const app = express()
 app.use(express.static('static')) // serve client files from /public
 
@@ -164,7 +162,7 @@ app.get('/login', (req, res) => {
     }
 
     // otherwise render a simple login page with a link to Formbar's OAuth
-    res.render('login', { authUrl: AUTH_URL, thisUrl: THIS_URL })
+    res.render('login', { authUrl: AUTH_URL, thisUrl: `${THIS_URL}/login` })
 })
 
 const server = http.createServer(app)
