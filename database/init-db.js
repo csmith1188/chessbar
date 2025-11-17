@@ -4,14 +4,15 @@ const db = new sqlite3.Database('database.db');
 
 db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY,
+        chessbar_id INTEGER PRIMARY KEY,
+        formbar_id INTEGER,
         tokens INTEGER
     );`);
 
-    db.run(`INSERT INTO users (id, tokens) VALUES (?, ?)`,
-        [0, 0],
+    db.run(`INSERT INTO users (formbar_id, tokens) VALUES (?, ?)`,
+        [-1, 0],
         (err) => {
-            if (err) return console.error(err);
+            if (err) return console.error('AHAHAHAHA', err);
             console.log("Row inserted");
         }
     );
