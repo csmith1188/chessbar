@@ -12,7 +12,7 @@ db.serialize(() => {
     db.run(`INSERT INTO users (formbar_id, tokens) VALUES (?, ?)`,
         [-1, 0],
         (err) => {
-            if (err) return console.error('AHAHAHAHA', err);
+            if (err) return console.error('Error updating default values:', err);
             console.log("Row inserted");
         }
     );

@@ -8,6 +8,7 @@ const POOL_ID = 0 // Pool ID
 
 //! For both FORMBAR_URL and THIS_URL:
 // Using `localhost:port` is generally a bad idea. Use your IP address instead, unless you are the only one testing.
+//! BE SURE TO INCLUDE http://
 const FORMBAR_URL = 'https://formbar.url.com'
 const THIS_URL = '192.0.0.1'
 

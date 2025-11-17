@@ -36,7 +36,8 @@ class User {
             id: this.id,
             side: this.side,
             displayName: this.displayName,
-            game: this.game ? { id: this.game.id, joinCode: this.game.joinCode } : null
+            game: this.game ? { id: this.game.id, joinCode: this.game.joinCode } : null,
+            tokens: this.tokens
         })
     }
 
@@ -61,14 +62,14 @@ class User {
                 `SELECT * FROM users WHERE formbar_id = ?`,
                 [this.id],
                 (err, user) => {
-                    if (err) return console.error(err);
+                    if (err) return console.error('Error adding user to database:', err);
 
                     if (!user) {
                         db.run(
-                            `INSERT INTO users(id, tokens) VALUES (?, ?)`,
+                            `INSERT INTO users(formbar_id, tokens) VALUES (?, ?)`,
                             [this.id, 0],
                             (err) => {
-                                if (err) return console.error(err);
+                                if (err) return console.error('Error updating user in database:', err);
                                 console.log("Inserted new user:", this.id);
                             }
                         );

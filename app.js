@@ -10,7 +10,7 @@ const sqlite3 = require('sqlite3')
 let sql
 
 const db = new sqlite3.Database('database/database.db', sqlite3.OPEN_READWRITE, (err) => {
-    if (err) return console.error(err.message)
+    if (err) return console.error('Error connecting to database:', err.message)
 })
 
 db.all('SELECT * FROM users', (err, rows) => {
@@ -52,6 +52,9 @@ const AUTH_URL = FORMBAR_URL
 
 const app = express()
 app.use(express.static('static')) // serve client files from /public
+
+app.set('views', path.join(__dirname, 'views'))
+app.set('view engine', 'ejs')
 
 // session for Formbar login
 const sessionMiddleware = session({
@@ -111,7 +114,7 @@ function payOut(player) {
 app.use(sessionMiddleware)
 
 // make the session user available to all templates via res.locals
-app.use((req, res, next) => {
+app.use((req, res, next) => {W
     res.locals.user = req.session ? req.session.user : null
     next()
 })
@@ -121,9 +124,6 @@ app.get('/me', (req, res) => {
     if (req.session && req.session.user) return res.json({ user: req.session.user, token: req.session.token || null })
     return res.status(200).json({ user: null })
 })
-
-app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'ejs')
 
 app.get('/', (req, res) => {
     // If the user is not signed in, send them to the login page.
@@ -165,6 +165,14 @@ app.get('/login', (req, res) => {
     res.render('login', { authUrl: AUTH_URL, thisUrl: `${THIS_URL}/login` })
 })
 
+app.get('/profile', (req, res) => {
+    if (!req.session || !req.session.user) {
+        return res.redirect('/login')
+    }
+
+    res.render('profile')
+})
+
 const server = http.createServer(app)
 const io = new Server(server, {
     cors: { origin: '*' } // adjust for production
@@ -192,7 +200,7 @@ io.on('connection', (socket) => {
     let user = new User(socket, sessionUser)
     user.addToDb(db)
     user.getTokens(db)
-    user.addTokens(db, 2)
+    // user.addTokens(db, 2)
     user.getTokens(db)
     // socket.is = user
     users.push(user)
