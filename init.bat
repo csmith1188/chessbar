@@ -1,6 +1,6 @@
 @echo off
 echo Downloading NPM dependencies
-start /b npm i
+call npm i
 echo Creating INFO.js file
 copy INFOtemplate.js INFO.js
 cd database
