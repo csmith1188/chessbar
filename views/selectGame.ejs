@@ -81,13 +81,12 @@
                 <!-- show signed-in user or link to sign in -->
                 <div id="navMessage" class="nav-message" aria-live="polite" role="status" style="display:none"></div>
                 <div style="display:inline-block;margin-left:12px;vertical-align:middle">
-                    <% if (user.displayName) { %>
-                        <span class="small">Signed in as <strong>
-                                <%= user.displayName %>
-                            </strong></span>
-                        <% } else { %>
-                            <a class="small" href="/login">Sign in</a>
-                            <% } %>
+                    <% if (user && user.displayName) { %>
+                        <span class="small">Signed in as <strong><%= user.displayName %></strong></span>
+                        <a class="small" href="/profile" style="margin-left:10px">Profile</a>
+                    <% } else { %>
+                        <a class="small" href="/login">Sign in</a>
+                    <% } %>
                 </div>
             </div>
         </header>

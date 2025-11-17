@@ -10,7 +10,7 @@ const POOL_ID = 0 // Pool ID
 // Using `localhost:port` is generally a bad idea. Use your IP address instead, unless you are the only one testing.
 //! BE SURE TO INCLUDE http://
 const FORMBAR_URL = 'https://formbar.url.com'
-const THIS_URL = '192.0.0.1'
+const THIS_URL = '192.0.0.1:3000' // Don't forget your port
 
 const FORMBAR_API_KEY = 'abcdef12356789' // Your API key (on your Formbar profile page)
 const FB_MIDDLEWARE_SECRET = 'secret_key!?!?!??' // Secret key for Formbar Oauth middleware

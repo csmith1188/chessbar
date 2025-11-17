@@ -114,7 +114,7 @@ function payOut(player) {
 app.use(sessionMiddleware)
 
 // make the session user available to all templates via res.locals
-app.use((req, res, next) => {W
+app.use((req, res, next) => {
     res.locals.user = req.session ? req.session.user : null
     next()
 })

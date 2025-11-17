@@ -1,0 +1,173 @@
+/* profile.css — adapted to site theme (dark gradients, shared variables) */
+
+:root {
+    --bg-1: #020613; /* very dark navy */
+    --bg-2: #07121a; /* deep navy */
+    --card: #0c1a24; /* dark panel */
+    --muted: #7f8a95; /* subdued text */
+    --accent: #c78d2f; /* muted amber */
+    --accent-2: #362380; /* muted purple */
+    --glass: rgba(255, 255, 255, 0.02);
+    --radius: 12px;
+    --max-width: 1100px;
+}
+
+* { box-sizing: border-box }
+
+html, body { height: 100% }
+
+body {
+    margin: 0;
+    font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+    color: #eaf4fb;
+    -webkit-font-smoothing: antialiased;
+    padding: 28px 18px;
+    display: flex;
+    justify-content: center;
+}
+
+.page-wrap { width: 100%; max-width: var(--max-width) }
+
+#profile{
+    display: grid;
+    /* allow the profile area to expand but keep it subtle */
+    width: 100%;
+    max-width: 820px; /* narrower than site max so profile doesn't dominate */
+    grid-template-columns: 160px 1fr; /* slightly narrower left column */
+    gap: 20px;
+    align-items: start;
+    margin: 18px 50px; /* center horizontally */
+    /* Make sure profile visually sits on top of other page panels when they overlap */
+    position: relative;
+    z-index: 40;
+}
+
+.panel {
+    /* lower-contrast panel so profile feels lighter */
+    background: rgba(255,255,255,0.012);
+    border-radius: calc(var(--radius) - 2px);
+    padding: 12px;
+    box-shadow: 0 6px 18px rgba(3, 8, 18, 0.5);
+    border: 1px solid rgba(255,255,255,0.02);
+}
+
+.profile-avatar{
+    width: 110px;
+    height: 110px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: var(--muted);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.45);
+}
+
+.profile-info h1{
+    margin: 0 0 6px 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.profile-info p{
+    margin: 0 0 12px 0;
+    color: var(--muted);
+}
+
+ #buyTokens{
+    max-width: 420px;
+    margin: 0;
+    width:100%;
+    height:min-content
+}
+/* keep buy panel under the profile when overlapping */
+#buyTokens.panel {
+    position: relative;
+    z-index: 10;
+}
+#buyTokens .panel { padding: 5px }
+
+/* Layout the purchase box with consistent spacing */
+#buyTokens.panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+#buyTokens input[type="number"],
+#buyTokens input[type="text"]{
+    width: calc(100% - 12px);
+    padding: 10px 12px;
+    margin: 6px 0 10px 0;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.02);
+    color: var(--muted);
+}
+
+/* support .input utility class used elsewhere */
+.input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.02);
+    color: var(--muted);
+}
+
+.btn {
+    background: var(--accent);
+    border-radius: 10px;
+    padding: 10px 14px;
+    border: 0;
+    color: #042628;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+}
+
+.btn.secondary {
+    background: linear-gradient(90deg, var(--accent-2), #5a1996);
+    color: #e2e7eb;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.03);
+}
+
+@media (max-width: 920px){
+    #profile{ grid-template-columns: 1fr; }
+    .profile-avatar{ width: 120px; height: 120px; margin: 0 auto; }
+}
+
+/* accessibility focus styles consistent with site */
+button:focus,
+input:focus { outline: 3px solid rgba(94, 234, 212, 0.12); outline-offset: 2px }
+
+.small { font-size: 13px; color: var(--muted) }
+
+/* keep hidden utility */
+.hidden { display: none }
+
+/* subtle inline back link for profile header */
+.back-link {
+    padding: 4px 6px;
+    border-radius: 8px;
+    color: var(--muted);
+}
+.back-link:hover { color: #eaf4fb; background: rgba(255,255,255,0.01); }
