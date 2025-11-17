@@ -5,7 +5,7 @@ const path = require('path')
 const { Board, attachSocket, classes } = require('./engine/main')
 const { User, takenUserIds } = require('./online/user')
 let { Game, games, takenGameIds, serializeGame } = require('./online/game')
-const { EMPLOYEE_ID_1, EMPLOYEE_ID_2, EMPLOYEE_PIN_1, EMPLOYEE_PIN_2, POOL_ID } = require('./PINS.js')
+const { EMPLOYEE_ID_1, EMPLOYEE_ID_2, EMPLOYEE_PIN_1, EMPLOYEE_PIN_2, POOL_ID, FORMBAR_URL, THIS_URL, FORMBAR_API_KEY, FB_MIDDLEWARE_SECRET } = require('./INFO.js')
 const sqlite3 = require('sqlite3')
 let sql
 
@@ -25,9 +25,9 @@ const WIN_AMOUNT = 110
 // Connect to Formbar WS API
 const fbIo = require('socket.io-client')
 // Replace this address with the address of the Formbar you want to use.
-const fbSocket = fbIo("https://formbeta.yorktechapps.com/", {
+const fbSocket = fbIo(FORMBAR_URL, {
     extraHeaders: {
-        api: "f5ce8558b3f929c31efe3e975c129be8a35cd36b56d249041ffb191fecab2bf6"
+        api: FORMBAR_API_KEY
     }
 })
 
@@ -47,17 +47,17 @@ fbSocket.on("connect", () => {
 const jwt = require('jsonwebtoken')
 const session = require('express-session')
 
-const AUTH_URL = 'http://localhost:420'
+const AUTH_URL = FORMBAR_URL
 // callback URL that Formbar should redirect back to with ?token=JWT
 
-const THIS_URL = 'http://localhost:3000/login' //! CHANGE IP WHEN RUNNING A SEPARATE INSTANCE
+const THIS_URL = `${THIS_URL}/login`
 
 const app = express()
 app.use(express.static('static')) // serve client files from /public
 
 // session for Formbar login
 const sessionMiddleware = session({
-    secret: 'idekWhatToPutHere!@#$%^&*',
+    secret: FB_MIDDLEWARE_SECRET,
     resave: false,
     saveUninitialized: false
 })
