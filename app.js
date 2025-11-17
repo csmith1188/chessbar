@@ -114,7 +114,8 @@ function payOut(player) {
 app.use(sessionMiddleware)
 
 // make the session user available to all templates via res.locals
-app.use((req, res, next) => {W
+app.use((req, res, next) => {
+    W
     res.locals.user = req.session ? req.session.user : null
     next()
 })
@@ -336,17 +337,28 @@ io.on('connection', (socket) => {
         }
 
         if (chatLimit.count >= CHAT_LIMIT) {
-            socket.emit('errorMessage', 'You\'re sending messages too fast. Please wait a few seconds.')
-            return
+            // Emit a chat message instead of an error message
+            io.emit('chatMessage', {
+                user: 'System',
+                text: 'You are sending messages too fast. Please wait a few seconds.'
+            });
+            return;
         }
-        chatLimit.count++
+        chatLimit.count++;
 
         if (chatLimit.count >= CHAT_LIMIT) {
-            socket.emit('errorMessage', 'Muted for 10 seconds for spamming.')
-            socket.mutedUntil = Date.now() + 10_000
-            return
+            // Emit a chat message for muting
+            io.emit('chatMessage', {
+                user: 'System',
+                text: 'Muted for 10 seconds for spamming.'
+            });
+            socket.mutedUntil = Date.now() + 10_000;
+            return;
         }
-        if (user && user.game) user.game.chatMsg(user.displayName, msg)
+
+        // Broadcast the actual chat message
+        io.emit('chatMessage', msg);
+
     })
 
     socket.on('deleteGame', (gameId) => {
