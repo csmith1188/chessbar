@@ -3,7 +3,7 @@ const http = require('http')
 const { Server } = require('socket.io')
 const path = require('path')
 const { Board, attachSocket, classes } = require('./engine/main')
-const { User, takenUserIds } = require('./online/user')
+const { User, takenUserIds, userSocket } = require('./online/user')
 let { Game, games, takenGameIds, serializeGame } = require('./online/game')
 const { EMPLOYEE_ID_1, EMPLOYEE_ID_2, EMPLOYEE_PIN_1, EMPLOYEE_PIN_2, POOL_ID, FORMBAR_URL, THIS_URL, FORMBAR_API_KEY, FB_MIDDLEWARE_SECRET } = require('./INFO.js')
 const sqlite3 = require('sqlite3')
@@ -185,6 +185,7 @@ io.use((socket, next) => {
 })
 
 attachSocket(io, games)
+userSocket(io)
 
 const PORT = process.env.PORT || 3000
 server.listen(PORT, () => {

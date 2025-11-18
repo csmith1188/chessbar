@@ -51,7 +51,7 @@ class User {
     addTokens(db, amount = 1) {
         this.getTokens(db)
         db.get(`SELECT * FROM users WHERE formbar_id = ${this.id}`, (err, user) => {
-            if(user) db.run(`UPDATE users SET tokens = ${this.tokens + amount} WHERE formbar_id = ${this.id}`)
+            if (user) db.run(`UPDATE users SET tokens = ${this.tokens + amount} WHERE formbar_id = ${this.id}`)
             this.tokens += amount
         })
     }
@@ -82,10 +82,14 @@ class User {
     }
 }
 
-function userSocket(socket) {
+function userSocket(socket, db) {
     socket.on('getUser', (uid) => {
-        
+        db.get('SELECT * FROM users WHERE formbar_id = ?', [uid], (err, user) => {
+            if (err || !user) return socket.emit('noUser');
+
+            console.log(user)
+        })
     })
 }
 
-module.exports = { User, takenUserIds }
+module.exports = { User, takenUserIds, userSocket }
