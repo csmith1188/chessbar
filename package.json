@@ -8,5 +8,16 @@
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "sqlite3": "^5.1.7"
-  }
+  },
+  "name": "chessbar",
+  "version": "1.0.0",
+  "description": "1. In the command prompt, run `init.bat`.\r 2. In `INFO.js`, fill out the correct information.",
+  "main": "app.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
