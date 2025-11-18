@@ -82,4 +82,10 @@ class User {
     }
 }
 
+function userSocket(socket) {
+    socket.on('getUser', (uid) => {
+        
+    })
+}
+
 module.exports = { User, takenUserIds }

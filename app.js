@@ -13,9 +13,9 @@ const db = new sqlite3.Database('database/database.db', sqlite3.OPEN_READWRITE, 
     if (err) return console.error('Error connecting to database:', err.message)
 })
 
-db.all('SELECT * FROM users', (err, rows) => {
-    console.log(rows)
-})
+// db.all('SELECT * FROM users', (err, rows) => {
+// console.log(rows)
+// })
 
 const PLAY_PRICE = 100
 const WIN_AMOUNT = 110
@@ -337,26 +337,20 @@ io.on('connection', (socket) => {
 
         if (chatLimit.count >= CHAT_LIMIT) {
             // Emit a chat message instead of an error message
-            io.emit('chatMessage', {
-                user: 'System',
-                text: 'You are sending messages too fast. Please wait a few seconds.'
-            });
+            socket.emit('chatMessage', 'System', 'You are sending messages too fast. Please wait a few seconds.');
             return;
         }
         chatLimit.count++;
 
         if (chatLimit.count >= CHAT_LIMIT) {
             // Emit a chat message for muting
-            io.emit('chatMessage', {
-                user: 'System',
-                text: 'Muted for 10 seconds for spamming.'
-            });
+            socket.emit('chatMessage', 'System', 'Muted for 10 seconds for spamming.')
             socket.mutedUntil = Date.now() + 10_000;
             return;
         }
 
         // Broadcast the actual chat message
-        io.emit('chatMessage', msg);
+        io.emit('chatMessage', user.displayName, msg);
 
     })
 
