@@ -324,8 +324,8 @@ io.on('connection', (socket) => {
         count: 0,
         lastReset: Date.now()
     }
-    const CHAT_LIMIT = 5      // max messages
-    const CHAT_WINDOW = 10_000
+    const CHAT_LIMIT = 5        // max messages
+    const CHAT_WINDOW = 10_000  // cooldown window in ms
 
     // When a message comes in
     socket.on('chatMessage', (msg) => {
