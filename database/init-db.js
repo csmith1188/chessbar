@@ -6,7 +6,9 @@ db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS users (
         chessbar_id INTEGER PRIMARY KEY,
         formbar_id INTEGER,
-        tokens INTEGER
+        tokens INTEGER,
+        wins INTEGER,
+        losses INTEGER
     );`);
 
     db.run(`INSERT INTO users (formbar_id, tokens) VALUES (?, ?)`,
