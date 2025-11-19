@@ -43,7 +43,11 @@ class User {
 
     getTokens(db) {
         db.get(`SELECT * FROM users WHERE formbar_id = ${this.id}`, (err, user) => {
-            if (user) this.tokens = user.tokens
+            if (user) {
+                this.tokens = user.tokens
+                this.wins = user.wins
+                this.losses = user.losses
+            }
         })
         // console.log(this.tokens)
 
@@ -66,8 +70,8 @@ class User {
 
                     if (!user) {
                         db.run(
-                            `INSERT INTO users(formbar_id, tokens) VALUES (?, ?)`,
-                            [this.id, 0],
+                            `INSERT INTO users(formbar_id, tokens, wins, losses) VALUES (?, ?, ?, ?)`,
+                            [this.id, 0, 0, 0],
                             (err) => {
                                 if (err) return console.error('Error updating user in database:', err);
                                 console.log("Inserted new user:", this.id);
@@ -82,12 +86,14 @@ class User {
     }
 }
 
-function userSocket(socket, db) {
-    socket.on('getUser', (uid) => {
-        db.get('SELECT * FROM users WHERE formbar_id = ?', [uid], (err, user) => {
-            if (err || !user) return socket.emit('noUser');
+function userSocket(io, db) {
+    io.on('connection', (socket) => {
+        socket.on('getUser', (uid) => {
+            db.get('SELECT * FROM users WHERE formbar_id = ?', [uid], (err, user) => {
+                if (err || !user) return socket.emit('noUser');
 
-            console.log(user)
+                return socket.emit('foundUser', user);
+            })
         })
     })
 }

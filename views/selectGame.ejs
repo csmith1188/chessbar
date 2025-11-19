@@ -59,7 +59,7 @@
             </div>
 
             <input type="text" class="input" id="gameName" placeholder="Enter Room Name...">
-            <input type="text" class="input" id="payPin" placeholder="Enter your Formbar payment PIN...">
+            <!-- <input type="text" class="input" id="payPin" placeholder="Enter your Formbar payment PIN..."> -->
             <div id="overlayMessage" class="overlay-message" aria-live="polite" role="status"></div>
 
             <button id="newPublicGame" class="btn" onclick="newGame('public')">New Public Game</button>
@@ -82,11 +82,13 @@
                 <div id="navMessage" class="nav-message" aria-live="polite" role="status" style="display:none"></div>
                 <div style="display:inline-block;margin-left:12px;vertical-align:middle">
                     <% if (user && user.displayName) { %>
-                        <span class="small">Signed in as <strong><%= user.displayName %></strong></span>
+                        <span class="small">Signed in as <strong>
+                                <%= user.displayName %>
+                            </strong></span>
                         <a class="small" href="/profile" style="margin-left:10px">Profile</a>
-                    <% } else { %>
-                        <a class="small" href="/login">Sign in</a>
-                    <% } %>
+                        <% } else { %>
+                            <a class="small" href="/login">Sign in</a>
+                            <% } %>
                 </div>
             </div>
         </header>
@@ -130,42 +132,46 @@
 <script src="js/gameList.js"></script>
 
 <script>
-    const payPin = document.getElementById('payPin')
+    // const payPin = document.getElementById('payPin')
     const joinCodeInput = document.getElementById('joinCodeInput');
     const gameName = document.getElementById('gameName')
 
-    socket.on('transferResponse', (res) => {
-        // prefer showing the message inside the new-game overlay if present
-        const overlayMsg = document.getElementById('overlayMessage');
-        const navMsg = document.getElementById('navMessage');
+    closeNav();
+    if (overlayMsg) { overlayMsg.classList.remove('visible'); overlayMsg.style.display = 'none'; overlayMsg.textContent = ''; }
+    if (navMsg) { navMsg.classList.remove('visible'); navMsg.style.display = 'none'; navMsg.textContent = ''; }
 
-        if (res.success === true) {
-            // close overlay and clear messages
-            closeNav();
-            if (overlayMsg) { overlayMsg.classList.remove('visible'); overlayMsg.style.display = 'none'; overlayMsg.textContent = ''; }
-            if (navMsg) { navMsg.classList.remove('visible'); navMsg.style.display = 'none'; navMsg.textContent = ''; }
-        } else {
-            const messageText = res.message || 'Transfer failed';
-            if (overlayMsg) {
-                overlayMsg.textContent = messageText;
-                overlayMsg.classList.add('visible');
-                overlayMsg.style.display = 'block';
-                // auto-hide after 5s
-                setTimeout(() => { overlayMsg.classList.remove('visible'); overlayMsg.style.display = 'none'; overlayMsg.textContent = ''; }, 5000);
-            } else if (navMsg) {
-                navMsg.textContent = messageText;
-                navMsg.classList.add('visible');
-                navMsg.style.display = 'inline-block';
-                setTimeout(() => { navMsg.classList.remove('visible'); navMsg.style.display = 'none'; navMsg.textContent = ''; }, 5000);
-            }
-        }
-    })
+    // socket.on('transferResponse', (res) => {
+    //     // prefer showing the message inside the new-game overlay if present
+    //     const overlayMsg = document.getElementById('overlayMessage');
+    //     const navMsg = document.getElementById('navMessage');
+
+    //     if (res.success === true) {
+    //         // close overlay and clear messages
+    //         closeNav();
+    //         if (overlayMsg) { overlayMsg.classList.remove('visible'); overlayMsg.style.display = 'none'; overlayMsg.textContent = ''; }
+    //         if (navMsg) { navMsg.classList.remove('visible'); navMsg.style.display = 'none'; navMsg.textContent = ''; }
+    //     } else {
+    //         const messageText = res.message || 'Transfer failed';
+    //         if (overlayMsg) {
+    //             overlayMsg.textContent = messageText;
+    //             overlayMsg.classList.add('visible');
+    //             overlayMsg.style.display = 'block';
+    //             // auto-hide after 5s
+    //             setTimeout(() => { overlayMsg.classList.remove('visible'); overlayMsg.style.display = 'none'; overlayMsg.textContent = ''; }, 5000);
+    //         } else if (navMsg) {
+    //             navMsg.textContent = messageText;
+    //             navMsg.classList.add('visible');
+    //             navMsg.style.display = 'inline-block';
+    //             setTimeout(() => { navMsg.classList.remove('visible'); navMsg.style.display = 'none'; navMsg.textContent = ''; }, 5000);
+    //         }
+    //     }
+    // })
 
 
     function newGame(visibility) {
-        if (payPin.value) {
-            socket.emit('newGame', visibility, gameName.value.trim(), payPin.value)
-        }
+        socket.emit('newGame', visibility, gameName.value.trim())
+        // if (payPin.value) {
+        // }
     }
 
     function joinGame() {
@@ -179,8 +185,8 @@
 
     function savePin() {
         let d = new Date()
-        d.setTime(d.getTime() + (365*24*60*60*1000))
-        let expires = "expires="+ d.toUTCString()
+        d.setTime(d.getTime() + (365 * 24 * 60 * 60 * 1000))
+        let expires = "expires=" + d.toUTCString()
 
         const PIN = pinInput.value
         if (!!Number(PIN)) {

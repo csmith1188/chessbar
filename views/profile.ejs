@@ -15,15 +15,15 @@
     <div id="profile">
         <!-- Left column: avatar + small info -->
         <div>
-            <div class="profile-avatar">CM</div>
+            <div class="profile-avatar" id="initials">CM</div>
 
             <div class="panel" style="margin-top:12px;">
                 <div style="display:flex;flex-direction:column;gap:8px;">
-                    <div><strong>Member since</strong></div>
-                    <div class="small">Apr 2023</div>
+                    <!-- <div><strong>Member since</strong></div>
+                    <div class="small">Apr 2023</div> -->
                     <div style="height:6px"></div>
-                    <div><strong>Location</strong></div>
-                    <div class="small">Online</div>
+                    <!-- <div><strong>Location</strong></div>
+                    <div class="small">Online</div> -->
                 </div>
             </div>
         </div>
@@ -31,8 +31,8 @@
         <!-- Right column: main profile info -->
         <div class="profile-info">
             <div class="panel">
-                <h1>ChessMaster</h1>
-                <p class="small">Casual player, coffee-fueled tactics solver, and challenger of time controls.</p>
+                <h1 id="name">unnamed</h1>
+                <!-- <p class="small">Casual player, coffee-fueled tactics solver, and challenger of time controls.</p> -->
 
                 <div style="display:flex;gap:10px;margin-top:12px;">
                     <button class="btn">Edit Profile</button>
@@ -42,16 +42,20 @@
 
             <div style="margin-top:12px; display:grid; grid-template-columns: repeat(3,1fr); gap:12px;">
                 <div class="panel">
-                    <div class="small">Rating</div>
-                    <div style="font-weight:700;font-size:18px;margin-top:6px;">1524</div>
+                    <div class="small">Win %</div>
+                    <div style="font-weight:700;font-size:18px;margin-top:6px;">0</div>
                 </div>
                 <div class="panel">
                     <div class="small">Tokens</div>
-                    <div style="font-weight:700;font-size:18px;margin-top:6px;">42</div>
+                    <div style="font-weight:700;font-size:18px;margin-top:6px;">0</div>
                 </div>
                 <div class="panel">
-                    <div class="small">Wins</div>
-                    <div style="font-weight:700;font-size:18px;margin-top:6px;">128</div>
+                    <div class="small">Games started</div>
+                    <div style="font-weight:700;font-size:18px;margin-top:6px;">0</div>
+                </div>
+                <div class="panel">
+                    <div class="small">Games finished</div>
+                    <div style="font-weight:700;font-size:18px;margin-top:6px;">0</div>
                 </div>
             </div>
         </div>
@@ -91,6 +95,22 @@
             socket.emit('purchaseToken', parseInt(pinBox.value) || null, val)
         }
     })
+</script>
+
+<script>
+    // Get the user data
+    socket.on('foundUser', (user) => {
+        console.log(user)
+    })
+
+    socket.on('youAre', (u) => {
+        console.log(u)
+        socket.emit('getUser', u.id)
+    })
+
+    function updateInfo() {
+
+    }
 </script>
 
 </html>

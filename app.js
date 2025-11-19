@@ -184,8 +184,9 @@ io.use((socket, next) => {
     sessionMiddleware(socket.request, socket.request.res || {}, next)
 })
 
+// Attack sockets
 attachSocket(io, games)
-userSocket(io)
+userSocket(io, db)
 
 const PORT = process.env.PORT || 3000
 server.listen(PORT, () => {
@@ -284,40 +285,39 @@ io.on('connection', (socket) => {
     })
 
     socket.on('newGame', (visibility = 'public', name = '', pin = 0) => {
-        if (!!Number(pin)) {
-            // Pay to play
-            if (user.id) {
-                const data = {
-                    from: user.id,
-                    to: 23,
-                    amount: 1,
-                    reason: "Chess Payment",
-                    pin: pin,
-                    pool: true
-                }
+        // if (!!Number(pin)) {
+        //     // Pay to play
+        //     if (user.id) {
+        //         const data = {
+        //             from: user.id,
+        //             to: 23,
+        //             amount: 1,
+        //             reason: "Chess Payment",
+        //             pin: pin,
+        //             pool: true
+        //         }
 
-                fbSocket.emit("transferDigipogs", data)
+        //         fbSocket.emit("transferDigipogs", data)
 
-                fbSocket.once('transferResponse', res => {
-                    socket.emit('transferResponse', res)
-                    if (res.success === true) {
-                        if (user.game) {
-                            user.game.leave(user)
-                        }
-                        // console.log('newGame event received')
-                        let game = new Game(visibility, name)
-                        game.owner = user
-                        // console.log(game.id, game.joinCode, game.owner)
-                        game.update()
-                        // send the updated visible-games list (including any private games the creator is in) to the creator only
-                        socket.emit('gamesList', getVisibleGames())
-                        io.emit('refreshGames')
-                        socket.emit('redirect', `/game?code=${game.joinCode}`)
-                    }
-                })
-            }
+        //         fbSocket.once('transferResponse', res => {
+        //             socket.emit('transferResponse', res)
+        //             if (res.success === true) {
+        if (user.game) {
+            user.game.leave(user)
         }
+        // console.log('newGame event received')
+        let game = new Game(visibility, name)
+        game.owner = user
+        // console.log(game.id, game.joinCode, game.owner)
+        game.update()
+        // send the updated visible-games list (including any private games the creator is in) to the creator only
+        socket.emit('gamesList', getVisibleGames())
+        io.emit('refreshGames')
+        socket.emit('redirect', `/game?code=${game.joinCode}`)
     })
+    //         })
+    //     }
+    // }
 
     socket.on('updateBoard', (data) => {
         console.log('updateBoard event received')
@@ -356,7 +356,7 @@ io.on('connection', (socket) => {
         }
 
         // Broadcast the actual chat message
-        io.emit('chatMessage', user.displayName, msg);
+        user.game.chatMsg(user.displayName, msg)
 
     })
 
