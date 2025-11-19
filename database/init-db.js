@@ -11,8 +11,8 @@ db.serialize(() => {
         losses INTEGER
     );`);
 
-    db.run(`INSERT INTO users (formbar_id, tokens) VALUES (?, ?)`,
-        [-1, 0],
+    db.run(`INSERT INTO users (formbar_id, tokens, wins, losses) VALUES (?, ?, ?, ?)`,
+        [-1, 0, 0, 0],
         (err) => {
             if (err) return console.error('Error updating default values:', err);
             console.log("Row inserted");

@@ -218,26 +218,31 @@ io.on('connection', (socket) => {
 
     socket.emit('gamesList', getVisibleGames())
 
-    socket.on('purchaseToken', (pin) => {
-        if (user.id) {
-            const data = {
-                from: user.id,
-                to: POOL_ID,
-                amount: 1, //! CHANGE TO PLAY AMOUNT
-                reason: "Chess Payment",
-                pin: pin,
-                pool: true
-            }
-            fbSocket.emit("transferDigipogs", data)
-
-            fbSocket.on('transferResponse', res => {
-                socket.emit('transferResponse', res)
-
-                if (res.success === true) {
-                    db.run(`UPDATE users SET tokens = ${user.tokens + 1} WHERE formbar_id = ${user.id} `)
+    socket.on('purchaseToken', (pin, amount) => {
+        console.log(pin, amount)
+        for (let i = 0; i < amount; i++)
+            if (user.id) {
+                const data = {
+                    from: user.id,
+                    to: POOL_ID,
+                    amount: 1, //! CHANGE TO PLAY AMOUNT
+                    reason: "Chess Payment",
+                    pin: pin,
+                    pool: true
                 }
-            })
-        }
+                fbSocket.emit("transferDigipogs", data)
+
+                fbSocket.once('transferResponse', res => {
+                    socket.emit('transferResponse', res)
+
+                    if (res.success === true) {
+                        db.run(`UPDATE users SET tokens = ${user.tokens + 1} WHERE formbar_id = ${user.id} `)
+                        user.tokens++
+                        console.log('Player bought token')
+                        console.log(user.tokens)
+                    }
+                })
+            }
     })
 
     socket.on('gamesList', () => {

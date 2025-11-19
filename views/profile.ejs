@@ -9,7 +9,9 @@
 </head>
 
 <body>
-    <a href="/" class="small back-link" style="margin:8px 0 0 18px;display:inline-block;text-decoration:none;color:var(--muted); height:min-content">← Back to games</a>
+    <a href="/" class="small back-link"
+        style="margin:8px 0 0 18px;display:inline-block;text-decoration:none;color:var(--muted); height:min-content">←
+        Back to games</a>
     <div id="profile">
         <!-- Left column: avatar + small info -->
         <div>
@@ -57,8 +59,9 @@
 
     <div id="buyTokens" class="panel">
         <h3>Purchase tokens</h3>
-    <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="Your PIN..." id="pinInput" class="input">
-    <input type="number" placeholder="Amount?" id="amount" class="input" min="1" value="1">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="Your PIN..." id="pinInput"
+            class="input">
+        <input type="number" placeholder="Amount?" id="amount" class="input" min="1" value="1">
 
         <div class="checkbox-row">
             <input type="checkbox" checked id="saveToCookies" name="box">
@@ -72,22 +75,21 @@
 
 </body>
 
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/socket.js"></script>
+
 <script>
     const pinBox = document.getElementById('pinInput')
     const amount = document.getElementById('amount')
     const checkbox = document.getElementById('saveToCookies')
     const submit = document.getElementById('submit')
-    
+
     // guard: prevent buying less than 1 token
     submit.addEventListener('click', (e) => {
-        const val = parseInt(amount.value, 10) || 0
-        if (val < 1) {
-            e.preventDefault()
-            amount.value = 1
-            amount.focus()
-            return false
+        const val = parseInt(amount.value) || 1
+        if (val > 0) {
+            socket.emit('purchaseToken', parseInt(pinBox.value) || null, val)
         }
-        // proceed: you may emit socket event or form submit elsewhere
     })
 </script>
 
