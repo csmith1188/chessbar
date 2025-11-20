@@ -84,9 +84,16 @@ class User {
             )
         }
     }
+
+    startedGame() {
+
+    }
 }
 
-function userSocket(io, db) {
+let db
+
+function userSocket(io, db1) {
+    db = db1
     io.on('connection', (socket) => {
         socket.on('getUser', (uid) => {
             db.get('SELECT * FROM users WHERE formbar_id = ?', [uid], (err, user) => {

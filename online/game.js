@@ -30,6 +30,8 @@ class Game {
         this.board = new Board()
 
         this.owner = null
+        this.prevWhite = null
+        this.prevBlack = null
 
         this.messages = []
 
@@ -47,16 +49,42 @@ class Game {
         this.update()
     }
 
-    assignSides() {
+    assignSides(newUser = null) {
 
         if (!this.users.some(user => user.side == 'white')) {
             let foo = this.users.find(u => u.side == 'unassigned')
-            if (foo) foo.side = 'white'
+            if (foo) {
+                foo.side = 'white'
+                if (!this.prevWhite) {
+                    foo.side = 'white'
+                    this.prevWhite = foo
+                } else if (newUser) {
+                    if (newUser.id !== this.prevWhite.id) {
+                        foo.side = 'white'
+                        newUser.startedGame()
+                    }
+                } else {
+                    foo.side = 'white'
+                }
+            }
         }
 
         if (!this.users.some(user => user.side == 'black')) {
             let foo = this.users.find(u => u.side == 'unassigned')
-            if (foo) foo.side = 'black'
+            if (foo) {
+                foo.side = 'black'
+                if (!this.prevBlack) {
+                    foo.side = 'black'
+                    this.prevBlack = foo
+                } else if (newUser) {
+                    if (newUser.id !== this.prevBlack.id) {
+                        foo.side = 'black'
+                        newUser.startedGame()
+                    }
+                } else {
+                    foo.side = 'black'
+                }
+            }
         }
 
         this.users.filter(u => u.side === 'unassigned').forEach(u => { u.side = 'spectator' })
@@ -72,7 +100,7 @@ class Game {
         this.users.push(user)
         // if (this.users.length == 1) this.owner = user
         user.game = this
-        this.assignSides()
+        this.assignSides(user)
         this.update()
     }
 
