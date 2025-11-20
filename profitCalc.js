@@ -1,17 +1,19 @@
-price = 100
-winAmount = 110
+let price = 100
+let winAmount = 110
+let tax = 0.1
+
 console.log('\nPlay price:', price)
 console.log('Payout amount:', winAmount)
 console.log()
 
-let initialTax = 2 * (price * 0.1)
+let initialTax = 2 * (price * tax)
 console.log('Initial tax:', initialTax)
 
 let initialProfit = (2 * price) - initialTax
 console.log('Initial profit:', initialProfit, 'Per employee:', initialProfit / 2)
 
-let winningOutgo = ((winAmount / 2) / .9) * 2
-let winTax = (winAmount) * .1
+let winningOutgo = ((winAmount / 2) / (1 - tax)) * 2
+let winTax = (winAmount) * tax
 console.log('Winning outgo:', winningOutgo)
 console.log('Winning tax:', winTax)
 
