@@ -70,8 +70,8 @@ class User {
 
                     if (!user) {
                         db.run(
-                            `INSERT INTO users(formbar_id, tokens, wins, losses) VALUES (?, ?, ?, ?)`,
-                            [this.id, 0, 0, 0],
+                            `INSERT INTO users(formbar_id, tokens, wins, losses, draws, started, finished) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                            [this.id, 0, 0, 0, 0, 0, 0],
                             (err) => {
                                 if (err) return console.error('Error updating user in database:', err);
                                 console.log("Inserted new user:", this.id);

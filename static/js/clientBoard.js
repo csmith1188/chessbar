@@ -4,7 +4,7 @@ let selected = null
 function findKing() {
     let king
     king = pieces.find(piece => piece.name == 'King' && piece.side == me.side)
-    console.log(king)
+    // console.log(king)
     if (king) return king
 }
 
@@ -242,18 +242,15 @@ function drawBoard() {
         }
 
         //check
+        let king = findKing()
         if (on) {
             if (me && me.incheck == true && me.side == 'white') {
-                let king = findKing()
-                console.log(king)
                 ctx.fillStyle = Settings.checkColor
                 ctx.fillRect(king.bx * Settings.boardSquareSize, king.by * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
                 console.log("white check")
             }
 
             if (me && me.incheck == true && me.side == 'black') {
-                let king = findKing()
-                console.log(king)
                 ctx.fillStyle = Settings.checkColor
                 ctx.fillRect(king.bx * Settings.boardSquareSize, king.by * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
                 console.log("black check")

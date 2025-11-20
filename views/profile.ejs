@@ -43,19 +43,23 @@
             <div style="margin-top:12px; display:grid; grid-template-columns: repeat(3,1fr); gap:12px;">
                 <div class="panel">
                     <div class="small">Win %</div>
-                    <div style="font-weight:700;font-size:18px;margin-top:6px;">0</div>
+                    <div style="font-weight:700;font-size:18px;margin-top:6px;" id="winPercent">0</div>
                 </div>
                 <div class="panel">
                     <div class="small">Tokens</div>
-                    <div style="font-weight:700;font-size:18px;margin-top:6px;">0</div>
+                    <div style="font-weight:700;font-size:18px;margin-top:6px;" id="tokens">0</div>
                 </div>
                 <div class="panel">
                     <div class="small">Games started</div>
-                    <div style="font-weight:700;font-size:18px;margin-top:6px;">0</div>
+                    <div style="font-weight:700;font-size:18px;margin-top:6px;" id="started">0</div>
                 </div>
                 <div class="panel">
                     <div class="small">Games finished</div>
-                    <div style="font-weight:700;font-size:18px;margin-top:6px;">0</div>
+                    <div style="font-weight:700;font-size:18px;margin-top:6px;" id="finished">0</div>
+                </div>
+                <div class="panel">
+                    <div class="small">W/D/L</div>
+                    <div style="font-weight:700;font-size:18px;margin-top:6px;" id="wdl">0/0/0</div>
                 </div>
             </div>
         </div>
@@ -63,7 +67,7 @@
 
     <div id="buyTokens" class="panel">
         <h3>Purchase tokens</h3>
-        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="Your PIN..." id="pinInput"
+        <input type="password" inputmode="numeric" pattern="[0-9]*" placeholder="Your PIN..." id="pinInput"
             class="input">
         <input type="number" placeholder="Amount?" id="amount" class="input" min="1" value="1">
 
@@ -98,9 +102,16 @@
 </script>
 
 <script>
+    const winPercent = document.getElementById('winPercent')
+    const tokens = document.getElementById('tokens')
+    const started = document.getElementById('started')
+    const finished = document.getElementById('finished')
+    const wdl = document.getElementById('wdl')
+
     // Get the user data
     socket.on('foundUser', (user) => {
-        console.log(user)
+        console.log('db:', user)
+        updateInfo(user)
     })
 
     socket.on('youAre', (u) => {
@@ -108,8 +119,12 @@
         socket.emit('getUser', u.id)
     })
 
-    function updateInfo() {
-
+    function updateInfo(user) {
+        winPercent.innerText = user.wins / user.losses * 100 || 0
+        tokens.innerText = user.tokens
+        started.innerText = user.started
+        finished.innerText = user.finished
+        wdl.innerText = `${user.wins}/${user.draws}/${user.losses}`
     }
 </script>
 

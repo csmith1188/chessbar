@@ -241,6 +241,8 @@ io.on('connection', (socket) => {
                         user.tokens++
                         console.log('Player bought token')
                         console.log(user.tokens)
+                    } else {
+                        console.log('Payment failed:', res)
                     }
                 })
             }
