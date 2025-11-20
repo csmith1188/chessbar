@@ -201,10 +201,7 @@ io.on('connection', (socket) => {
     const sessionUser = socket.request && socket.request.session ? socket.request.session.user : null
     let user = new User(socket, sessionUser)
     user.addToDb(db)
-    user.getTokens(db)
-    // user.addTokens(db, 2)
-    user.getTokens(db)
-    // socket.is = user
+    user.getInfo(db)
     users.push(user)
 
     function getVisibleGames() {
@@ -252,7 +249,7 @@ io.on('connection', (socket) => {
         socket.emit('gamesList', getVisibleGames())
     })
 
-    console.log('A user connected:', user.id)
+    // console.log('A user connected:', user.id)
 
     socket.on('join', (gameId) => {
         for (let game of games) {

@@ -53,14 +53,18 @@ class Game {
 
         if (!this.users.some(user => user.side == 'white')) {
             let foo = this.users.find(u => u.side == 'unassigned')
+            console.log(!!foo, !!this.prevBlack, !!this.prevWhite)
             if (foo) {
                 foo.side = 'white'
                 if (!this.prevWhite) {
                     foo.side = 'white'
                     this.prevWhite = foo
+                    newUser.startedGame()
                 } else if (newUser) {
+                    //! Detects if the person who joined is not the original player
                     if (newUser.id !== this.prevWhite.id) {
                         foo.side = 'white'
+                        this.prevWhite = newUser
                         newUser.startedGame()
                     }
                 } else {
@@ -136,7 +140,13 @@ class Game {
 
             user.socket.emit('updateBoard', { board: this.board, move: move })
             if (check) user.socket.emit('check', { side: opponent })
-            if (mate) user.socket.emit('mate', { winner: winner })
+            if (mate) {
+                user.socket.emit('mate', { winner: winner })
+                let foo = this.users.find(u => u.side == winner) 
+                foo.win()
+                let foo2 = this.users.find(u => u.side == opponent) 
+                foo2.lose()
+            }
         }
     }
 

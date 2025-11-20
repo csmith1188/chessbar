@@ -24,6 +24,12 @@ class User {
 
         this.sessionUser = sessionUser || null
 
+        this.started = 0
+        this.finished = 0
+        this.wins = 0
+        this.losses = 0
+        this.draws = 0
+
         this.game = null
         this.active = true
 
@@ -41,19 +47,21 @@ class User {
         })
     }
 
-    getTokens(db) {
+    getInfo(db) {
         db.get(`SELECT * FROM users WHERE formbar_id = ${this.id}`, (err, user) => {
             if (user) {
                 this.tokens = user.tokens
                 this.wins = user.wins
                 this.losses = user.losses
+                this.draws = user.draws
+                this.started = user.started
+                this.finished = user.finished
             }
         })
-        // console.log(this.tokens)
 
     }
     addTokens(db, amount = 1) {
-        this.getTokens(db)
+        this.getInfo(db)
         db.get(`SELECT * FROM users WHERE formbar_id = ${this.id}`, (err, user) => {
             if (user) db.run(`UPDATE users SET tokens = ${this.tokens + amount} WHERE formbar_id = ${this.id}`)
             this.tokens += amount
@@ -78,7 +86,7 @@ class User {
                             }
                         );
                     } else {
-                        console.log("User already exists:", user);
+                        // console.log("User already exists:", user);
                     }
                 }
             )
@@ -86,7 +94,20 @@ class User {
     }
 
     startedGame() {
+        // console.log(this.started)
+        this.started++
+        db.run(`UPDATE users SET started = ${this.started} WHERE formbar_id = ${this.id}`)
+        // console.log(this.started)
+    }
 
+    win() {
+        this.wins++
+        db.run(`UPDATE users SET wins = ${this.wins} WHERE formbar_id = ${this.id}`)
+    }
+
+    lose() {
+        this.losses++
+        db.run(`UPDATE users SET losses = ${this.losses} WHERE formbar_id = ${this.id}`)
     }
 }
 
