@@ -107,8 +107,8 @@
     })
 
     function updateInfo(user) {
-        winPercent.innerText = user.wins / user.losses * 100 || 0
-        if (user.wins / user.losses * 100  == Infinity) {
+        winPercent.innerText = user.wins / user.finished * 100 || 0
+        if (user.wins / user.finished * 100  == Infinity) {
             winPercent.innerText = '100'
         }
         tokens.innerText = user.tokens
