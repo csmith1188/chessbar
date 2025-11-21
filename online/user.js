@@ -103,11 +103,18 @@ class User {
     win() {
         this.wins++
         db.run(`UPDATE users SET wins = ${this.wins} WHERE formbar_id = ${this.id}`)
+        this.finishGame()
     }
 
     lose() {
         this.losses++
         db.run(`UPDATE users SET losses = ${this.losses} WHERE formbar_id = ${this.id}`)
+        this.finishGame()
+    }
+
+    finishGame() {
+        this.finished++
+        db.run(`UPDATE users SET finished = ${this.finished} WHERE formbar_id = ${this.id}`)
     }
 }
 

@@ -13,20 +13,6 @@
         style="margin:8px 0 0 18px;display:inline-block;text-decoration:none;color:var(--muted); height:min-content">←
         Back to games</a>
     <div id="profile">
-        <!-- Left column: avatar + small info -->
-        <div>
-            <div class="profile-avatar" id="initials">CM</div>
-
-            <div class="panel" style="margin-top:12px;">
-                <div style="display:flex;flex-direction:column;gap:8px;">
-                    <!-- <div><strong>Member since</strong></div>
-                    <div class="small">Apr 2023</div> -->
-                    <div style="height:6px"></div>
-                    <!-- <div><strong>Location</strong></div>
-                    <div class="small">Online</div> -->
-                </div>
-            </div>
-        </div>
 
         <!-- Right column: main profile info -->
         <div class="profile-info">
@@ -107,6 +93,7 @@
     const started = document.getElementById('started')
     const finished = document.getElementById('finished')
     const wdl = document.getElementById('wdl')
+    const nameBox = document.getElementById('name')
 
     // Get the user data
     socket.on('foundUser', (user) => {
@@ -121,10 +108,14 @@
 
     function updateInfo(user) {
         winPercent.innerText = user.wins / user.losses * 100 || 0
+        if (user.wins / user.losses * 100  == Infinity) {
+            winPercent.innerText = '100'
+        }
         tokens.innerText = user.tokens
         started.innerText = user.started
         finished.innerText = user.finished
         wdl.innerText = `${user.wins}/${user.draws}/${user.losses}`
+        nameBox.innerText = me.displayName
     }
 </script>
 

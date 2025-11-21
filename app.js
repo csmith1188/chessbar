@@ -136,6 +136,9 @@ app.get('/', (req, res) => {
 })
 
 app.get('/game', (req, res) => {
+    if (!req.session || !req.session.user) {
+        return res.redirect('/login')
+    }
     res.render('game')
 })
 

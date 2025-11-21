@@ -34,7 +34,7 @@ body {
     /* allow the profile area to expand but keep it subtle */
     width: 100%;
     max-width: 820px; /* narrower than site max so profile doesn't dominate */
-    grid-template-columns: 160px 1fr; /* slightly narrower left column */
+    /* grid-template-columns: 160px 1fr; slightly narrower left column */
     gap: 20px;
     align-items: start;
     margin: 18px 50px; /* center horizontally */

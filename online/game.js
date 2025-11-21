@@ -33,6 +33,9 @@ class Game {
         this.prevWhite = null
         this.prevBlack = null
 
+        this.winner = null
+        this.loser = null
+
         this.messages = []
 
         // generate a unique 6-digit join code
@@ -53,7 +56,7 @@ class Game {
 
         if (!this.users.some(user => user.side == 'white')) {
             let foo = this.users.find(u => u.side == 'unassigned')
-            console.log(!!foo, !!this.prevBlack, !!this.prevWhite)
+            // console.log(!!foo, !!this.prevBlack, !!this.prevWhite)
             if (foo) {
                 foo.side = 'white'
                 if (!this.prevWhite) {
@@ -142,10 +145,16 @@ class Game {
             if (check) user.socket.emit('check', { side: opponent })
             if (mate) {
                 user.socket.emit('mate', { winner: winner })
-                let foo = this.users.find(u => u.side == winner) 
-                foo.win()
-                let foo2 = this.users.find(u => u.side == opponent) 
-                foo2.lose()
+                if (!this.winner) {
+                    let foo = this.users.find(u => u.side == winner)
+                    foo.win()
+                    this.winner = foo
+                }
+                if (!this.loser) {
+                    let foo2 = this.users.find(u => u.side == opponent)
+                    foo2.lose()
+                    this.loser = foo2
+                }
             }
         }
     }
