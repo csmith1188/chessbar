@@ -11,14 +11,14 @@ const db = new sqlite3.Database(dbPath, (err) => {
 
 db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS users (
-        chessbar_id INTEGER PRIMARY KEY NOT NULL,
-        formbar_id INTEGER NOT NULL,
-        tokens INTEGER NOT NULL,
-        wins INTEGER NOT NULL,
-        losses INTEGER NOT NULL,
-        started INTEGER NOT NULL,
-        finished INTEGER NOT NULL,
-        draws INTEGER NOT NULL
+        chessbar_id INTEGER PRIMARY KEY NOT NULL DEFAULT 0,
+        formbar_id INTEGER NOT NULL DEFAULT 0,
+        tokens INTEGER NOT NULL DEFAULT 0,
+        wins INTEGER NOT NULL DEFAULT 0,
+        losses INTEGER NOT NULL DEFAULT 0,
+        started INTEGER NOT NULL DEFAULT 0,
+        finished INTEGER NOT NULL DEFAULT 0,
+        draws INTEGER NOT NULL DEFAULT 0
     );`);
 
     db.run(`INSERT INTO users (formbar_id, tokens, wins, losses, started, finished, draws) VALUES (?, ?, ?, ?, ?, ?, ?)`,
