@@ -56,19 +56,24 @@ class Game {
 
         if (!this.users.some(user => user.side == 'white')) {
             let foo = this.users.find(u => u.side == 'unassigned')
-            // console.log(!!foo, !!this.prevBlack, !!this.prevWhite)
             if (foo) {
                 foo.side = 'white'
                 if (!this.prevWhite) {
-                    foo.side = 'white'
-                    this.prevWhite = foo
-                    newUser.startedGame()
+                    if (newUser.tokens) {
+                        foo.side = 'white'
+                        this.prevWhite = foo
+                        newUser.startedGame()
+                    } else {
+                        newUser.socket.emit('redirect', '/') //! CHANGE THIS LATER
+                    }
                 } else if (newUser) {
                     //! Detects if the person who joined is not the original player
-                    if (newUser.id !== this.prevWhite.id) {
+                    if (newUser.id !== this.prevWhite.id && newUser.tokens) {
                         foo.side = 'white'
                         this.prevWhite = newUser
                         newUser.startedGame()
+                    } else if (!newUser.tokens) {
+                        newUser.socket.emit('redirect', '/') //! CHANGE THIS LATER
                     }
                 } else {
                     foo.side = 'white'
@@ -102,10 +107,8 @@ class Game {
     }
 
     join(user) {
-        // console.log(`User ${user.id} is joining game ${this.id}.`)
         user.side = 'unassigned'
         this.users.push(user)
-        // if (this.users.length == 1) this.owner = user
         user.game = this
         this.assignSides(user)
         this.update()

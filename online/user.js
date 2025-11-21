@@ -116,6 +116,16 @@ class User {
         this.finished++
         db.run(`UPDATE users SET finished = ${this.finished} WHERE formbar_id = ${this.id}`)
     }
+
+    spend(db) {
+        this.getInfo(db)
+        if (this.tokens > 0) {
+            this.tokens--
+            db.run(`UPDATE users SET tokens = ${this.tokens} WHERE formbar_id = ${this.id}`)
+            return true
+        } 
+        return false
+    }
 }
 
 let db

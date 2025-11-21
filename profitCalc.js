@@ -1,5 +1,5 @@
-let price = 100
-let winAmount = 110
+let price = 50
+let winAmount = 25
 let tax = 0.1
 
 console.log('\nPlay price:', price)

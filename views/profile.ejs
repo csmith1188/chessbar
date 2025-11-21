@@ -83,6 +83,7 @@
         const val = parseInt(amount.value) || 1
         if (val > 0) {
             socket.emit('purchaseToken', parseInt(pinBox.value) || null, val)
+            socket.emit('getUser', me.id)
         }
     })
 </script>

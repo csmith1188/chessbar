@@ -1,0 +1,91 @@
+/* pay.css — styles for the pay / purchase tokens page
+   Inspired by profile.css and site theme variables. */
+
+:root {
+    --bg-1: #020613;
+    --bg-2: #07121a;
+    --panel: rgba(255,255,255,0.012);
+    --muted: #7f8a95;
+    --accent: #c78d2f;
+    --accent-2: #362380;
+    --radius: 12px;
+}
+
+* { box-sizing: border-box }
+
+html, body { height: 100% }
+
+body {
+    margin: 0;
+    font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+    color: #eaf4fb;
+    -webkit-font-smoothing: antialiased;
+    padding: 28px 18px;
+    display: flex;
+    justify-content: center;
+}
+
+/* Center the small purchase card */
+#buyTokens {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+.panel {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(3, 8, 18, 0.7);
+    border: 1px solid rgba(255,255,255,0.03);
+}
+
+#buyTokens h3 { margin: 0 0 8px 0 }
+
+.input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.02);
+    color: var(--muted);
+    margin: 8px 0;
+    outline: none;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+}
+
+.actions { display:flex; justify-content:flex-end; margin-top:6px }
+
+.btn {
+    background: var(--accent);
+    border-radius: 10px;
+    padding: 10px 14px;
+    border: 0;
+    color: #042628;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    transition: transform 120ms ease, filter 120ms ease;
+}
+
+.btn:hover { transform: translateY(-2px) }
+
+/* small utilities */
+button:focus, input:focus { outline: 3px solid rgba(94, 234, 212, 0.12); outline-offset: 2px }
+
+.small { font-size: 13px; color: var(--muted) }
+
+@media (max-width: 560px) {
+    body { padding: 18px }
+    #buyTokens { padding: 0 }
+}
+
+/* keep hidden utility */
+.hidden { display:none }

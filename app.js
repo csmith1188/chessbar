@@ -135,6 +135,15 @@ app.get('/', (req, res) => {
     res.render('selectGame')
 })
 
+app.get('/pay', (req, res) => {
+    // If the user is not signed in, send them to the login page.
+    if (!req.session || !req.session.user) {
+        return res.redirect('/login')
+    }
+
+    res.render('pay')
+})
+
 app.get('/game', (req, res) => {
     if (!req.session || !req.session.user) {
         return res.redirect('/login')
@@ -220,8 +229,20 @@ io.on('connection', (socket) => {
     socket.emit('gamesList', getVisibleGames())
 
     socket.on('purchaseToken', (pin, amount) => {
-        console.log(pin, amount)
-        for (let i = 0; i < amount; i++)
+        console.log('purchaseToken', pin, amount)
+
+        const amt = parseInt(amount) || 0
+        if (amt <= 0) {
+            socket.emit('tokenTransactionComplete')
+            return
+        }
+
+        let completed = 0
+
+        // For each requested token: attach a one-time response handler BEFORE emitting
+        // the transfer, to avoid missing fast responses. Count completions and only
+        // notify the client when all transfers have returned.
+        for (let i = 0; i < amt; i++) {
             if (user.id) {
                 const data = {
                     from: user.id,
@@ -231,21 +252,37 @@ io.on('connection', (socket) => {
                     pin: pin,
                     pool: true
                 }
-                fbSocket.emit("transferDigipogs", data)
 
                 fbSocket.once('transferResponse', res => {
                     socket.emit('transferResponse', res)
 
-                    if (res.success === true) {
-                        db.run(`UPDATE users SET tokens = ${user.tokens + 1} WHERE formbar_id = ${user.id} `)
-                        user.tokens++
-                        console.log('Player bought token')
-                        console.log(user.tokens)
+                    if (res && res.success === true) {
+                        // Use parameterized query to avoid accidental SQL issues
+                        db.run('UPDATE users SET tokens = ? WHERE formbar_id = ?', [user.tokens + 1, user.id], function (err) {
+                            if (err) console.error('DB update error:', err)
+                            else {
+                                user.tokens++
+                                console.log('Player bought token', user.tokens)
+                            }
+                        })
                     } else {
                         console.log('Payment failed:', res)
                     }
+
+                    completed++
+                    if (completed === amt) {
+                        socket.emit('tokenTransactionComplete')
+                    }
                 })
+
+                // Emit after the listener is attached so we don't miss fast responses
+                fbSocket.emit('transferDigipogs', data)
+            } else {
+                // No user id available; still count this iteration toward completion
+                completed++
+                if (completed === amt) socket.emit('tokenTransactionComplete')
             }
+        }
     })
 
     socket.on('gamesList', () => {
@@ -332,7 +369,7 @@ io.on('connection', (socket) => {
         lastReset: Date.now()
     }
     const CHAT_LIMIT = 5        // max messages
-    const CHAT_WINDOW = 10_000  // cooldown window in ms
+    const CHAT_WINDOW = 10_000  // cool-down window in ms
 
     // When a message comes in
     socket.on('chatMessage', (msg) => {
