@@ -64,8 +64,7 @@ class Game {
                         this.prevWhite = foo
                         newUser.startedGame()
                     } else {
-                        console.log(this.prevWhite, this.prevBlack)
-                        newUser.socket.emit('redirect', '/') //! CHANGE THIS LATER
+                        newUser.socket.emit('redirect', `/pay?code=${this.joinCode}`) //! CHANGE THIS LATER
                     }
                 } else if (newUser) {
                     //! Detects if the person who joined is not the original player
@@ -75,7 +74,7 @@ class Game {
                         newUser.startedGame()
                     } else if (!newUser.tokens) {
                         console.log(this.prevWhite, this.prevBlack)
-                        newUser.socket.emit('redirect', '/') //! CHANGE THIS LATER
+                        newUser.socket.emit('redirect', `/pay?code=${this.joinCode}`) //! CHANGE THIS LATER
                     }
                 } else {
                     foo.side = 'white'
