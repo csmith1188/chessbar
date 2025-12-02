@@ -64,6 +64,7 @@ class Game {
                         this.prevWhite = foo
                         newUser.startedGame()
                     } else {
+                        console.log(this.prevWhite, this.prevBlack)
                         newUser.socket.emit('redirect', '/') //! CHANGE THIS LATER
                     }
                 } else if (newUser) {
@@ -73,6 +74,7 @@ class Game {
                         this.prevWhite = newUser
                         newUser.startedGame()
                     } else if (!newUser.tokens) {
+                        console.log(this.prevWhite, this.prevBlack)
                         newUser.socket.emit('redirect', '/') //! CHANGE THIS LATER
                     }
                 } else {
