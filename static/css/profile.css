@@ -107,8 +107,8 @@ body {
     justify-content: flex-end;
 }
 
-#buyTokens input[type="number"],
-#buyTokens input[type="text"]{
+#buyTokens input[type='number'],
+#buyTokens input[type='text']{
     width: calc(100% - 12px);
     padding: 10px 12px;
     margin: 6px 0 10px 0;

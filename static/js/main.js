@@ -32,7 +32,7 @@ socket.on('promotion', (x, y) => {
     let piece = ''
 
     while (!(piece == 'Knight' || piece == 'Queen' || piece == 'Rook' || piece == 'Bishop')) {
-        piece = prompt("Queen Rook Bishop Knight (capitol letter to start)", 'Queen')
+        piece = prompt('Queen Rook Bishop Knight (capitol letter to start)', 'Queen')
     }
 
     socket.emit('promotion', x, y, piece)
@@ -85,7 +85,7 @@ socket.on('updateBoard', (data) => {
 socket.on('check', (data) => {
     if (data.side == me.side) {
         me.incheck = true
-        console.log("me in check")
+        console.log('me in check')
     }
 })
 

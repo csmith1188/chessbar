@@ -25,7 +25,7 @@ db.serialize(() => {
         [-1, 0, 0, 0, 0, 0, 0],
         (err) => {
             if (err) return console.error('Error updating default values:', err);
-            console.log("Row inserted");
+            console.log('Row inserted');
 
             // Verification: fetch and print the row we just inserted so you can
             // confirm values aren't null and we opened the correct DB file.

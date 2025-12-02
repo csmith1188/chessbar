@@ -1,33 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang='en'>
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Pay - Chessbar</title>
-    <link rel="stylesheet" href="/css/pay.css">
+    <link rel='stylesheet' href='/css/pay.css'>
 </head>
 
 <body>
-    <div id="buyTokens" class="panel">
+    <div id='buyTokens' class='panel'>
         <h3>Purchase tokens</h3>
-        <input type="password" inputmode="numeric" pattern="[0-9]*" placeholder="Your PIN..." id="pinInput"
-            class="input">
-        <input type="number" placeholder="Amount?" id="amount" class="input" min="1" value="1">
+        <input type='password' inputmode='numeric' pattern='[0-9]*' placeholder='Your PIN...' id='pinInput'
+            class='input'>
+        <input type='number' placeholder='Amount?' id='amount' class='input' min='1' value='1'>
 
-        <div class="checkbox-row">
-            <input type="checkbox" checked id="saveToCookies" name="box">
-            <label for="saveToCookies">Save PIN for quick pay?</label>
+        <div class='checkbox-row'>
+            <input type='checkbox' checked id='saveToCookies' name='box'>
+            <label for='saveToCookies'>Save PIN for quick pay?</label>
         </div>
 
-        <div class="actions">
-            <button id="submit" class="btn">Buy</button>
+        <div class='actions'>
+            <button id='submit' class='btn'>Buy</button>
         </div>
     </div>
 </body>
 
-<script src="/socket.io/socket.io.js"></script>
-<script src="js/socket.js"></script>
+<script src='/socket.io/socket.io.js'></script>
+<script src='js/socket.js'></script>
 
 <script>
     const pinBox = document.getElementById('pinInput')

@@ -3,128 +3,128 @@
 
 <head>
     <title>Game - Chessbar</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lavishly+Yours&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/game.css">
+    <link href='https://fonts.googleapis.com/css2?family=Lavishly+Yours&display=swap' rel='stylesheet'>
+    <link rel='stylesheet' href='/css/game.css'>
 </head>
 
 <body>
     <!-- Join code badge (top-left) -->
-    <div id="join-code-badge" role="button" tabindex="0" aria-live="polite" aria-label="Copy join code"
-        title="Click to copy join code" style="display:none"></div>
-    <div id="container">
-        <canvas id="canvas"></canvas>
-        <div id="sidebar">
-            <div id="CapturedW" class="captureBox"></div>
-            <div id="CapturedB" class="captureBox"></div>
-            <div id="InfoBox"></div>
+    <div id='join-code-badge' role='button' tabindex='0' aria-live='polite' aria-label='Copy join code'
+        title='Click to copy join code' style='display:none'></div>
+    <div id='container'>
+        <canvas id='canvas'></canvas>
+        <div id='sidebar'>
+            <div id='CapturedW' class='captureBox'></div>
+            <div id='CapturedB' class='captureBox'></div>
+            <div id='InfoBox'></div>
         </div>
     </div>
 
     <!-- === Chat Section === -->
-    <div id="chat-container">
-        <div id="chat-sidebar">
+    <div id='chat-container'>
+        <div id='chat-sidebar'>
             <h2>Users</h2>
         </div>
 
-        <div id="chat-main">
-            <div id="messages"></div>
+        <div id='chat-main'>
+            <div id='messages'></div>
 
-            <div id="inputBar">
-                <input type="text" id="msg" placeholder="Type your message here..." />
-                <button id="send">Send</button>
+            <div id='inputBar'>
+                <input type='text' id='msg' placeholder='Type your message here...' />
+                <button id='send'>Send</button>
             </div>
         </div>
     </div>
 
-    <a href="/" id="back-link"
-        style="position:fixed;bottom:12px;left:12px;z-index:1000;padding:8px 12px;background:rgba(0,0,0,0.7);color:#fff;border-radius:4px;text-decoration:none;font-family:inherit;">Back
+    <a href='/' id='back-link'
+        style='position:fixed;bottom:12px;left:12px;z-index:1000;padding:8px 12px;background:rgba(0,0,0,0.7);color:#fff;border-radius:4px;text-decoration:none;font-family:inherit;'>Back
         to game selection</a>
 
     <!-- Settings button -->
-    <button id="settings-btn" type="button" title="Settings" aria-label="Open settings"></button>
+    <button id='settings-btn' type='button' title='Settings' aria-label='Open settings'></button>
 
     <!-- Settings modal (hidden by default) -->
-    <div id="settings-modal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title"
-        aria-hidden="true" style="display:none">
-        <div id="settings-panel">
-            <h3 id="settings-title">Settings</h3>
+    <div id='settings-modal' class='hidden' role='dialog' aria-modal='true' aria-labelledby='settings-title'
+        aria-hidden='true' style='display:none'>
+        <div id='settings-panel'>
+            <h3 id='settings-title'>Settings</h3>
 
-            <div class="setting-row">
-                <label for="boardSquareSize">Board square size</label>
-                <input id="boardSquareSize" type="number" min="30" max="200" />
+            <div class='setting-row'>
+                <label for='boardSquareSize'>Board square size</label>
+                <input id='boardSquareSize' type='number' min='30' max='200' />
             </div>
 
-            <div class="setting-row">
-                <label for="lightSquareColor">Light square color</label>
-                <input id="lightSquareColor" type="color" />
+            <div class='setting-row'>
+                <label for='lightSquareColor'>Light square color</label>
+                <input id='lightSquareColor' type='color' />
             </div>
 
-            <div class="setting-row">
-                <label for="moveColor">Move Highlight Color:</label>
-                <input type="color" id="moveColor">
-                <label for="moveAlpha">Transparency (0–1):</label>
-                <input type="number" id="moveAlpha" min="0" max="1" step="0.01" value="0.31">
-
-            </div>
-
-            <div class="setting-row">
-                <label for="arrowColor">Move Arrow Color:</label>
-                <input type="color" id="arrowColor">
-                <label for="arrowAlpha">Transparency (0–1):</label>
-                <input type="number" id="arrowAlpha" min="0" max="1" step="0.01" value="0.6">
+            <div class='setting-row'>
+                <label for='moveColor'>Move Highlight Color:</label>
+                <input type='color' id='moveColor'>
+                <label for='moveAlpha'>Transparency (0–1):</label>
+                <input type='number' id='moveAlpha' min='0' max='1' step='0.01' value='0.31'>
 
             </div>
 
-            <div class="setting-row">
-                <label for="darkSquareColor">Dark square color</label>
-                <input id="darkSquareColor" type="color" />
+            <div class='setting-row'>
+                <label for='arrowColor'>Move Arrow Color:</label>
+                <input type='color' id='arrowColor'>
+                <label for='arrowAlpha'>Transparency (0–1):</label>
+                <input type='number' id='arrowAlpha' min='0' max='1' step='0.01' value='0.6'>
+
             </div>
 
-            <div class="setting-row">
-                <label for="defaultPieceMargin">Piece margin</label>
-                <input id="defaultPieceMargin" type="number" min="0" max="100" />
+            <div class='setting-row'>
+                <label for='darkSquareColor'>Dark square color</label>
+                <input id='darkSquareColor' type='color' />
             </div>
 
-            <div class="setting-row">
-                <label for="hoverSizeIncrease">Hover size increase</label>
-                <input id="hoverSizeIncrease" type="number" min="0" max="50" />
+            <div class='setting-row'>
+                <label for='defaultPieceMargin'>Piece margin</label>
+                <input id='defaultPieceMargin' type='number' min='0' max='100' />
             </div>
 
-            <div class="setting-row">
-                <label for="pieceStyle">Piece style</label>
-                <select id="pieceStyle">
-                    <option value="basic">Basic</option>
-                    <option value="goofy">Goofy</option>
-                    <option value="pixel">Pixel</option>
+            <div class='setting-row'>
+                <label for='hoverSizeIncrease'>Hover size increase</label>
+                <input id='hoverSizeIncrease' type='number' min='0' max='50' />
+            </div>
+
+            <div class='setting-row'>
+                <label for='pieceStyle'>Piece style</label>
+                <select id='pieceStyle'>
+                    <option value='basic'>Basic</option>
+                    <option value='goofy'>Goofy</option>
+                    <option value='pixel'>Pixel</option>
                 </select>
             </div>
 
-            <fieldset class="setting-group">
+            <fieldset class='setting-group'>
                 <legend>Debug</legend>
-                <label><input id="logMouseEvents" type="checkbox" /> Log mouse events</label>
-                <label><input id="showHoverSquare" type="checkbox" /> Show hover square</label>
-                <label><input id="showClickSquare" type="checkbox" /> Show click square</label>
-                <label><input id="logMoveEvents" type="checkbox" /> Log move events</label>
+                <label><input id='logMouseEvents' type='checkbox' /> Log mouse events</label>
+                <label><input id='showHoverSquare' type='checkbox' /> Show hover square</label>
+                <label><input id='showClickSquare' type='checkbox' /> Show click square</label>
+                <label><input id='logMoveEvents' type='checkbox' /> Log move events</label>
             </fieldset>
 
-            <div class="settings-actions">
-                <button id="save-settings" type="button">Save & reload</button>
-                <button id="reset-settings" type="button">Reset</button>
-                <button id="close-settings" type="button" tabindex="0">Close</button>
+            <div class='settings-actions'>
+                <button id='save-settings' type='button'>Save & reload</button>
+                <button id='reset-settings' type='button'>Reset</button>
+                <button id='close-settings' type='button' tabindex='0'>Close</button>
             </div>
         </div>
     </div>
 
     <!-- Socket.IO client -->
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="js/socket.js"></script>
+    <script src='/socket.io/socket.io.js'></script>
+    <script src='js/socket.js'></script>
 
     <!-- Your game scripts -->
-    <script src="js/chat.js"></script>
-    <script src="js/settings.js"></script>
-    <script src="js/docEvents.js"></script>
-    <script src="js/clientBoard.js"></script>
-    <script src="js/main.js"></script>
+    <script src='js/chat.js'></script>
+    <script src='js/settings.js'></script>
+    <script src='js/docEvents.js'></script>
+    <script src='js/clientBoard.js'></script>
+    <script src='js/main.js'></script>
 
     <script>
         const joinCode = new URLSearchParams(window.location.search).get('code');
@@ -135,11 +135,11 @@
         // Join-code badge element (will be populated from server `youAre` or the URL)
         const joinBadge = document.getElementById('join-code-badge');
 
-        const InfoBox = document.getElementById("InfoBox");
-        socket.on("updateBoard", (data) => {
+        const InfoBox = document.getElementById('InfoBox');
+        socket.on('updateBoard', (data) => {
             InfoBox.innerHTML = data.board.turn;
-            CapturedW.innerHTML = "";
-            CapturedB.innerHTML = "";
+            CapturedW.innerHTML = '';
+            CapturedB.innerHTML = '';
         });
 
         // Listen for server-sent identity info which includes game joinCode when in a game

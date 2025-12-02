@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang='en'>
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Chess</title>
-    <link rel="stylesheet" href="/css/selectGame.css">
-    <link rel="stylesheet" href="/css/newGame.css">
+    <link rel='stylesheet' href='/css/selectGame.css'>
+    <link rel='stylesheet' href='/css/newGame.css'>
     <style>
         /* Simple nav message (appears when transfers fail) */
         .nav-message {
@@ -43,93 +43,93 @@
 </head>
 
 <body>
-    <div id="newGameOverlay" class="overlay">
-        <div class="overlay-content">
-            <button class="closebtn" onclick="closeNav()">&times;</button>
+    <div id='newGameOverlay' class='overlay'>
+        <div class='overlay-content'>
+            <button class='closebtn' onclick='closeNav()'>&times;</button>
 
-            <div class="checkbox-group">
-                <div class="checkbox-item">
-                    <input type="checkbox" id="chatOn" name="chat" checked>
-                    <label for="chatOn">Chat enabled</label>
+            <div class='checkbox-group'>
+                <div class='checkbox-item'>
+                    <input type='checkbox' id='chatOn' name='chat' checked>
+                    <label for='chatOn'>Chat enabled</label>
                 </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="startWhite" name="white" checked>
-                    <label for="startWhite">Start as white</label>
+                <div class='checkbox-item'>
+                    <input type='checkbox' id='startWhite' name='white' checked>
+                    <label for='startWhite'>Start as white</label>
                 </div>
             </div>
 
-            <input type="text" class="input" id="gameName" placeholder="Enter Room Name...">
-            <!-- <input type="text" class="input" id="payPin" placeholder="Enter your Formbar payment PIN..."> -->
-            <div id="overlayMessage" class="overlay-message" aria-live="polite" role="status"></div>
+            <input type='text' class='input' id='gameName' placeholder='Enter Room Name...'>
+            <!-- <input type='text' class='input' id='payPin' placeholder='Enter your Formbar payment PIN...'> -->
+            <div id='overlayMessage' class='overlay-message' aria-live='polite' role='status'></div>
 
-            <button id="newPublicGame" class="btn" onclick="newGame('public')">New Public Game</button>
-            <button id="newPrivateGame" class="btn secondary" onclick="newGame('private')">New Private Game</button>
+            <button id='newPublicGame' class='btn' onclick='newGame('public')'>New Public Game</button>
+            <button id='newPrivateGame' class='btn secondary' onclick='newGame('private')'>New Private Game</button>
         </div>
     </div>
 
-    <!-- <span onclick="openNav()">open</span> -->
+    <!-- <span onclick='openNav()'>open</span> -->
 
-    <div class="page-wrap">
-        <header class="header">
-            <div class="brand">
-                <img src="/img/basic/white_rook.png" alt="logo">
+    <div class='page-wrap'>
+        <header class='header'>
+            <div class='brand'>
+                <img src='/img/basic/white_rook.png' alt='logo'>
                 <h1>Chessbar — Select a Game</h1>
             </div>
-            <div class="controls">
-                <!-- <a class="small" href="/game">Open last game</a> -->
-                <button id="newPublicGame" class="btn" onclick="openNav()">New Game</button>
+            <div class='controls'>
+                <!-- <a class='small' href='/game'>Open last game</a> -->
+                <button id='newPublicGame' class='btn' onclick='openNav()'>New Game</button>
                 <!-- show signed-in user or link to sign in -->
-                <div id="navMessage" class="nav-message" aria-live="polite" role="status" style="display:none"></div>
-                <div style="display:inline-block;margin-left:12px;vertical-align:middle">
+                <div id='navMessage' class='nav-message' aria-live='polite' role='status' style='display:none'></div>
+                <div style='display:inline-block;margin-left:12px;vertical-align:middle'>
                     <% if (user && user.displayName) { %>
-                        <span class="small">Signed in as <strong>
+                        <span class='small'>Signed in as <strong>
                                 <%= user.displayName %>
                             </strong></span>
-                        <a class="small" href="/profile" style="margin-left:10px">Profile</a>
+                        <a class='small' href='/profile' style='margin-left:10px'>Profile</a>
                         <% } else { %>
-                            <a class="small" href="/login">Sign in</a>
+                            <a class='small' href='/login'>Sign in</a>
                             <% } %>
                 </div>
             </div>
         </header>
 
-        <main class="main">
-            <section class="panel" id="games">
+        <main class='main'>
+            <section class='panel' id='games'>
                 <h2>Available Games</h2>
-                <ul id="gameList"></ul>
+                <ul id='gameList'></ul>
             </section>
 
-            <aside class="sidebar">
-                <!-- <div class="panel" style="margin-bottom: 10px">
-                    <label for="joinCodeInput" class="small">Formbar payment PIN</label>
-                    <input class="input" type="text" id="pinInput" placeholder="Enter PIN">
-                    <div style="display:flex;gap:8px">
-                        <button id="pinInput" class="btn" onclick="savePin()">Enter</button>
+            <aside class='sidebar'>
+                <!-- <div class='panel' style='margin-bottom: 10px'>
+                    <label for='joinCodeInput' class='small'>Formbar payment PIN</label>
+                    <input class='input' type='text' id='pinInput' placeholder='Enter PIN'>
+                    <div style='display:flex;gap:8px'>
+                        <button id='pinInput' class='btn' onclick='savePin()'>Enter</button>
                     </div>
 
-                    <div class="footer-note">Saving your pin to cookies WILL take your digipogs without prompting you.
+                    <div class='footer-note'>Saving your pin to cookies WILL take your digipogs without prompting you.
                         We are not stealing your digipogs.
                     </div>
                 </div> -->
 
-                <div class="panel">
-                    <label for="joinCodeInput" class="small">Join by code</label>
-                    <input class="input" type="text" id="joinCodeInput" placeholder="Enter Join Code">
-                    <div style="display:flex;gap:8px">
-                        <button id="joinGameButton" class="btn" onclick="joinGame()">Join</button>
-                        <button class="btn secondary" onclick="location.reload()">Refresh</button>
+                <div class='panel'>
+                    <label for='joinCodeInput' class='small'>Join by code</label>
+                    <input class='input' type='text' id='joinCodeInput' placeholder='Enter Join Code'>
+                    <div style='display:flex;gap:8px'>
+                        <button id='joinGameButton' class='btn' onclick='joinGame()'>Join</button>
+                        <button class='btn secondary' onclick='location.reload()'>Refresh</button>
                     </div>
-                    <div class="footer-note">Public games are visible to everyone. Private games require the join code.
+                    <div class='footer-note'>Public games are visible to everyone. Private games require the join code.
                     </div>
                 </div>
             </aside>
         </main>
     </div>
 </body>
-<script src="/socket.io/socket.io.js"></script>
-<script src="js/socket.js"></script>
+<script src='/socket.io/socket.io.js'></script>
+<script src='js/socket.js'></script>
 
-<script src="js/gameList.js"></script>
+<script src='js/gameList.js'></script>
 
 <script>
     // const payPin = document.getElementById('payPin')
@@ -186,7 +186,7 @@
     function savePin() {
         let d = new Date()
         d.setTime(d.getTime() + (365 * 24 * 60 * 60 * 1000))
-        let expires = "expires=" + d.toUTCString()
+        let expires = 'expires=' + d.toUTCString()
 
         const PIN = pinInput.value
         if (!!Number(PIN)) {
@@ -197,11 +197,11 @@
 
 <script>
     function openNav() {
-        document.getElementById("newGameOverlay").classList.add("active");
+        document.getElementById('newGameOverlay').classList.add('active');
     }
 
     function closeNav() {
-        document.getElementById("newGameOverlay").classList.remove("active");
+        document.getElementById('newGameOverlay').classList.remove('active');
     }
 
 </script>

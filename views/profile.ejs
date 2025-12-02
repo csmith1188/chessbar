@@ -1,76 +1,76 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang='en'>
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Profile - Chessbar</title>
-    <link rel="stylesheet" href="/css/profile.css">
+    <link rel='stylesheet' href='/css/profile.css'>
 </head>
 
 <body>
-    <a href="/" class="small back-link"
-        style="margin:8px 0 0 18px;display:inline-block;text-decoration:none;color:var(--muted); height:min-content">←
+    <a href='/' class='small back-link'
+        style='margin:8px 0 0 18px;display:inline-block;text-decoration:none;color:var(--muted); height:min-content'>←
         Back to games</a>
-    <div id="profile">
+    <div id='profile'>
 
         <!-- Right column: main profile info -->
-        <div class="profile-info">
-            <div class="panel">
-                <h1 id="name">unnamed</h1>
-                <!-- <p class="small">Casual player, coffee-fueled tactics solver, and challenger of time controls.</p> -->
+        <div class='profile-info'>
+            <div class='panel'>
+                <h1 id='name'>unnamed</h1>
+                <!-- <p class='small'>Casual player, coffee-fueled tactics solver, and challenger of time controls.</p> -->
 
-                <div style="display:flex;gap:10px;margin-top:12px;">
-                    <button class="btn">Edit Profile</button>
-                    <button class="btn secondary">Message</button>
+                <div style='display:flex;gap:10px;margin-top:12px;'>
+                    <button class='btn'>Edit Profile</button>
+                    <button class='btn secondary'>Message</button>
                 </div>
             </div>
 
-            <div style="margin-top:12px; display:grid; grid-template-columns: repeat(3,1fr); gap:12px;">
-                <div class="panel">
-                    <div class="small">Win %</div>
-                    <div style="font-weight:700;font-size:18px;margin-top:6px;" id="winPercent">0</div>
+            <div style='margin-top:12px; display:grid; grid-template-columns: repeat(3,1fr); gap:12px;'>
+                <div class='panel'>
+                    <div class='small'>Win %</div>
+                    <div style='font-weight:700;font-size:18px;margin-top:6px;' id='winPercent'>0</div>
                 </div>
-                <div class="panel">
-                    <div class="small">Tokens</div>
-                    <div style="font-weight:700;font-size:18px;margin-top:6px;" id="tokens">0</div>
+                <div class='panel'>
+                    <div class='small'>Tokens</div>
+                    <div style='font-weight:700;font-size:18px;margin-top:6px;' id='tokens'>0</div>
                 </div>
-                <div class="panel">
-                    <div class="small">Games started</div>
-                    <div style="font-weight:700;font-size:18px;margin-top:6px;" id="started">0</div>
+                <div class='panel'>
+                    <div class='small'>Games started</div>
+                    <div style='font-weight:700;font-size:18px;margin-top:6px;' id='started'>0</div>
                 </div>
-                <div class="panel">
-                    <div class="small">Games finished</div>
-                    <div style="font-weight:700;font-size:18px;margin-top:6px;" id="finished">0</div>
+                <div class='panel'>
+                    <div class='small'>Games finished</div>
+                    <div style='font-weight:700;font-size:18px;margin-top:6px;' id='finished'>0</div>
                 </div>
-                <div class="panel">
-                    <div class="small">W/D/L</div>
-                    <div style="font-weight:700;font-size:18px;margin-top:6px;" id="wdl">0/0/0</div>
+                <div class='panel'>
+                    <div class='small'>W/D/L</div>
+                    <div style='font-weight:700;font-size:18px;margin-top:6px;' id='wdl'>0/0/0</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="buyTokens" class="panel">
+    <div id='buyTokens' class='panel'>
         <h3>Purchase tokens</h3>
-        <input type="password" inputmode="numeric" pattern="[0-9]*" placeholder="Your PIN..." id="pinInput"
-            class="input">
-        <input type="number" placeholder="Amount?" id="amount" class="input" min="1" value="1">
+        <input type='password' inputmode='numeric' pattern='[0-9]*' placeholder='Your PIN...' id='pinInput'
+            class='input'>
+        <input type='number' placeholder='Amount?' id='amount' class='input' min='1' value='1'>
 
-        <div class="checkbox-row">
-            <input type="checkbox" checked id="saveToCookies" name="box">
-            <label for="saveToCookies">Save PIN for quick pay?</label>
+        <div class='checkbox-row'>
+            <input type='checkbox' checked id='saveToCookies' name='box'>
+            <label for='saveToCookies'>Save PIN for quick pay?</label>
         </div>
 
-        <div class="actions">
-            <button id="submit" class="btn">Buy</button>
+        <div class='actions'>
+            <button id='submit' class='btn'>Buy</button>
         </div>
     </div>
 
 </body>
 
-<script src="/socket.io/socket.io.js"></script>
-<script src="js/socket.js"></script>
+<script src='/socket.io/socket.io.js'></script>
+<script src='js/socket.js'></script>
 
 <script>
     const pinBox = document.getElementById('pinInput')

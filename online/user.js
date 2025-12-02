@@ -82,11 +82,11 @@ class User {
                             [this.id, 0, 0, 0, 0, 0, 0],
                             (err) => {
                                 if (err) return console.error('Error updating user in database:', err);
-                                console.log("Inserted new user:", this.id);
+                                console.log('Inserted new user:', this.id);
                             }
                         );
                     } else {
-                        // console.log("User already exists:", user);
+                        // console.log('User already exists:', user);
                     }
                 }
             )

@@ -32,14 +32,14 @@ const fbSocket = fbIo(FORMBAR_URL, {
 })
 
 // Wait for successful connection
-fbSocket.on("connect", () => {
-    console.log("Connected to Formbar server")
+fbSocket.on('connect', () => {
+    console.log('Connected to Formbar server')
     // Send the transfer
 })
 
-// fbSocket.on("transferResponse", (response) => {
-// console.log("Transfer Response:", response)
-// response will be: { success: true/false, message: "..." }
+// fbSocket.on('transferResponse', (response) => {
+// console.log('Transfer Response:', response)
+// response will be: { success: true/false, message: '...' }
 // })
 
 //! End digipogs
@@ -69,7 +69,7 @@ function playPayment(player) {
         from: player.id,
         to: POOL_ID,
         amount: PLAY_PRICE,
-        reason: "Chessbar payment",
+        reason: 'Chessbar payment',
         pin: player.pin,
         pool: true
     }
@@ -92,7 +92,7 @@ function payOut(player) {
         from: EMPLOYEE_ID_1,
         to: player.id,
         amount: payoutAmount,
-        reason: "Chessbar payout",
+        reason: 'Chessbar payout',
         pin: EMPLOYEE_PIN_1
     }
 
@@ -104,7 +104,7 @@ function payOut(player) {
         from: EMPLOYEE_ID_2,
         to: player.id,
         amount: payoutAmount,
-        reason: "Chessbar payout",
+        reason: 'Chessbar payout',
         pin: EMPLOYEE_PIN_2
     }
 
@@ -248,7 +248,7 @@ io.on('connection', (socket) => {
                     from: user.id,
                     to: POOL_ID,
                     amount: 1, //! CHANGE TO PLAY AMOUNT
-                    reason: "Chess Payment",
+                    reason: 'Chess Payment',
                     pin: pin,
                     pool: true
                 }
@@ -331,12 +331,12 @@ io.on('connection', (socket) => {
         //             from: user.id,
         //             to: 23,
         //             amount: 1,
-        //             reason: "Chess Payment",
+        //             reason: 'Chess Payment',
         //             pin: pin,
         //             pool: true
         //         }
 
-        //         fbSocket.emit("transferDigipogs", data)
+        //         fbSocket.emit('transferDigipogs', data)
 
         //         fbSocket.once('transferResponse', res => {
         //             socket.emit('transferResponse', res)
