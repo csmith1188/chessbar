@@ -137,28 +137,52 @@ function populateUI() {
 
 function readUIToSettings() {
     const el = (id) => document.getElementById(id)
-    Settings.boardSquareSize = parseInt(el('boardSquareSize').value || Settings.boardSquareSize, 10)
-    Settings.lightSquareColor = hexToRgba(el('lightSquareColor').value, 1)
-    Settings.darkSquareColor = hexToRgba(el('darkSquareColor').value, 1)
+
+    // required inputs (boardSquareSize should always exist)
+    const boardEl = el('boardSquareSize')
+    if (boardEl) Settings.boardSquareSize = parseInt(boardEl.value || Settings.boardSquareSize, 10)
+
+    // colors (guard each element in case some optional inputs were removed from the UI)
+    const lightEl = el('lightSquareColor')
+    if (lightEl && lightEl.value) Settings.lightSquareColor = hexToRgba(lightEl.value, 1)
+
+    const darkEl = el('darkSquareColor')
+    if (darkEl && darkEl.value) Settings.darkSquareColor = hexToRgba(darkEl.value, 1)
 
     // read RGBA (with adjustable alpha)
-    const moveAlpha = el('moveAlpha') ? parseFloat(el('moveAlpha').value || 0.31) : 0.31
-    Settings.moveColor = hexToRgba(el('moveColor').value, moveAlpha)
+    const moveEl = el('moveColor')
+    const moveAlphaEl = el('moveAlpha')
+    const moveAlpha = moveAlphaEl ? parseFloat(moveAlphaEl.value || 0.31) : 0.31
+    if (moveEl && moveEl.value) Settings.moveColor = hexToRgba(moveEl.value, isNaN(moveAlpha) ? 0.31 : moveAlpha)
 
-    const checkAlpha = el('checkAlpha') ? parseFloat(el('checkAlpha').value || 0.31) : 0.31
-    Settings.checkColor = hexToRgba(el('checkColor').value, checkAlpha)
+    const checkEl = el('checkColor')
+    const checkAlphaEl = el('checkAlpha')
+    const checkAlpha = checkAlphaEl ? parseFloat(checkAlphaEl.value || 0.31) : 0.31
+    if (checkEl && checkEl.value) Settings.checkColor = hexToRgba(checkEl.value, isNaN(checkAlpha) ? 0.31 : checkAlpha)
 
-    const arrowAlpha = el('arrowAlpha') ? parseFloat(el('arrowAlpha').value || 0.6) : 0.6
-    Settings.arrowColor = hexToRgba(el('arrowColor').value, arrowAlpha)
+    const arrowEl = el('arrowColor')
+    const arrowAlphaEl = el('arrowAlpha')
+    const arrowAlpha = arrowAlphaEl ? parseFloat(arrowAlphaEl.value || 0.6) : 0.6
+    if (arrowEl && arrowEl.value) Settings.arrowColor = hexToRgba(arrowEl.value, isNaN(arrowAlpha) ? 0.6 : arrowAlpha)
 
-    Settings.defaultPieceMargin = parseInt(el('defaultPieceMargin').value || 0, 10)
-    Settings.pieceStyle = el('pieceStyle').value
-    Settings.hoverSizeIncrease = parseInt(el('hoverSizeIncrease').value || 0, 10)
+    const marginEl = el('defaultPieceMargin')
+    if (marginEl) Settings.defaultPieceMargin = parseInt(marginEl.value || 0, 10)
 
-    Debug.logMouseEvents = el('logMouseEvents').checked
-    Debug.showHoverSquare = el('showHoverSquare').checked
-    Debug.showClickSquare = el('showClickSquare').checked
-    Debug.logMoveEvents = el('logMoveEvents').checked
+    const styleEl = el('pieceStyle')
+    if (styleEl) Settings.pieceStyle = styleEl.value
+
+    const hoverEl = el('hoverSizeIncrease')
+    if (hoverEl) Settings.hoverSizeIncrease = parseInt(hoverEl.value || 0, 10)
+
+    // debug flags
+    const logMouseEl = el('logMouseEvents')
+    if (logMouseEl) Debug.logMouseEvents = !!logMouseEl.checked
+    const hoverSquareEl = el('showHoverSquare')
+    if (hoverSquareEl) Debug.showHoverSquare = !!hoverSquareEl.checked
+    const clickSquareEl = el('showClickSquare')
+    if (clickSquareEl) Debug.showClickSquare = !!clickSquareEl.checked
+    const logMoveEl = el('logMoveEvents')
+    if (logMoveEl) Debug.logMoveEvents = !!logMoveEl.checked
 }
 
 function resetToDefaults() {
@@ -176,8 +200,8 @@ function initSettingsUI() {
 
     const close = document.getElementById('close-settings')
     if (close) {
+        // single click handler is enough; avoid duplicate listeners
         close.addEventListener('click', () => closeSettingsUI())
-        close.addEventListener('click', () => closeSettingsUI(), { capture: true })
     }
 
     const save = document.getElementById('save-settings')
