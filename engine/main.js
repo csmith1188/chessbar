@@ -188,7 +188,7 @@ function attachSocket(io, games) {
                         // Reject moves that leave your own king in check
                         if (board.wouldBeInCheckAfterMove(x1, y1, x2, y2)) {
                             // console.log(`Still ${board.turn}'s turn, move failed (Would leave king in check).`)
-                            socket.emit('updateBoard', { board: board, move: {} })
+                            game.update()
                             return
                         }
 
@@ -208,20 +208,20 @@ function attachSocket(io, games) {
                         game.update({x1: x1, y1: y1, x2: x2, y2: y2, name: foo.name, side: foo.side}, inCheck, isMate, opponent, foo.side)
                     } else {
                         // console.log(`Still ${board.turn}'s turn, move failed (Invalid).`)
-                        socket.emit('updateBoard', { board: board, move: {} })
+                        game.update()
                     }
                 } else {
                     // console.log(`Still ${board.turn}'s turn, move failed (Off screen).`)
-                    socket.emit('updateBoard', { board: board, move: {} })
+                    game.update()
                 }
             } else if (player.side == 'spectating') {
 
                 // console.log(`Spectators can't play, move failed.`)
-                socket.emit('updateBoard', { board: board, move: {} })
+                game.update()
 
             } else {
                 // console.log(`Still ${board.turn}'s turn, move failed.`)
-                socket.emit('updateBoard', { board: board, move: {} })
+                game.update()
             }
 
         })

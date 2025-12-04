@@ -58,13 +58,13 @@
         <input type='number' placeholder='Amount?' id='amount' class='input' min='1' value='1'>
 
         <div class='checkbox-row'>
-            <input type='checkbox' checked id='saveToCookies' name='box'>
+            <input type='checkbox' id='saveToCookies' name='box'>
             <label for='saveToCookies'>Save PIN for quick pay?</label>
             <p>Saving your pin will automatically purchase a token when you try to join a game without tokens.</p>
         </div>
 
         <div class='actions'>
-            <button id='submit' class='btn'>Buy</button>
+            <button id='submit' class='btn'>Buy (25)</button>
         </div>
     </div>
 
@@ -79,12 +79,39 @@
     const checkbox = document.getElementById('saveToCookies')
     const submit = document.getElementById('submit')
 
+    function getCookie(name) {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === ' ') {
+                c = c.substring(1, c.length); // Remove leading spaces
+            }
+            if (c.indexOf(nameEQ) === 0) {
+                // Decode the cookie value
+                return decodeURIComponent(c.substring(nameEQ.length, c.length));
+            }
+        }
+        return null; // Return null if the cookie is not found
+    }
+
+    if (getCookie('pin')) checkbox.checked = true
+
     // guard: prevent buying less than 1 token
     submit.addEventListener('click', (e) => {
         const val = parseInt(amount.value) || 1
         if (val > 0) {
             socket.emit('purchaseToken', parseInt(pinBox.value) || null, val)
-            socket.emit('getUser', me.id)
+            socket.once('tokenTransactionComplete', () => {
+                if (checkbox.checked) {
+                    const exp = new Date()
+                    exp.setFullYear(exp.getFullYear() + 1)
+                    document.cookie = `pin=${encodeURIComponent(pinBox.value.trim())}; expires=${exp.toUTCString()}; path=/`
+                } else {
+                    document.cookie = `pin=0`
+                }
+                socket.emit('getUser', me.id)
+            })
         }
     })
 </script>
@@ -110,7 +137,7 @@
 
     function updateInfo(user) {
         winPercent.innerText = user.wins / user.finished * 100 || 0
-        if (user.wins / user.finished * 100  == Infinity) {
+        if (user.wins / user.finished * 100 == Infinity) {
             winPercent.innerText = '100'
         }
         tokens.innerText = user.tokens

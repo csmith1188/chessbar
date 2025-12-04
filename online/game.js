@@ -64,17 +64,17 @@ class Game {
                         this.prevWhite = foo
                         newUser.startedGame()
                     } else {
-                        newUser.socket.emit('redirect', `/pay?code=${this.joinCode}`) //! CHANGE THIS LATER
+                        newUser.socket.emit('redirect', `/pay?code=${this.joinCode}`)
                     }
                 } else if (newUser) {
-                    //! Detects if the person who joined is not the original player
+                    // Detects if the person who joined is not the original white player
                     if (newUser.id !== this.prevWhite.id && newUser.tokens) {
                         foo.side = 'white'
                         this.prevWhite = newUser
                         newUser.startedGame()
                     } else if (!newUser.tokens) {
-                        console.log(this.prevWhite, this.prevBlack)
-                        newUser.socket.emit('redirect', `/pay?code=${this.joinCode}`) //! CHANGE THIS LATER
+                        // console.log(this.prevWhite, this.prevBlack)
+                        newUser.socket.emit('redirect', `/pay?code=${this.joinCode}`)
                     }
                 } else {
                     foo.side = 'white'
@@ -87,12 +87,22 @@ class Game {
             if (foo) {
                 foo.side = 'black'
                 if (!this.prevBlack) {
-                    foo.side = 'black'
-                    this.prevBlack = foo
-                } else if (newUser) {
-                    if (newUser.id !== this.prevBlack.id) {
+                    if (newUser.tokens) {
                         foo.side = 'black'
+                        this.prevBlack = foo
                         newUser.startedGame()
+                    } else {
+                        newUser.socket.emit('redirect', `/pay?code=${this.joinCode}`)
+                    }
+                } else if (newUser) {
+                    // Detects if the person who joined is not the original black player
+                    if (newUser.id !== this.prevBlack.id && newUser.tokens) {
+                        foo.side = 'black'
+                        this.prevBlack = newUser
+                        newUser.startedGame()
+                    } else if (!newUser.tokens) {
+                        // console.log(this.prevBlack, this.prevBlack)
+                        newUser.socket.emit('redirect', `/pay?code=${this.joinCode}`)
                     }
                 } else {
                     foo.side = 'black'
@@ -139,14 +149,22 @@ class Game {
     }
 
     update(move = {}, check = false, mate = false, opponent = null, winner = null) {
+        let promotion = false
         for (let user of this.activeUsers()) {
+
             user.youAre()
+
             if (move && move.side == user.side && (move.y2 == 7 || move.y2 === 0) && move.name == 'Pawn') {
                 user.socket.emit('promotion', move.x2, move.y2)
+                promotion = true
             }
 
-            user.socket.emit('updateBoard', { board: this.board, move: move })
-            if (check) user.socket.emit('check', { side: opponent })
+            user.socket.emit('updateBoard', serializeGame(this))
+
+            if (check) {
+                user.socket.emit('check', { side: opponent })
+            }
+
             if (mate) {
                 user.socket.emit('mate', { winner: winner })
                 if (!this.winner) {
@@ -154,12 +172,23 @@ class Game {
                     foo.win()
                     this.winner = foo
                 }
+
                 if (!this.loser) {
                     let foo2 = this.users.find(u => u.side == opponent)
                     foo2.lose()
                     this.loser = foo2
                 }
             }
+            if (promotion) {
+                user.socket.emit('sound', 'tada')
+            } else if (mate) {
+                user.socket.emit('sound', 'explosion')
+            } else if (check) {
+                user.socket.emit('sound', 'check')
+            } else if (move) {
+                user.socket.emit('sound', 'move')
+            }
+
         }
     }
 

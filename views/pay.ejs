@@ -8,6 +8,44 @@
     <link rel='stylesheet' href='/css/pay.css'>
 </head>
 
+<script src='/socket.io/socket.io.js'></script>
+<script src='js/socket.js'></script>
+
+<script>
+    function getCookie(name) {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === ' ') {
+                c = c.substring(1, c.length); // Remove leading spaces
+            }
+            if (c.indexOf(nameEQ) === 0) {
+                // Decode the cookie value
+                return decodeURIComponent(c.substring(nameEQ.length, c.length));
+            }
+        }
+        return null; // Return null if the cookie is not found
+    }
+
+    // If the user has quick pay on, skip everything else and automatically buy stuff
+    const joinCode = new URLSearchParams(window.location.search).get('code')
+
+    const cookiePIN = getCookie('pin')
+
+    if (cookiePIN) {
+        socket.emit('purchaseToken', parseInt(cookiePIN) || null, 1)
+        socket.once('tokenTransactionComplete', () => {
+            if (joinCode) {
+                window.location.href = `/game?code=${joinCode}`
+            } else {
+                window.location.href = '/'
+            }
+        })
+    }
+
+</script>
+
 <body>
     <div id='buyTokens' class='panel'>
         <h3>Purchase tokens</h3>
@@ -17,18 +55,15 @@
         <input type='number' placeholder='Amount?' id='amount' class='input' min='1' value='1'>
 
         <div class='checkbox-row'>
-            <input type='checkbox' checked id='saveToCookies' name='box'>
+            <input type='checkbox' id='saveToCookies' name='box'>
             <label for='saveToCookies'>Save PIN for quick pay?</label>
         </div>
 
         <div class='actions'>
-            <button id='submit' class='btn'>Buy</button>
+            <button id='submit' class='btn'>Buy (25)</button>
         </div>
     </div>
 </body>
-
-<script src='/socket.io/socket.io.js'></script>
-<script src='js/socket.js'></script>
 
 <script>
     const pinBox = document.getElementById('pinInput')
@@ -36,7 +71,7 @@
     const checkbox = document.getElementById('saveToCookies')
     const submit = document.getElementById('submit')
 
-    const joinCode = new URLSearchParams(window.location.search).get('code')
+    if (getCookie('pin')) checkbox.checked = true
 
     // guard: prevent buying less than 1 token
     submit.addEventListener('click', (e) => {
@@ -44,7 +79,13 @@
         if (val > 0) {
             socket.emit('purchaseToken', parseInt(pinBox.value) || null, val)
             socket.once('tokenTransactionComplete', () => {
-                console.log('yes')
+                if (checkbox.checked) {
+                    const exp = new Date()
+                    exp.setFullYear(exp.getFullYear() + 1)
+                    document.cookie = `pin=${encodeURIComponent(pinBox.value.trim())}; expires=${exp.toUTCString()}; path=/`
+                } else {
+                    document.cookie = `pin=0`
+                }
                 if (joinCode) {
                     window.location.href = `/game?code=${joinCode}`
                 } else {

@@ -21,6 +21,7 @@ let Mouse = {
 let keys = {}
 
 let board
+let gameData
 
 let freshBoard = false
 
@@ -39,6 +40,7 @@ socket.on('promotion', (x, y) => {
 })
 
 socket.on('updateBoard', (data) => {
+    gameData = data
     selected = null
     //kayden added this
     

@@ -97,6 +97,7 @@ class User {
         // console.log(this.started)
         this.started++
         db.run(`UPDATE users SET started = ${this.started} WHERE formbar_id = ${this.id}`)
+        this.spend()
         // console.log(this.started)
     }
 
@@ -117,7 +118,7 @@ class User {
         db.run(`UPDATE users SET finished = ${this.finished} WHERE formbar_id = ${this.id}`)
     }
 
-    spend(db) {
+    spend() {
         this.getInfo(db)
         if (this.tokens > 0) {
             this.tokens--

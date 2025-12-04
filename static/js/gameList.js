@@ -81,7 +81,37 @@ function renderGameList() {
             const actionBtn = document.createElement('button')
             actionBtn.className = 'delete'
             actionBtn.textContent = 'Delete'
-            actionBtn.onclick = () => socket.emit('deleteGame', game.id)
+
+            // Confirm-on-second-click behavior:
+            // First click changes the label to "Are you sure?" and starts a timeout.
+            // Second click within the timeout emits the delete event.
+            let confirmState = false
+            let confirmTimer = null
+            const CONFIRM_TIMEOUT_MS = 5000
+
+            actionBtn.onclick = () => {
+                if (!confirmState) {
+                    confirmState = true
+                    actionBtn.textContent = 'Are you sure?'
+                    actionBtn.classList.add('confirm')
+
+                    // Revert after timeout
+                    confirmTimer = setTimeout(() => {
+                        confirmState = false
+                        actionBtn.textContent = 'Delete'
+                        actionBtn.classList.remove('confirm')
+                        confirmTimer = null
+                    }, CONFIRM_TIMEOUT_MS)
+                } else {
+                    // second click -> proceed
+                    if (confirmTimer) {
+                        clearTimeout(confirmTimer)
+                        confirmTimer = null
+                    }
+                    socket.emit('deleteGame', game.id)
+                }
+            }
+
             actions.appendChild(actionBtn)
         }
 
