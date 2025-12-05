@@ -1,4 +1,4 @@
-let price = 30
+let price = 1
 let winAmount = 0
 let tax = 0.1
 
