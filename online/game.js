@@ -54,62 +54,69 @@ class Game {
 
     assignSides(newUser = null) {
 
-        if (!this.users.some(user => user.side == 'white')) {
-            let foo = this.users.find(u => u.side == 'unassigned')
-            if (foo) {
-                foo.side = 'white'
-                if (!this.prevWhite) {
-                    if (newUser.tokens) {
-                        foo.side = 'white'
-                        this.prevWhite = foo
-                        newUser.startedGame()
-                    } else {
-                        newUser.socket.emit('redirect', `/pay?code=${this.joinCode}`)
-                    }
-                } else if (newUser) {
-                    // Detects if the person who joined is not the original white player
-                    if (newUser.id !== this.prevWhite.id && newUser.tokens) {
-                        foo.side = 'white'
+        if (newUser) {
+            // console.log(newUser)
+            if (this.prevWhite && newUser.id == this.prevWhite.id) {
+                newUser.side = 'white'
+                return this.assignEarlyQuit()
+
+            } else if (this.prevBlack && newUser.id == this.prevBlack.id) {
+                newUser.side = 'black'
+                return this.assignEarlyQuit()
+
+            } else if (newUser.tokens) {
+                if (!this.users.some(u => u.side == 'white')) {
+                    if (!this.prevWhite) {
+                        newUser.side = 'white'
                         this.prevWhite = newUser
-                        newUser.startedGame()
-                    } else if (!newUser.tokens) {
-                        // console.log(this.prevWhite, this.prevBlack)
-                        newUser.socket.emit('redirect', `/pay?code=${this.joinCode}`)
+                        newUser.spend()
+                        return this.assignEarlyQuit()
                     }
-                } else {
-                    foo.side = 'white'
                 }
-            }
-        }
 
-        if (!this.users.some(user => user.side == 'black')) {
-            let foo = this.users.find(u => u.side == 'unassigned')
-            if (foo) {
-                foo.side = 'black'
-                if (!this.prevBlack) {
-                    if (newUser.tokens) {
-                        foo.side = 'black'
-                        this.prevBlack = foo
-                        newUser.startedGame()
-                    } else {
-                        newUser.socket.emit('redirect', `/pay?code=${this.joinCode}`)
-                    }
-                } else if (newUser) {
-                    // Detects if the person who joined is not the original black player
-                    if (newUser.id !== this.prevBlack.id && newUser.tokens) {
-                        foo.side = 'black'
+                if (!this.users.some(u => u.side == 'black')) {
+                    if (!this.prevBlack) {
+                        newUser.side = 'black'
                         this.prevBlack = newUser
-                        newUser.startedGame()
-                    } else if (!newUser.tokens) {
-                        // console.log(this.prevBlack, this.prevBlack)
-                        newUser.socket.emit('redirect', `/pay?code=${this.joinCode}`)
+                        newUser.spend()
+                        return this.assignEarlyQuit()
                     }
-                } else {
-                    foo.side = 'black'
+                }
+
+            } else {
+                newUser.socket.emit('redirect', `/pay?code=${this.joinCode}`)
+                this.users = this.users.filter(u => u.id !== newUser.id)
+                this.assignSides()
+                this.update()
+            }
+        } else {
+            for (let user of this.users) {
+                if (!this.users.some(u => u.side == 'white')) {
+                    if (!this.prevWhite) {
+                        user.side = 'white'
+                        this.prevWhite = user
+                        continue
+                    }
+                }
+
+                if (!this.users.some(u => u.side == 'black')) {
+                    if (!this.prevBlack) {
+                        user.side = 'black'
+                        this.prevBlack = user
+                        continue
+                    }
                 }
             }
         }
 
+        this.users.filter(u => u.side === 'unassigned').forEach(u => { u.side = 'spectator' })
+
+        for (let user of this.activeUsers()) {
+            user.youAre()
+        }
+    }
+
+    assignEarlyQuit() {
         this.users.filter(u => u.side === 'unassigned').forEach(u => { u.side = 'spectator' })
 
         for (let user of this.activeUsers()) {
@@ -148,7 +155,7 @@ class Game {
 
     }
 
-    update(move = {}, check = false, mate = false, opponent = null, winner = null) {
+    update(move = {}, check = false, mate = false, opponent = null, winner = null, takenPiece) {
         let promotion = false
         for (let user of this.activeUsers()) {
 
@@ -179,12 +186,16 @@ class Game {
                     this.loser = foo2
                 }
             }
-            if (promotion) {
+            if (takenPiece == 'Queen') {
+                user.socket.emit('sound', 'smash')
+            } else if (promotion) {
                 user.socket.emit('sound', 'tada')
             } else if (mate) {
                 user.socket.emit('sound', 'explosion')
             } else if (check) {
                 user.socket.emit('sound', 'check')
+            } else if (takenPiece) { 
+                user.socket.emit('sound', 'break')
             } else if (move) {
                 user.socket.emit('sound', 'move')
             }

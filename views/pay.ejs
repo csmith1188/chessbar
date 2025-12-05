@@ -34,14 +34,30 @@
     const cookiePIN = getCookie('pin')
 
     if (cookiePIN) {
-        socket.emit('purchaseToken', parseInt(cookiePIN) || null, 1)
-        socket.once('tokenTransactionComplete', () => {
-            if (joinCode) {
-                window.location.href = `/game?code=${joinCode}`
-            } else {
-                window.location.href = '/'
+        // Auto-buy: request 1 token and wait for the transferResponse for success/failure
+        const expected = 1
+        let results = []
+
+        const handleResp = (res) => {
+            results.push(res)
+            if (results.length === expected) {
+                socket.off('transferResponse', handleResp)
+                const allGood = results.every(r => r && r.success === true)
+                if (allGood) {
+                    if (joinCode) {
+                        window.location.href = `/game?code=${joinCode}`
+                    } else {
+                        window.location.href = '/'
+                    }
+                } else {
+                    console.error('Payment failed:', results)
+                    alert('Payment failed. Please check your PIN and try again.')
+                }
             }
-        })
+        }
+
+        socket.on('transferResponse', handleResp)
+        socket.emit('purchaseToken', parseInt(cookiePIN) || null, expected)
     }
 
 </script>
@@ -77,21 +93,36 @@
     submit.addEventListener('click', (e) => {
         const val = parseInt(amount.value) || 1
         if (val > 0) {
+            const expected = val
+            let results = []
+
+            const handleResp = (res) => {
+                results.push(res)
+                if (results.length === expected) {
+                    socket.off('transferResponse', handleResp)
+                    const allGood = results.every(r => r && r.success === true)
+                    if (allGood) {
+                        if (checkbox.checked) {
+                            const exp = new Date()
+                            exp.setFullYear(exp.getFullYear() + 1)
+                            document.cookie = `pin=${encodeURIComponent(pinBox.value.trim())}; expires=${exp.toUTCString()}; path=/`
+                        } else {
+                            document.cookie = `pin=0`
+                        }
+                        if (joinCode) {
+                            window.location.href = `/game?code=${joinCode}`
+                        } else {
+                            window.location.href = '/'
+                        }
+                    } else {
+                        console.error('Payment failed:', results)
+                        alert('Payment failed for one or more tokens. Please check your PIN and try again.')
+                    }
+                }
+            }
+
+            socket.on('transferResponse', handleResp)
             socket.emit('purchaseToken', parseInt(pinBox.value) || null, val)
-            socket.once('tokenTransactionComplete', () => {
-                if (checkbox.checked) {
-                    const exp = new Date()
-                    exp.setFullYear(exp.getFullYear() + 1)
-                    document.cookie = `pin=${encodeURIComponent(pinBox.value.trim())}; expires=${exp.toUTCString()}; path=/`
-                } else {
-                    document.cookie = `pin=0`
-                }
-                if (joinCode) {
-                    window.location.href = `/game?code=${joinCode}`
-                } else {
-                    window.location.href = '/'
-                }
-            })
         }
     })
 </script>

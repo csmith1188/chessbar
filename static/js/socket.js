@@ -26,8 +26,12 @@ let soundMap = {
 }
 
 socket.on('sound', (sound) => {
+    let number = Math.floor(Math.random() * 6) + 1
     console.log(`Playing sound ${sound}`)
-    if (soundMap[sound]) {
+
+    if (sound == 'break') {
+        soundMap[`break${number}`].play()
+    } else if (soundMap[sound]) {
         soundMap[sound].play()
     } else {
         console.log('Sound failed')
