@@ -246,12 +246,19 @@ io.on('connection', (socket) => {
             } else if (game.id == gameId && game.visibility === 'public') {
                 game.join(user)
             }
-            if (user.game && user.game.messages) socket.emit('messageHistory', user.game.messages)
+
+            if (user.game) {
+                if (user.game.messages) {
+                    socket.emit('messageHistory', user.game.messages)
+                }
+                return
+            }
         }
+        socket.emit('noGame')
     })
 
     socket.on('disconnect', () => {
-        //const name = users[socket.id]
+        //const name = users{socket.id]
         //console.log(`${name} disconnected`)
         if (takenUserIds.includes(user.id)) {
             takenUserIds.splice(takenUserIds.indexOf(user.id), 1)

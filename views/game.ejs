@@ -127,6 +127,10 @@
     <script src='js/main.js'></script>
 
     <script>
+        socket.on('noGame', () => {
+            window.location.href = '/'
+        })
+
         const joinCode = new URLSearchParams(window.location.search).get('code');
         if (joinCode) {
             socket.emit('join', joinCode);
@@ -164,10 +168,6 @@
                 // Ignore errors and hide badge
                 joinBadge.dataset.code = '';
                 joinBadge.style.display = 'none';
-            }
-
-            if (!me.game) {
-                window.location.href = '/'
             }
         });
 
