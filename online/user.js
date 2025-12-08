@@ -38,13 +38,7 @@ class User {
 
     youAre() {
         this.displayName = this.sessionUser && this.sessionUser.displayName ? this.sessionUser.displayName : `Guest${this.id}`
-        this.socket.emit('youAre', {
-            id: this.id,
-            side: this.side,
-            displayName: this.displayName,
-            game: this.game ? { id: this.game.id, joinCode: this.game.joinCode } : null,
-            tokens: this.tokens
-        })
+        this.socket.emit('youAre', this.serialize())
     }
 
     getInfo(db) {
@@ -135,7 +129,8 @@ class User {
             wins: this.wins,
             losses: this.losses,
             draws: this.draws,
-            active: this.active
+            active: this.active,
+            displayName: this.displayName
         }
     }
 }

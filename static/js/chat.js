@@ -4,31 +4,39 @@ const messages = document.getElementById('messages');
 const sidebar = document.getElementById('chat-sidebar');
 
 let msgHistory = []
+let prevSender
 
 function renderMessages(history) {
     messages.innerHTML = '';
     history.forEach(({ sender, message }) => {
-        const row = document.createElement('div');
-        row.classList.add('message-row');
-        row.classList.add(sender === me.displayName ? 'you' : 'other');
-
-        let senderDiv
-
-        if (!sender === me.displayName) {
-            senderDiv = document.createElement('div');
-            senderDiv.classList.add('sender');
-            senderDiv.textContent = sender;
-        }
-
-        const bubble = document.createElement('div');
-        bubble.classList.add('message');
-        bubble.textContent = message;
-
-        if (senderDiv) row.appendChild(senderDiv);
-        row.appendChild(bubble);
-        messages.appendChild(row);
+        renderMessage(sender, message)
     });
+}
+
+function renderMessage(sender, message) {
+    const row = document.createElement('div');
+    row.classList.add('message-row');
+    row.classList.add(sender === me.displayName ? 'you' : 'other');
+
+    let senderDiv
+
+    // If me is not the sender and the previous message was not sent by the same person
+    if (sender !== prevSender && sender !== me.displayName) {
+        senderDiv = document.createElement('div');
+        senderDiv.classList.add('sender');
+        senderDiv.textContent = sender;
+    }
+
+    const bubble = document.createElement('div');
+    bubble.classList.add('message');
+    bubble.textContent = message;
+
+    if (senderDiv) row.appendChild(senderDiv);
+    row.appendChild(bubble);
+    messages.appendChild(row);
     messages.scrollTop = messages.scrollHeight;
+    
+    prevSender = sender
 }
 
 socket.on('messageHistory', (h) => {
@@ -47,23 +55,8 @@ sendBtn.onclick = () => {
 }
 
 // Receive new messages
-socket.on('chatMessage', (name, message) => {
-    // console.log('message recieved:', name, message)
-    const row = document.createElement('div');
-    row.classList.add('message-row');
-    row.classList.add(name === me.id ? 'you' : 'other');
-    const senderDiv = document.createElement('div');
-    senderDiv.classList.add('sender');
-    senderDiv.textContent = name;
-
-    const bubble = document.createElement('div');
-    bubble.classList.add('message');
-    bubble.textContent = message;
-
-    row.appendChild(senderDiv);
-    row.appendChild(bubble);
-    messages.appendChild(row);
-    messages.scrollTop = messages.scrollHeight;
+socket.on('chatMessage', (sender, message) => {
+    renderMessage(sender, message)
 });
 
 // Update user list

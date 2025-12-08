@@ -127,6 +127,27 @@
     <script src='js/main.js'></script>
 
     <script>
+        const users = document.getElementById('chat-sidebar')
+
+        function populateUsers() {
+            gameData.users.forEach(u => {
+                const userDiv = document.createElement('div')
+                const name = document.createElement('h3')
+                name.classList.add('username')
+
+                if (u.id == me.id) {
+                    name.innerText = `You (${u.side})`
+                } else {
+                    name.innerText = `${u.displayName} (${u.side})`
+                }
+
+                userDiv.appendChild(name)
+                users.appendChild(userDiv)
+            })
+        }
+    </script>
+
+    <script>
         socket.on('noGame', () => {
             window.location.href = '/'
         })
@@ -141,6 +162,7 @@
 
         const InfoBox = document.getElementById('InfoBox');
         socket.on('updateBoard', (data) => {
+            populateUsers()
             InfoBox.innerHTML = data.board.turn;
             CapturedW.innerHTML = '';
             CapturedB.innerHTML = '';

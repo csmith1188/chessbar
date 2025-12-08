@@ -1,12 +1,17 @@
 /* Clean styles for game.ejs */
-:root{
-    --bg-1:#020613; /* very dark navy */
-    --bg-2:#07121a; /* deep navy */
-    --panel:rgba(255,255,255,0.02);
-    --muted:#7f8a95; /* subdued text */
-    --accent:#c78d2f; /* muted amber */
-    --accent-2:#362380; /* muted purple */
-    --radius:12px;
+:root {
+    --bg-1: #020613;
+    /* very dark navy */
+    --bg-2: #07121a;
+    /* deep navy */
+    --panel: rgba(255, 255, 255, 0.02);
+    --muted: #7f8a95;
+    /* subdued text */
+    --accent: #c78d2f;
+    /* muted amber */
+    --accent-2: #362380;
+    /* muted purple */
+    --radius: 12px;
 }
 
 * {
@@ -97,7 +102,7 @@ body {
 #chat-sidebar {
     width: 100%;
     background: var(--panel);
-    padding: 10px;
+    padding: 3px;
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.03);
     flex: 0 0 auto;
@@ -128,17 +133,19 @@ body {
 
 .message-row {
     display: flex;
-    flex-direction: column; 
-    gap: 4px; 
+    flex-direction: column;
+    gap: 4px;
     margin: 2px 0;
 }
 
 .message-row.you {
-    align-items: flex-end; /* align bubbles and sender to the right for your messages */
+    align-items: flex-end;
+    /* align bubbles and sender to the right for your messages */
 }
 
 .message-row.other {
-    align-items: flex-start; /* align to the left for others */
+    align-items: flex-start;
+    /* align to the left for others */
 }
 
 /* Sender label above each bubble */
@@ -147,7 +154,8 @@ body {
     color: var(--muted);
     font-weight: 600;
     line-height: 1;
-    margin: 0 0 2px 0; /* compact spacing under the sender */
+    margin: 0 0 2px 0;
+    /* compact spacing under the sender */
 }
 
 .message {
@@ -264,7 +272,7 @@ input:focus {
     border-radius: 10px;
     border: 0;
     /* Quote the data URL with double-quotes so inner single-quotes in the SVG don't break the string */
-    background: rgba(255,255,255,0.04) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23eaf5fb'><path d='M19.14 12.94a7.97 7.97 0 000-1.88l2.03-1.58a0.5 0.5 0 00.12-0.64l-1.92-3.32a0.5 0.5 0 00-0.6-0.22l-2.39 0.96a8.12 8.12 0 00-1.62-0.94L14.5 2.5a0.5 0.5 0 00-0.49-0.5h-3.98a0.5 0.5 0 00-0.49 0.5l-0.36 2.65c-0.58 0.25-1.12 0.57-1.62 0.94L5.64 5.13a0.5 0.5 0 00-0.6 0.22L3.12 8.67a0.5 0.5 0 00.12 0.64L5.27 10.9a7.97 7.97 0 000 1.88L3.12 14.36a0.5 0.5 0 00-0.12 0.64l1.92 3.32c0.15 0.26 0.46 0.36 0.73 0.27l2.39-0.96c0.5 0.37 1.04 0.69 1.62 0.94l0.36 2.65c0.05 0.28 0.29 0.5 0.58 0.5h3.98c0.29 0 0.53-0.22 0.58-0.5l0.36-2.65c0.58-0.25 1.12-0.57 1.62-0.94l2.39 0.96c0.27 0.11 0.58-0.01 0.73-0.27l1.92-3.32a0.5 0.5 0 00-0.12-0.64l-2.03-1.58z'/></svg>") center/60% no-repeat;
+    background: rgba(255, 255, 255, 0.04) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23eaf5fb'><path d='M19.14 12.94a7.97 7.97 0 000-1.88l2.03-1.58a0.5 0.5 0 00.12-0.64l-1.92-3.32a0.5 0.5 0 00-0.6-0.22l-2.39 0.96a8.12 8.12 0 00-1.62-0.94L14.5 2.5a0.5 0.5 0 00-0.49-0.5h-3.98a0.5 0.5 0 00-0.49 0.5l-0.36 2.65c-0.58 0.25-1.12 0.57-1.62 0.94L5.64 5.13a0.5 0.5 0 00-0.6 0.22L3.12 8.67a0.5 0.5 0 00.12 0.64L5.27 10.9a7.97 7.97 0 000 1.88L3.12 14.36a0.5 0.5 0 00-0.12 0.64l1.92 3.32c0.15 0.26 0.46 0.36 0.73 0.27l2.39-0.96c0.5 0.37 1.04 0.69 1.62 0.94l0.36 2.65c0.05 0.28 0.29 0.5 0.58 0.5h3.98c0.29 0 0.53-0.22 0.58-0.5l0.36-2.65c0.58-0.25 1.12-0.57 1.62-0.94l2.39 0.96c0.27 0.11 0.58-0.01 0.73-0.27l1.92-3.32a0.5 0.5 0 00-0.12-0.64l-2.03-1.58z'/></svg>") center/60% no-repeat;
     cursor: pointer;
 }
 
@@ -273,7 +281,7 @@ input:focus {
     inset: 0;
     display: grid;
     place-items: center;
-    background: rgba(2,6,12,0.6);
+    background: rgba(2, 6, 12, 0.6);
     z-index: 1600;
 }
 
@@ -284,13 +292,13 @@ input:focus {
     left: 12px;
     z-index: 1450;
     padding: 8px 12px;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0, 0, 0, 0.6);
     color: #eaf5fb;
     border-radius: 8px;
     font-weight: 700;
     font-size: 14px;
-    border: 1px solid rgba(255,255,255,0.04);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
 }
 
 #join-code-badge {
@@ -300,7 +308,7 @@ input:focus {
 }
 
 #join-code-badge:focus {
-    outline: 3px solid rgba(94,234,212,0.14);
+    outline: 3px solid rgba(94, 234, 212, 0.14);
     outline-offset: 2px;
     transform: translateY(-2px);
 }
@@ -312,15 +320,39 @@ input:focus {
     border-radius: 12px;
     width: 360px;
     max-width: calc(100% - 24px);
-    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-    border: 1px solid rgba(255,255,255,0.04);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-#settings-panel h3 { margin: 0 0 12px 0 }
-.setting-row { display:flex; align-items:center; gap:8px; margin:8px 0 }
-.setting-row label { flex:1; font-size:14px }
-.setting-row input[type='number'], .setting-row select { width:110px }
-.setting-group { margin: 8px 0; border:0; padding:8px; background: rgba(255,255,255,0.02); border-radius:8px }
+#settings-panel h3 {
+    margin: 0 0 12px 0
+}
+
+.setting-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0
+}
+
+.setting-row label {
+    flex: 1;
+    font-size: 14px
+}
+
+.setting-row input[type='number'],
+.setting-row select {
+    width: 110px
+}
+
+.setting-group {
+    margin: 8px 0;
+    border: 0;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px
+}
+
 .setting-group label {
     display: flex;
     align-items: center;
@@ -328,13 +360,45 @@ input:focus {
     margin: 6px 0;
     font-size: 14px;
 }
+
 .setting-group input[type='checkbox'] {
     margin: 0 6px 0 0;
 }
-.settings-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:12px }
-.settings-actions button { padding:8px 12px; border-radius:8px; border:0; cursor:pointer }
-.settings-actions #save-settings { background: #c78d2f; color: var(--bg-1) }
-.settings-actions #reset-settings { background: rgba(255,255,255,0.04); color: #eaf5fb }
-.settings-actions #close-settings { background: rgba(255,255,255,0.02); color: #eaf5fb }
 
-.hidden { display:none }
+.settings-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 12px
+}
+
+.settings-actions button {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 0;
+    cursor: pointer
+}
+
+.settings-actions #save-settings {
+    background: #c78d2f;
+    color: var(--bg-1)
+}
+
+.settings-actions #reset-settings {
+    background: rgba(255, 255, 255, 0.04);
+    color: #eaf5fb
+}
+
+.settings-actions #close-settings {
+    background: rgba(255, 255, 255, 0.02);
+    color: #eaf5fb
+}
+
+.hidden {
+    display: none
+}
+
+.username {
+    font-size: 15px;
+    margin: 2px;
+}
