@@ -97,8 +97,6 @@ class User {
         // console.log(this.started)
         this.started++
         db.run(`UPDATE users SET started = ${this.started} WHERE formbar_id = ${this.id}`)
-        this.spend()
-        // console.log(this.started)
     }
 
     win() {
@@ -118,14 +116,27 @@ class User {
         db.run(`UPDATE users SET finished = ${this.finished} WHERE formbar_id = ${this.id}`)
     }
 
-    spend() {
+    pay() {
         this.getInfo(db)
         if (this.tokens > 0) {
             this.tokens--
             db.run(`UPDATE users SET tokens = ${this.tokens} WHERE formbar_id = ${this.id}`)
             return true
-        } 
+        }
         return false
+    }
+
+    serialize() {
+        return {
+            id: this.id,
+            side: this.side,
+            started: this.started,
+            finished: this.finished,
+            wins: this.wins,
+            losses: this.losses,
+            draws: this.draws,
+            active: this.active
+        }
     }
 }
 

@@ -38,6 +38,8 @@ class Game {
 
         this.messages = []
 
+        this.paid = []
+
         // generate a unique 6-digit join code
         let code = Math.floor(Math.random() * 900000) + 100000
         while (takenGameCodes.includes(code)) {
@@ -52,59 +54,77 @@ class Game {
         this.update()
     }
 
-    assignSides(newUser = null) {
+    assignSides() {
 
-        if (newUser) {
-            // console.log(newUser)
-            if (this.prevWhite && newUser.id == this.prevWhite.id) {
-                newUser.side = 'white'
-                return this.assignEarlyQuit()
+        this.users.forEach(u => u.side = 'unassigned')
 
-            } else if (this.prevBlack && newUser.id == this.prevBlack.id) {
-                newUser.side = 'black'
-                return this.assignEarlyQuit()
+        console.log('this.users:', this.users.map(u => u.serialize()))
+        console.log('this.paid:', this.paid.map(u => u.serialize()))
+        console.log('\n')
 
-            } else if (newUser.tokens) {
-                if (!this.users.some(u => u.side == 'white')) {
-                    if (!this.prevWhite) {
-                        newUser.side = 'white'
-                        this.prevWhite = newUser
-                        newUser.spend()
-                        return this.assignEarlyQuit()
+        for (let user of this.users) {
+
+            if (!this.prevBlack && !this.prevWhite) {
+                // If user hasn't paid
+                if (!this.paid.some(u => u.id == user.id)) {
+                    console.log(user.tokens)
+                    if (user.tokens > 0) {
+                        user.pay()
+                        this.paid.push(user)
+                    } else {
+                        console.log(`User ${user.id} has not paid.`)
+                        user.socket.emit('redirect', `/pay?code=${this.joinCode}`)
+                        this.users = this.users.filter(u => u.id != user.id)
+                        continue
                     }
                 }
-
-                if (!this.users.some(u => u.side == 'black')) {
-                    if (!this.prevBlack) {
-                        newUser.side = 'black'
-                        this.prevBlack = newUser
-                        newUser.spend()
-                        return this.assignEarlyQuit()
-                    }
-                }
-
-            } else {
-                newUser.socket.emit('redirect', `/pay?code=${this.joinCode}`)
-                this.users = this.users.filter(u => u.id !== newUser.id)
-                this.assignSides()
-                this.update()
             }
-        } else {
-            for (let user of this.users) {
-                if (!this.users.some(u => u.side == 'white')) {
-                    if (!this.prevWhite) {
-                        user.side = 'white'
-                        this.prevWhite = user
+
+            if (this.prevBlack && user.id == this.prevBlack.id) {
+                if (!this.paid.some(u => u.id == user.id)) {
+                    console.log(user.tokens)
+                    if (user.tokens > 0) {
+                        user.pay()
+                        this.paid.push(user)
+                    } else {
+                        console.log(`User ${user.id} has not paid.`)
+                        user.socket.emit('redirect', `/pay?code=${this.joinCode}`)
+                        this.users = this.users.filter(u => u.id != user.id)
                         continue
                     }
                 }
+                user.side = 'black'
+                continue
+            }
 
-                if (!this.users.some(u => u.side == 'black')) {
-                    if (!this.prevBlack) {
-                        user.side = 'black'
-                        this.prevBlack = user
+            if (this.prevWhite && user.id == this.prevWhite.id) {
+                if (!this.paid.some(u => u.id == user.id)) {
+                    if (user.tokens) {
+                        user.pay()
+                        this.paid.push(user)
+                    } else {
+                        user.socket.emit('redirect', `/pay?code=${this.joinCode}`)
+                        this.users = this.users.filter(u => u.id != user.id)
                         continue
                     }
+                }
+                user.side = 'white'
+                continue
+            }
+
+            if (!this.users.some(u => u.side == 'white')) {
+                if (!this.prevWhite) {
+                    user.side = 'white'
+                    this.prevWhite = user
+                    continue
+                }
+            }
+
+            if (!this.users.some(u => u.side == 'black')) {
+                if (!this.prevBlack) {
+                    user.side = 'black'
+                    this.prevBlack = user
+                    continue
                 }
             }
         }
@@ -128,7 +148,7 @@ class Game {
         user.side = 'unassigned'
         this.users.push(user)
         user.game = this
-        this.assignSides(user)
+        this.assignSides()
         this.update()
     }
 
@@ -188,13 +208,13 @@ class Game {
             }
             if (takenPiece == 'Queen') {
                 user.socket.emit('sound', 'smash')
-            } else if (promotion) {
-                user.socket.emit('sound', 'tada')
             } else if (mate) {
                 user.socket.emit('sound', 'explosion')
+            } else if (promotion) {
+                user.socket.emit('sound', 'tada')
             } else if (check) {
                 user.socket.emit('sound', 'check')
-            } else if (takenPiece) { 
+            } else if (takenPiece) {
                 user.socket.emit('sound', 'break')
             } else if (move) {
                 user.socket.emit('sound', 'move')
@@ -218,13 +238,15 @@ class Game {
 function serializeGame(game) {
     return {
         id: game.id,
-        users: game.users.map(u => ({ id: u.id, side: u.side })),
+        users: game.users.map(u => (u.serialize())),
         board: game.board,
         joinCode: game.joinCode,
         messages: game.messages,
         name: game.name,
         owner: game.owner.id,
-        visibility: game.visibility
+        visibility: game.visibility,
+        prevBlack: game.prevBlack ? game.prevBlack.serialize() : 'none',
+        prevWhite: game.prevWhite ? game.prevWhite.serialize() : 'none'
     }
 }
 

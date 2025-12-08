@@ -276,23 +276,6 @@ io.on('connection', (socket) => {
     })
 
     socket.on('newGame', (visibility = 'public', name = '', pin = 0) => {
-        // if (!!Number(pin)) {
-        //     // Pay to play
-        //     if (user.id) {
-        //         const data = {
-        //             from: user.id,
-        //             to: 23,
-        //             amount: 1,
-        //             reason: 'Chess Payment',
-        //             pin: pin,
-        //             pool: true
-        //         }
-
-        //         fbSocket.emit('transferDigipogs', data)
-
-        //         fbSocket.once('transferResponse', res => {
-        //             socket.emit('transferResponse', res)
-        //             if (res.success === true) {
         if (user.game) {
             user.game.leave(user)
         }
