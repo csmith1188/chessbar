@@ -8,8 +8,58 @@ function findKing() {
     if (king) return king
 }
 
+document.addEventListener('mousedown', () => {
+    if (event.button === 2) { // Right mouse button
+        isRightClickHeld = true;
+
+        // Convert screen coordinates to board coordinates
+        startX = Math.floor(event.clientX / Settings.boardSquareSize);
+        startY = Math.floor(event.clientY / Settings.boardSquareSize);
+
+        console.log('Right click started at:', startX, startY);
+    }
+})
+
+document.addEventListener('mousemove', (event) => {
+    if (isRightClickHeld) {
+        // Convert screen coordinates to board coordinates
+        const endX = Math.floor(event.clientX / Settings.boardSquareSize);
+        const endY = Math.floor(event.clientY / Settings.boardSquareSize);
+
+        // Clear the canvas (optional, if you want to redraw the board)
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Redraw the board and pieces (if needed)
+        drawBoard();
+        drawPieces();
+
+        // Draw the arrow
+        drawArrow(ctx, startX, startY, endX, endY, 'red');
+    }
+});
+
+document.addEventListener('mouseup', (event) => {
+    if (event.button === 2) { // Right mouse button
+        isRightClickHeld = false;
+
+        // Convert screen coordinates to board coordinates
+        const endX = Math.floor(event.clientX / Settings.boardSquareSize);
+        const endY = Math.floor(event.clientY / Settings.boardSquareSize);
+
+        console.log('Right click released at:', endX, endY);
+
+        // Finalize the arrow (optional, if you want to keep it on the board)
+        drawArrow(ctx, startX, startY, endX, endY, 'red');
+    }
+});
+
+document.addEventListener('contextmenu', (event) => {
+    event.preventDefault();
+});
+
 function drawArrow(ctx, startX, startY, endX, endY, color) {
     // Convert board coordinates to pixel coordinates
+
     const pixelStartX = startX * Settings.boardSquareSize + Settings.boardSquareSize / 2;
     const pixelStartY = startY * Settings.boardSquareSize + Settings.boardSquareSize / 2;
     const pixelEndX = endX * Settings.boardSquareSize + Settings.boardSquareSize / 2;
@@ -32,9 +82,9 @@ function drawArrow(ctx, startX, startY, endX, endY, color) {
 
 function drawArrowhead(ctx, x, y, angle, size, color) {
     ctx.save();
-    ctx.translate(x, y); // Use pixel coordinates directly
-    ctx.rotate(angle);
-    ctx.beginPath();
+    ctx.translate(x, y); // pixel coordinates 
+    ctx.rotate(angle); // the angle
+    ctx.beginPath(); //start
     ctx.moveTo(size, 0); // Tip of the arrowhead
     ctx.lineTo(0, -size / 2); // Left corner of the arrowhead
     ctx.lineTo(0, size / 2); // Right corner of the arrowhead

@@ -121,18 +121,10 @@
 ### Kayden
 -added arrows
 
-## 11/12
+## 12/8
 
 ### Truit
--
+-lock in on DOCS
 
 ### Kayden
--
-
-## 11/13
-
-### Truit
--
-
-### Kayden
--
+-lock in on DOCS
