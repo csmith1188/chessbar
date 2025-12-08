@@ -13,10 +13,6 @@ const db = new sqlite3.Database('database/database.db', sqlite3.OPEN_READWRITE, 
     if (err) return console.error('Error connecting to database:', err.message)
 })
 
-// db.all('SELECT * FROM users', (err, rows) => {
-// console.log(rows)
-// })
-
 const PLAY_PRICE = 1
 // const WIN_AMOUNT = 110
 
@@ -289,9 +285,6 @@ io.on('connection', (socket) => {
         io.emit('refreshGames')
         socket.emit('redirect', `/game?code=${game.joinCode}`)
     })
-    //         })
-    //     }
-    // }
 
     socket.on('updateBoard', (data) => {
         // console.log('updateBoard event received')

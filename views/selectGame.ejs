@@ -136,37 +136,8 @@
     const joinCodeInput = document.getElementById('joinCodeInput');
     const gameName = document.getElementById('gameName')
 
-    closeNav();
     if (overlayMsg) { overlayMsg.classList.remove('visible'); overlayMsg.style.display = 'none'; overlayMsg.textContent = ''; }
     if (navMsg) { navMsg.classList.remove('visible'); navMsg.style.display = 'none'; navMsg.textContent = ''; }
-
-    // socket.on('transferResponse', (res) => {
-    //     // prefer showing the message inside the new-game overlay if present
-    //     const overlayMsg = document.getElementById('overlayMessage');
-    //     const navMsg = document.getElementById('navMessage');
-
-    //     if (res.success === true) {
-    //         // close overlay and clear messages
-    //         closeNav();
-    //         if (overlayMsg) { overlayMsg.classList.remove('visible'); overlayMsg.style.display = 'none'; overlayMsg.textContent = ''; }
-    //         if (navMsg) { navMsg.classList.remove('visible'); navMsg.style.display = 'none'; navMsg.textContent = ''; }
-    //     } else {
-    //         const messageText = res.message || 'Transfer failed';
-    //         if (overlayMsg) {
-    //             overlayMsg.textContent = messageText;
-    //             overlayMsg.classList.add('visible');
-    //             overlayMsg.style.display = 'block';
-    //             // auto-hide after 5s
-    //             setTimeout(() => { overlayMsg.classList.remove('visible'); overlayMsg.style.display = 'none'; overlayMsg.textContent = ''; }, 5000);
-    //         } else if (navMsg) {
-    //             navMsg.textContent = messageText;
-    //             navMsg.classList.add('visible');
-    //             navMsg.style.display = 'inline-block';
-    //             setTimeout(() => { navMsg.classList.remove('visible'); navMsg.style.display = 'none'; navMsg.textContent = ''; }, 5000);
-    //         }
-    //     }
-    // })
-
 
     function newGame(visibility) {
         socket.emit('newGame', visibility, gameName.value.trim())

@@ -165,6 +165,10 @@
                 joinBadge.dataset.code = '';
                 joinBadge.style.display = 'none';
             }
+
+            if (!me.game) {
+                window.location.href = '/'
+            }
         });
 
         // Copy-to-clipboard helper with fallback

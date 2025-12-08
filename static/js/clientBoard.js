@@ -8,7 +8,7 @@ function findKing() {
     if (king) return king
 }
 
-document.addEventListener('mousedown', () => {
+document.addEventListener('mousedown', (event) => {
     if (event.button === 2) { // Right mouse button
         isRightClickHeld = true;
 
@@ -31,7 +31,6 @@ document.addEventListener('mousemove', (event) => {
 
         // Redraw the board and pieces (if needed)
         drawBoard();
-        drawPieces();
 
         // Draw the arrow
         drawArrow(ctx, startX, startY, endX, endY, 'red');
