@@ -8,13 +8,10 @@ function findKing() {
     if (king) return king
 }
 
-<<<<<<< Updated upstream
-=======
 let isRightClickHeld = false; 
 let startX = null; 
 let startY = null; 
 
->>>>>>> Stashed changes
 document.addEventListener('mousedown', (event) => {
     if (event.button === 2) { // Right mouse button
         isRightClickHeld = true;
@@ -32,19 +29,7 @@ document.addEventListener('mousemove', (event) => {
         // Convert screen coordinates to board coordinates
         const endX = Math.floor(event.clientX / Settings.boardSquareSize);
         const endY = Math.floor(event.clientY / Settings.boardSquareSize);
-<<<<<<< Updated upstream
-
-        // Clear the canvas (optional, if you want to redraw the board)
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Redraw the board and pieces (if needed)
-        drawBoard();
-
-        // Draw the arrow
-        drawArrow(ctx, startX, startY, endX, endY, 'red');
-=======
         console.log('Right click dragging at:', endX, endY);
->>>>>>> Stashed changes
     }
 });
 
