@@ -136,8 +136,8 @@
     const joinCodeInput = document.getElementById('joinCodeInput');
     const gameName = document.getElementById('gameName')
 
-    if (overlayMsg) { overlayMsg.classList.remove('visible'); overlayMsg.style.display = 'none'; overlayMsg.textContent = ''; }
-    if (navMsg) { navMsg.classList.remove('visible'); navMsg.style.display = 'none'; navMsg.textContent = ''; }
+    // if (overlayMsg) { overlayMsg.classList.remove('visible'); overlayMsg.style.display = 'none'; overlayMsg.textContent = ''; }
+    // if (navMsg) { navMsg.classList.remove('visible'); navMsg.style.display = 'none'; navMsg.textContent = ''; }
 
     function newGame(visibility) {
         socket.emit('newGame', visibility, gameName.value.trim())

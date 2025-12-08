@@ -58,10 +58,6 @@ class Game {
 
         this.users.forEach(u => u.side = 'unassigned')
 
-        console.log('this.users:', this.users.map(u => u.serialize()))
-        console.log('this.paid:', this.paid.map(u => u.serialize()))
-        console.log('\n')
-
         for (let user of this.users) {
 
             if (!this.prevBlack && !this.prevWhite) {

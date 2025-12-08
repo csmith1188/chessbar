@@ -10,12 +10,21 @@ function renderMessages(history) {
     history.forEach(({ sender, message }) => {
         const row = document.createElement('div');
         row.classList.add('message-row');
-        row.classList.add(sender === me.id ? 'you' : 'other');
+        row.classList.add(sender === me.displayName ? 'you' : 'other');
+
+        let senderDiv
+
+        if (!sender === me.displayName) {
+            senderDiv = document.createElement('div');
+            senderDiv.classList.add('sender');
+            senderDiv.textContent = sender;
+        }
 
         const bubble = document.createElement('div');
         bubble.classList.add('message');
-        bubble.textContent = `${sender}: ${message}`;
+        bubble.textContent = message;
 
+        if (senderDiv) row.appendChild(senderDiv);
         row.appendChild(bubble);
         messages.appendChild(row);
     });
@@ -43,11 +52,15 @@ socket.on('chatMessage', (name, message) => {
     const row = document.createElement('div');
     row.classList.add('message-row');
     row.classList.add(name === me.id ? 'you' : 'other');
+    const senderDiv = document.createElement('div');
+    senderDiv.classList.add('sender');
+    senderDiv.textContent = name;
 
     const bubble = document.createElement('div');
     bubble.classList.add('message');
-    bubble.textContent = `${name}: ${message}`;
+    bubble.textContent = message;
 
+    row.appendChild(senderDiv);
     row.appendChild(bubble);
     messages.appendChild(row);
     messages.scrollTop = messages.scrollHeight;

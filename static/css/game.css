@@ -124,25 +124,35 @@ body {
 #messages {
     flex: 1 1 auto;
     overflow: auto;
-    padding: 6px
 }
 
 .message-row {
     display: flex;
-    margin: 8px 0
+    flex-direction: column; 
+    gap: 4px; 
+    margin: 2px 0;
 }
 
 .message-row.you {
-    justify-content: flex-end
+    align-items: flex-end; /* align bubbles and sender to the right for your messages */
 }
 
 .message-row.other {
-    justify-content: flex-start
+    align-items: flex-start; /* align to the left for others */
+}
+
+/* Sender label above each bubble */
+.sender {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+    line-height: 1;
+    margin: 0 0 2px 0; /* compact spacing under the sender */
 }
 
 .message {
     max-width: 70%;
-    padding: 10px 12px;
+    padding: 5px 12px;
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.03);
     color: #eaf5fb
