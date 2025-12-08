@@ -42,6 +42,8 @@ document.addEventListener('mouseup', (event) => {
         const endY = Math.floor(event.clientY / Settings.boardSquareSize);
 
         console.log('Right click released at:', endX, endY);
+
+        drawArrow(ctx, startX, startY, endX, endY, Settings.arrowColor);
     }
 });
 
