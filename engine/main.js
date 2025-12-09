@@ -151,7 +151,7 @@ function attachSocket(io, games) {
 
         socket.on('move', (player, piece, x2, y2) => {
             // Find the player's game (client should include game id in `player.game`)
-            const game = games.find(g => g.id == player.game.id)
+            const game = games.find(g => g.users.some(u => u.id == player.id))
 
             if (!game) {
                 // send back a no-op board to the requesting socket so client can re-sync

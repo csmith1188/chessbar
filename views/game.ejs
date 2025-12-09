@@ -130,15 +130,25 @@
         const users = document.getElementById('chat-sidebar')
 
         function populateUsers() {
+            users.innerHTML = ''
+
+            let usersToShow = []
+            if (gameData.prevWhite) usersToShow.push(gameData.prevWhite)
+            if (gameData.prevBlack) usersToShow.push(gameData.prevBlack)
+
             gameData.users.forEach(u => {
+                if (!usersToShow.some (user => user.id == u.id)) usersToShow.push(u)
+            })
+
+            usersToShow.forEach(u => {
                 const userDiv = document.createElement('div')
                 const name = document.createElement('h3')
                 name.classList.add('username')
 
                 if (u.id == me.id) {
-                    name.innerText = `You (${u.side})`
+                    name.innerText = `You (${u.side}) (${u.active ? 'Online' : 'Offline'})`
                 } else {
-                    name.innerText = `${u.displayName} (${u.side})`
+                    name.innerText = `${u.displayName} (${u.side}) (${u.active ? 'Online' : 'Offline'})`
                 }
 
                 userDiv.appendChild(name)

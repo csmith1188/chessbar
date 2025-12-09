@@ -45,7 +45,10 @@
 <body>
     <div id='newGameOverlay' class='overlay'>
         <div class='overlay-content'>
+            <h1 id="newTitle">New Game</h1>
             <button class='closebtn' onclick='closeNav()'>&times;</button>
+
+            <input type='text' class='input' id='gameName' placeholder='Enter Room Name...'>
 
             <div class='checkbox-group'>
                 <div class='checkbox-item'>
@@ -58,7 +61,6 @@
                 </div>
             </div>
 
-            <input type='text' class='input' id='gameName' placeholder='Enter Room Name...'>
             <!-- <input type='text' class='input' id='payPin' placeholder='Enter your Formbar payment PIN...'> -->
             <div id='overlayMessage' class='overlay-message' aria-live='polite' role='status'></div>
 

@@ -162,7 +162,11 @@ io.on('connection', (socket) => {
     let user = new User(socket, sessionUser)
     user.addToDb(db)
     user.getInfo(db)
-    users.push(user)
+    if (users.some(u => u.id == user.id)) {
+        user = users.find(u => u.id == user.id)
+    } else {
+        users.push(user)
+    }
 
     function getVisibleGames() {
         // console.log(games)
@@ -258,6 +262,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('disconnect', () => {
+        user.active = false
         //const name = users{socket.id]
         //console.log(`${name} disconnected`)
         if (takenUserIds.includes(user.id)) {

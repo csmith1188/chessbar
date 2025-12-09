@@ -63,7 +63,7 @@ class Game {
             if (!this.prevBlack && !this.prevWhite) {
                 // If user hasn't paid and isnt spectating
                 if (!this.paid.some(u => u.id == user.id)) {
-                    console.log(user.tokens)
+                    // console.log(user.tokens)
                     if (user.tokens > 0) {
                         user.pay()
                         this.paid.push(user)
@@ -78,7 +78,7 @@ class Game {
 
             if (this.prevBlack && user.id == this.prevBlack.id) {
                 if (!this.paid.some(u => u.id == user.id)) {
-                    console.log(user.tokens)
+                    // console.log(user.tokens)
                     if (user.tokens > 0) {
                         user.pay()
                         this.paid.push(user)

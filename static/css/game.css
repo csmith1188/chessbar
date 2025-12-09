@@ -161,7 +161,7 @@ body {
 .message {
     max-width: 70%;
     padding: 5px 15px;
-    border-radius: 30px;
+    border-radius: 1em;
     background: rgba(255, 255, 255, 0.03);
     color: #eaf5fb
 }

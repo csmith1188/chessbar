@@ -29,7 +29,7 @@
     color: white;
     width: 400px;
     max-width: 90%;
-    padding: 40px 30px;
+    padding: 5px 35px 25px 15px;
     border-radius: 12px;
     text-align: center;
     box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
@@ -42,6 +42,10 @@
     /* Make children full width */
     gap: 15px;
     /* Space between elements */
+}
+
+#newTitle {
+    margin-top: 5px
 }
 
 /* Animate scale on open */

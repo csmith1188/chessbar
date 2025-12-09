@@ -27,6 +27,11 @@ function renderMessage(sender, message) {
         senderDiv.textContent = sender;
     }
 
+    // If I am the sender and the previous sender is not me
+    if (sender == me.displayName && sender !== prevSender) {
+        row.style.marginTop = '20px'
+    }
+
     const bubble = document.createElement('div');
     bubble.classList.add('message');
     bubble.textContent = message;
