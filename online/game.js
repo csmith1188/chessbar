@@ -61,7 +61,7 @@ class Game {
         for (let user of this.users) {
 
             if (!this.prevBlack && !this.prevWhite) {
-                // If user hasn't paid
+                // If user hasn't paid and isnt spectating
                 if (!this.paid.some(u => u.id == user.id)) {
                     console.log(user.tokens)
                     if (user.tokens > 0) {
