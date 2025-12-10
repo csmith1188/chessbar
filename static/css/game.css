@@ -154,7 +154,7 @@ body {
     color: var(--muted);
     font-weight: 600;
     line-height: 1;
-    margin: 0 0 2px 0;
+    margin: 10px 0 2px 0;
     /* compact spacing under the sender */
 }
 
