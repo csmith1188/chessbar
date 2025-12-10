@@ -168,8 +168,9 @@ body {
     transform: translateX(-50%) translateY(-6px) scale(0.98);
     z-index: 2000;
     opacity: 0;
-    pointer-events: none; /* don't allow interaction when hidden */
-    transition: opacity 240ms cubic-bezier(.2,.9,.3,1), transform 240ms cubic-bezier(.2,.9,.3,1);
+    pointer-events: none;
+    /* don't allow interaction when hidden */
+    transition: opacity 240ms cubic-bezier(.2, .9, .3, 1), transform 240ms cubic-bezier(.2, .9, .3, 1);
     will-change: opacity, transform;
 }
 
@@ -222,6 +223,19 @@ body {
     margin-top: 8px
 }
 
+#back-link {
+    position: fixed;
+    bottom: 12px;
+    left: 12px;
+    z-index: 1000;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    border-radius: 4px;
+    text-decoration: none;
+    font-family: inherit;
+}
+
 #msg {
     flex: 1;
     padding: 10px;
@@ -236,11 +250,12 @@ body {
     /* background: linear-gradient(90deg, var(--accent), var(--accent-2)); */
     background: var(--accent);
     border: 0;
-    padding: 10px 14px;
-    border-radius: 8px;
     color: #022;
     font-weight: 700;
-    cursor: pointer
+    cursor: pointer;
+
+    padding: 5px 15px;
+    border-radius: 1em;
 }
 
 #send:hover {
@@ -435,4 +450,29 @@ input:focus {
 .username {
     font-size: 15px;
     margin: 2px;
+    width: fit-content;
+}
+
+/* Status dot styles */
+.status-dot {
+    width: .5em;
+    height: .5em;
+    border-radius: 50%;
+    margin-left: 6px;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+.status-dot.online {
+    background-color: #57d95b; /* Green for online */
+}
+
+.status-dot.offline {
+    background-color: #888888; /* Gray for offline */
+}
+
+.userdiv {
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
 }

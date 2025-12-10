@@ -36,9 +36,7 @@
         </div>
     </div>
 
-    <a href='/' id='back-link'
-        style='position:fixed;bottom:12px;left:12px;z-index:1000;padding:8px 12px;background:rgba(0,0,0,0.7);color:#fff;border-radius:4px;text-decoration:none;font-family:inherit;'>Back
-        to game selection</a>
+    <a href='/' id='back-link'>Back to game selection</a>
 
     <!-- Settings button -->
     <button id='settings-btn' type='button' title='Settings' aria-label='Open settings'></button>
@@ -157,33 +155,43 @@
     </script>
 
     <script>
+        // User list population
         const users = document.getElementById('chat-sidebar')
 
         function populateUsers() {
-            users.innerHTML = ''
+            if (gameData && gameData.users) {
+                users.innerHTML = ''
 
-            let usersToShow = []
-            if (gameData.prevWhite) usersToShow.push(gameData.prevWhite)
-            if (gameData.prevBlack) usersToShow.push(gameData.prevBlack)
+                let usersToShow = []
+                if (gameData.prevWhite) usersToShow.push(gameData.prevWhite)
+                if (gameData.prevBlack) usersToShow.push(gameData.prevBlack)
 
-            gameData.users.forEach(u => {
-                if (!usersToShow.some (user => user.id == u.id)) usersToShow.push(u)
-            })
+                gameData.users.forEach(u => {
+                    if (!usersToShow.some(user => user.id == u.id)) usersToShow.push(u)
+                })
 
-            usersToShow.forEach(u => {
-                const userDiv = document.createElement('div')
-                const name = document.createElement('h3')
-                name.classList.add('username')
+                usersToShow.forEach(u => {
+                    const userDiv = document.createElement('div')
+                    userDiv.classList.add('userdiv')
+                    const name = document.createElement('h3')
+                    const statusDot = document.createElement('div')
+                    name.classList.add('username')
 
-                if (u.id == me.id) {
-                    name.innerText = `You (${u.side}) (${u.active ? 'Online' : 'Offline'})`
-                } else {
-                    name.innerText = `${u.displayName} (${u.side}) (${u.active ? 'Online' : 'Offline'})`
-                }
+                    statusDot.classList.add('status-dot')
+                    statusDot.classList.add(u.active ? 'online' : 'offline')
 
-                userDiv.appendChild(name)
-                users.appendChild(userDiv)
-            })
+                    if (u.id == me.id) {
+                        name.innerText = `You (${u.side})`
+                    } else {
+                        name.innerText = `${u.displayName} (${u.side})`
+                    }
+
+                    userDiv.appendChild(name)
+                    userDiv.appendChild(statusDot)
+
+                    users.appendChild(userDiv)
+                })
+            }
         }
     </script>
 

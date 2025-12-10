@@ -124,7 +124,6 @@ class Piece {
         if (this.selected) {
             this.x = Mouse.x - this.w / 2
             this.y = Mouse.y - this.h / 2
-            prevMove = this.side == 'white' ? { x1: this.bx, y1: this.by, x2: null, y2: null } : { x1: this.bx, y1: 7 - this.by, x2: null, y2: null }
         }
     }
 
@@ -243,6 +242,13 @@ function drawBoard() {
                     ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
                 }
             }
+
+            // Draw the selected piece highlight
+                if (selected && selected.bx == x && selected.by == y) {
+                    ctx.fillStyle = Settings.moveColor
+                    ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
+                }
+
         }
         // Alternate colors at the edge of the board
         color = (color == 'light') ? 'dark' : 'light'

@@ -39,6 +39,8 @@ class Game {
         this.winner = null
         this.loser = null
 
+        this.prevMove = {}
+
         this.messages = []
 
         this.paid = []
@@ -179,6 +181,8 @@ class Game {
     }
 
     update(move = {}, check = false, mate = false, opponent = null, winner = null, takenPiece) {
+        if (move && move.x1 && move.y1 && move.x2 && move.y2) this.prevMove = move
+
         let promotion = false
         for (let user of this.users) {
 
@@ -189,6 +193,7 @@ class Game {
                 promotion = true
             }
 
+            // Update for the users
             user.socket.emit('updateBoard', serializeGame(this))
 
             if (check) {
@@ -236,10 +241,15 @@ class Game {
             user.socket.emit('chatMessage', sender, msg)
         }
     }
+
+    emptyUpdate(socket) {
+        socket.emit('updateBoard', serializeGame(this))
+    }
 }
 
 function serializeGame(game) {
     return {
+        move: game.prevMove,
         id: game.id,
         users: game.users.map(u => (u.serialize())),
         board: game.board,
