@@ -1,3 +1,5 @@
+console.clear()
+
 const express = require('express')
 const http = require('http')
 const { Server } = require('socket.io')
@@ -154,9 +156,9 @@ server.listen(PORT, () => {
 })
 
 function logUsers() {
-    console.clear()
-    console.log('Users:')
-    users.forEach(u => console.log(`${u.displayName || u.id} (${u.active ? 'Active' : 'Not active'})`))
+    // console.clear()
+    console.log('\nUsers:')
+    users.forEach(u => console.log(`${u.displayName || u.id} (${u.active ? 'Active' : 'Inactive'})`))
     console.log()
 }
 
@@ -172,8 +174,10 @@ io.on('connection', (socket) => {
     if (users.some(u => u.id == user.id)) {
         user = users.find(u => u.id == user.id)
         user.active = true
+        console.log(`User ${user.displayName || user.id} reconnected`)
     } else {
         users.push(user)
+        console.log(`Created new user: ${user.displayName || user.id}`)
     }
 
     logUsers()
@@ -257,17 +261,20 @@ io.on('connection', (socket) => {
         for (let game of games) {
             if (game.joinCode == gameId) {
                 game.join(user)
+                break
             } else if (game.id == gameId && game.visibility === 'public') {
                 game.join(user)
-            }
-
-            if (user.game) {
-                if (user.game.messages) {
-                    socket.emit('messageHistory', user.game.messages)
-                }
-                return
+                break
             }
         }
+
+        if (user.game) {
+            if (user.game.messages) {
+                socket.emit('messageHistory', user.game.messages)
+            }
+            return
+        }
+
         socket.emit('noGame')
     })
 

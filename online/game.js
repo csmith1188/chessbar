@@ -52,6 +52,9 @@ class Game {
         // console.log('\nGames:\n', games)
 
         this.update()
+
+        console.log(`New game created: ${this.id}`)
+        console.log(games)
     }
 
     assignSides() {
@@ -130,6 +133,8 @@ class Game {
         for (let user of this.activeUsers()) {
             user.youAre()
         }
+
+        this.update()
     }
 
     assignEarlyQuit() {
@@ -141,6 +146,7 @@ class Game {
     }
 
     join(user) {
+        console.log(`User ${user.displayName || user.id} joined game ${this.id}`)
         user.side = 'unassigned'
         this.users.push(user)
         user.game = this
@@ -154,26 +160,11 @@ class Game {
         this.update()
     }
 
-    disconnect(user) {
-        let leaving = this.users.find(u => u.id == user.id)
-        leaving.active = false
-    }
-
-    reconnect(user) {
-        let foo = this.users.find(u => u.id == user.id)
-        if (foo) {
-            foo.active = true
-            console.log('reconnection')
-            return true
-        }
-
-        return false
-
-    }
-
     update(move = {}, check = false, mate = false, opponent = null, winner = null, takenPiece) {
         let promotion = false
-        for (let user of this.activeUsers()) {
+        for (let user of this.users) {
+
+            console.log(`Updating game ${this.id} for user ${user.displayName || user.id}.`)
 
             user.youAre()
 
@@ -181,6 +172,8 @@ class Game {
                 user.socket.emit('promotion', move.x2, move.y2)
                 promotion = true
             }
+
+            console.log(user)
 
             user.socket.emit('updateBoard', serializeGame(this))
 

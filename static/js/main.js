@@ -40,6 +40,8 @@ socket.on('promotion', (x, y) => {
 })
 
 socket.on('updateBoard', (data) => {
+    console.log('Update board socket event') 
+    console.log(data)
     gameData = data
     selected = null
     //kayden added this
