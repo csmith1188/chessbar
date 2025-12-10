@@ -153,6 +153,13 @@ server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
 
+function logUsers() {
+    console.clear()
+    console.log('Users:')
+    users.forEach(u => console.log(`${u.displayName || u.id} (${u.active ? 'Active' : 'Not active'})`))
+    console.log()
+}
+
 let users = []
 
 io.on('connection', (socket) => {
@@ -164,9 +171,12 @@ io.on('connection', (socket) => {
     user.getInfo(db)
     if (users.some(u => u.id == user.id)) {
         user = users.find(u => u.id == user.id)
+        user.active = true
     } else {
         users.push(user)
     }
+
+    logUsers()
 
     function getVisibleGames() {
         // console.log(games)
@@ -261,14 +271,18 @@ io.on('connection', (socket) => {
         socket.emit('noGame')
     })
 
+    //! Disconnection
     socket.on('disconnect', () => {
         user.active = false
-        //const name = users{socket.id]
-        //console.log(`${name} disconnected`)
-        if (takenUserIds.includes(user.id)) {
-            takenUserIds.splice(takenUserIds.indexOf(user.id), 1)
-        }
         if (user.game) user.game.leave(user)
+
+        if (user.id <= 0) {
+            if (takenUserIds.includes(user.id)) {
+                takenUserIds.splice(takenUserIds.indexOf(user.id), 1)
+            }
+        }
+
+        logUsers()
     })
 
     socket.on('messageHistory', () => {
