@@ -39,13 +39,13 @@ socket.on('promotion', (x, y) => {
     socket.emit('promotion', x, y, piece)
 })
 
-socket.on('updateBoard', (data) => {
-    console.log('Update board socket event') 
+function updateBoard(data) {
+    console.log('Update board socket event')
     console.log(data)
     gameData = data
     selected = null
     //kayden added this
-    
+
     freshBoard = true
     newBoard = data.board
     // console.log(data)
@@ -83,7 +83,7 @@ socket.on('updateBoard', (data) => {
     }
 
     board = newBoard
-})
+}
 
 // check socket go here
 socket.on('check', (data) => {

@@ -52,9 +52,6 @@ class Game {
         // console.log('\nGames:\n', games)
 
         this.update()
-
-        console.log(`New game created: ${this.id}`)
-        console.log(games)
     }
 
     assignSides() {
@@ -164,16 +161,12 @@ class Game {
         let promotion = false
         for (let user of this.users) {
 
-            console.log(`Updating game ${this.id} for user ${user.displayName || user.id}.`)
-
             user.youAre()
 
             if (move && move.side == user.side && (move.y2 == 7 || move.y2 === 0) && move.name == 'Pawn') {
                 user.socket.emit('promotion', move.x2, move.y2)
                 promotion = true
             }
-
-            console.log(user)
 
             user.socket.emit('updateBoard', serializeGame(this))
 
@@ -234,8 +227,8 @@ function serializeGame(game) {
         name: game.name,
         owner: game.owner.id,
         visibility: game.visibility,
-        prevBlack: game.prevBlack ? game.prevBlack.serialize() : 'none',
-        prevWhite: game.prevWhite ? game.prevWhite.serialize() : 'none'
+        prevBlack: game.prevBlack ? game.prevBlack.serialize() : null,
+        prevWhite: game.prevWhite ? game.prevWhite.serialize() : null
     }
 }
 

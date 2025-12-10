@@ -156,8 +156,8 @@ server.listen(PORT, () => {
 })
 
 function logUsers() {
-    // console.clear()
-    console.log('\nUsers:')
+    console.clear()
+    console.log('Users:')
     users.forEach(u => console.log(`${u.displayName || u.id} (${u.active ? 'Active' : 'Inactive'})`))
     console.log()
 }
@@ -173,6 +173,8 @@ io.on('connection', (socket) => {
     user.getInfo(db)
     if (users.some(u => u.id == user.id)) {
         user = users.find(u => u.id == user.id)
+        user.socket = socket
+        user.sessionUser = sessionUser
         user.active = true
         console.log(`User ${user.displayName || user.id} reconnected`)
     } else {

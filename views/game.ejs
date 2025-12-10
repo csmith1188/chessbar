@@ -172,6 +172,7 @@
 
         const InfoBox = document.getElementById('InfoBox');
         socket.on('updateBoard', (data) => {
+            updateBoard(data)
             populateUsers()
             InfoBox.innerHTML = data.board.turn;
             CapturedW.innerHTML = '';
