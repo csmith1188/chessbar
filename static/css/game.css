@@ -158,21 +158,34 @@ body {
     /* compact spacing under the sender */
 }
 
+
+/* chatOff: hidden by default using opacity so transitions work. JS will toggle the `show` class. */
 #chatOff {
     position: fixed;
     top: 16px;
     left: 50%;
-    transform: translateX(-50%);
+    /* start slightly above and a touch smaller for a subtle entrance */
+    transform: translateX(-50%) translateY(-6px) scale(0.98);
     z-index: 2000;
-    display: block;
+    opacity: 0;
+    pointer-events: none; /* don't allow interaction when hidden */
+    transition: opacity 240ms cubic-bezier(.2,.9,.3,1), transform 240ms cubic-bezier(.2,.9,.3,1);
+    will-change: opacity, transform;
 }
 
-#chatOff .chatOffMessage {
+/* Visible state */
+#chatOff.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+#chatOff .chat-off-message {
     background: rgba(0, 0, 0, 0.78);
     color: #fff;
     padding: 8px 12px;
     border-radius: 6px;
-    font-size: 1.5rem;
+    font-size: 20px;
     max-width: 420px;
     min-width: 220px;
     text-align: center;

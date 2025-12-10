@@ -44,7 +44,7 @@
     <button id='settings-btn' type='button' title='Settings' aria-label='Open settings'></button>
 
     <!-- Chat disabled message -->
-    <div id="chatOff" aria-live="polite">
+    <div id="chatOff" aria-live="polite" aria-hidden="true">
         <div class="chat-off-message" role="status">
             This game does not allow chat. Sorry!
         </div>
@@ -132,6 +132,29 @@
     <script src='js/docEvents.js'></script>
     <script src='js/clientBoard.js'></script>
     <script src='js/main.js'></script>
+
+    <script>
+        const message = document.getElementById('chatOff')
+
+        socket.on('chatOff', () => {
+            if (!message) return;
+
+            // Add visible class to trigger CSS transition
+            message.classList.add('show');
+            message.setAttribute('aria-hidden', 'false');
+
+            // clear any previous hide timer
+            if (message._chatOffTimeout) clearTimeout(message._chatOffTimeout);
+
+            // hide after a few seconds
+            message._chatOffTimeout = setTimeout(() => {
+                // remove class so CSS transitions the element out
+                message.classList.remove('show');
+                message.setAttribute('aria-hidden', 'true');
+                message._chatOffTimeout = null;
+            }, 3000);
+        });
+    </script>
 
     <script>
         const users = document.getElementById('chat-sidebar')
