@@ -14,13 +14,16 @@ let takenGameCodes = []
 */
 
 class Game {
-    constructor(visibility, name = null) {
+    constructor(visibility, name = null, chatOn = true, startWhite = true) {
         this.visibility = visibility
         this.id = 1
 
         while (takenGameIds.includes(this.id)) {
             this.id++
         }
+
+        this.chatOn = chatOn
+        this.startWhite = startWhite
 
         this.name = name ? name : this.id
 
@@ -61,9 +64,8 @@ class Game {
         for (let user of this.users) {
 
             if (!this.prevBlack && !this.prevWhite) {
-                // If user hasn't paid and isnt spectating
+                // If user hasn't paid and isn't spectating, make them pay
                 if (!this.paid.some(u => u.id == user.id)) {
-                    // console.log(user.tokens)
                     if (user.tokens > 0) {
                         user.pay()
                         this.paid.push(user)
@@ -76,9 +78,9 @@ class Game {
                 }
             }
 
+            // If the player is already in the game on a certain side, reconnect them to the game. This also ensures nobody can take your place when you leave the game.
             if (this.prevBlack && user.id == this.prevBlack.id) {
                 if (!this.paid.some(u => u.id == user.id)) {
-                    // console.log(user.tokens)
                     if (user.tokens > 0) {
                         user.pay()
                         this.paid.push(user)
@@ -108,19 +110,39 @@ class Game {
                 continue
             }
 
-            if (!this.users.some(u => u.side == 'white')) {
-                if (!this.prevWhite) {
-                    user.side = 'white'
-                    this.prevWhite = user
-                    continue
+            // Assign player sides once they have paid
+            if (this.startWhite) {
+                if (!this.users.some(u => u.side == 'white')) {
+                    if (!this.prevWhite) {
+                        user.side = 'white'
+                        this.prevWhite = user
+                        continue
+                    }
                 }
-            }
 
-            if (!this.users.some(u => u.side == 'black')) {
-                if (!this.prevBlack) {
-                    user.side = 'black'
-                    this.prevBlack = user
-                    continue
+                if (!this.users.some(u => u.side == 'black')) {
+                    if (!this.prevBlack) {
+                        user.side = 'black'
+                        this.prevBlack = user
+                        continue
+                    }
+                }
+            } else {
+                // Do this in backwards order if startWhite is false
+                if (!this.users.some(u => u.side == 'black')) {
+                    if (!this.prevBlack) {
+                        user.side = 'black'
+                        this.prevBlack = user
+                        continue
+                    }
+                }
+
+                if (!this.users.some(u => u.side == 'white')) {
+                    if (!this.prevWhite) {
+                        user.side = 'white'
+                        this.prevWhite = user
+                        continue
+                    }
                 }
             }
         }

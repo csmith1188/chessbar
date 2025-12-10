@@ -137,12 +137,11 @@
     // const payPin = document.getElementById('payPin')
     const joinCodeInput = document.getElementById('joinCodeInput');
     const gameName = document.getElementById('gameName')
-
-    // if (overlayMsg) { overlayMsg.classList.remove('visible'); overlayMsg.style.display = 'none'; overlayMsg.textContent = ''; }
-    // if (navMsg) { navMsg.classList.remove('visible'); navMsg.style.display = 'none'; navMsg.textContent = ''; }
+    const chatOn = document.getElementById('chatOn')
+    const startWhite = document.getElementById('startWhite')
 
     function newGame(visibility) {
-        socket.emit('newGame', visibility, gameName.value.trim())
+        socket.emit('newGame', visibility, gameName.value.trim(), chatOn.checked, startWhite.checked)
         // if (payPin.value) {
         // }
     }

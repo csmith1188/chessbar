@@ -29,7 +29,7 @@
     color: white;
     width: 400px;
     max-width: 90%;
-    padding: 5px 35px 25px 15px;
+    padding: 5px 15px 25px 15px;
     border-radius: 12px;
     text-align: center;
     box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
@@ -55,9 +55,10 @@
 
 /* === Close Button === */
 .overlay .closebtn {
+    padding: 0;
     position: absolute;
-    top: 10px;
-    right: 15px;
+    top: 0px;
+    right: 5px;
     font-size: 26px;
     color: #fff;
     background: transparent;
@@ -67,7 +68,9 @@
 }
 
 .overlay .closebtn:hover {
-    color: #f1f1f1;
+    padding-top: 1px;
+    color: #8f8e8e;
+    font-size: 25px;
 }
 
 /* === Text Input === */
@@ -95,20 +98,23 @@
 
 .checkbox-item {
     display: flex;
-    /* puts checkbox and label on same line */
     align-items: center;
-    /* vertically center label with checkbox */
     gap: 8px;
-    /* space between checkbox and label */
+}
+
+.checkbox-item:hover label {
+    font-size: 1.05rem;
+}
+
+.checkbox-item * {
+    transition: font-size 0.25s ease, color 0.2s ease;
 }
 
 /* Default label color (unchecked) */
 .checkbox-item label {
-    font-size: 16px;
+    font-size: 1rem;
     cursor: pointer;
     color: #aaa;
-    /* gray when unchecked */
-    transition: color 0.2s ease;
 }
 
 /* Checkbox styling */
@@ -121,7 +127,8 @@
     background-color: #555;
     cursor: pointer;
     position: relative;
-    transition: background-color 0.2s, border-color 0.2s;
+    transform-origin: center center;
+    transition: transform 0.18s ease, background-color 0.2s, border-color 0.2s;
 }
 
 /* Checked state */
@@ -130,11 +137,16 @@
     border-color: #007bff;
 }
 
+/* Grow checkbox when hovering the whole checkbox row (including label) */
+.checkbox-item:hover input[type='checkbox'] {
+    transform: scale(1.15);
+}
+
 /* Checkmark for checked boxes */
 .checkbox-item input[type='checkbox']:checked::after {
     content: '';
     position: absolute;
-    left: 5px;
+    left: 4px;
     top: 1px;
     width: 4px;
     height: 8px;

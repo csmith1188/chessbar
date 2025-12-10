@@ -306,19 +306,23 @@ io.on('connection', (socket) => {
         }
     })
 
-    socket.on('newGame', (visibility = 'public', name = '', pin = 0) => {
-        if (user.game) {
-            user.game.leave(user)
+    socket.on('newGame', (visibility = 'public', name = '', chatOn = true, startWhite = true) => {
+        if (user.id > 0) {
+            if (user.game) {
+                user.game.leave(user)
+            }
+            // console.log('newGame event received')
+            let game = new Game(visibility, name, chatOn, startWhite)
+            game.owner = user
+            // console.log(game.id, game.joinCode, game.owner)
+            game.update()
+            // send the updated visible-games list (including any private games the creator is in) to the creator only
+            socket.emit('gamesList', getVisibleGames())
+            io.emit('refreshGames')
+            socket.emit('redirect', `/game?code=${game.joinCode}`)
+        } else {
+            socket.emit('redirect', '/login')
         }
-        // console.log('newGame event received')
-        let game = new Game(visibility, name)
-        game.owner = user
-        // console.log(game.id, game.joinCode, game.owner)
-        game.update()
-        // send the updated visible-games list (including any private games the creator is in) to the creator only
-        socket.emit('gamesList', getVisibleGames())
-        io.emit('refreshGames')
-        socket.emit('redirect', `/game?code=${game.joinCode}`)
     })
 
     socket.on('updateBoard', (data) => {
