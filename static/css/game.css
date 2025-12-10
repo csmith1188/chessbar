@@ -158,6 +158,27 @@ body {
     /* compact spacing under the sender */
 }
 
+#chatOff {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    display: block;
+}
+
+#chatOff .chatOffMessage {
+    background: rgba(0, 0, 0, 0.78);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 1.5rem;
+    max-width: 420px;
+    min-width: 220px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
 .message {
     max-width: 70%;
     padding: 5px 15px;
