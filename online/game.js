@@ -165,7 +165,6 @@ class Game {
     }
 
     join(user) {
-        console.log(`User ${user.displayName || user.id} joined game ${this.id}`)
         user.side = 'unassigned'
         this.users.push(user)
         user.game = this

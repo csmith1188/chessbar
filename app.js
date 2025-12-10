@@ -340,29 +340,33 @@ io.on('connection', (socket) => {
 
     // When a message comes in
     socket.on('chatMessage', (msg) => {
-        const now = Date.now()
+        if (user.game.chatOn) {
+            const now = Date.now()
 
-        if (now - chatLimit.lastReset > CHAT_WINDOW) {
-            chatLimit.count = 0
-            chatLimit.lastReset = now
+            if (now - chatLimit.lastReset > CHAT_WINDOW) {
+                chatLimit.count = 0
+                chatLimit.lastReset = now
+            }
+
+            if (chatLimit.count >= CHAT_LIMIT) {
+                // Emit a chat message instead of an error message
+                socket.emit('chatMessage', 'System', 'You are sending messages too fast. Please wait a few seconds.');
+                return;
+            }
+            chatLimit.count++;
+
+            if (chatLimit.count >= CHAT_LIMIT) {
+                // Emit a chat message for muting
+                socket.emit('chatMessage', 'System', 'Muted for 10 seconds for spamming.')
+                socket.mutedUntil = Date.now() + 10_000;
+                return;
+            }
+
+            // Broadcast the actual chat message
+            user.game.chatMsg(user.displayName, msg)
+        } else {
+            user.socket.emit('chatOff')
         }
-
-        if (chatLimit.count >= CHAT_LIMIT) {
-            // Emit a chat message instead of an error message
-            socket.emit('chatMessage', 'System', 'You are sending messages too fast. Please wait a few seconds.');
-            return;
-        }
-        chatLimit.count++;
-
-        if (chatLimit.count >= CHAT_LIMIT) {
-            // Emit a chat message for muting
-            socket.emit('chatMessage', 'System', 'Muted for 10 seconds for spamming.')
-            socket.mutedUntil = Date.now() + 10_000;
-            return;
-        }
-
-        // Broadcast the actual chat message
-        user.game.chatMsg(user.displayName, msg)
 
     })
 
