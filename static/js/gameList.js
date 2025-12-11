@@ -68,15 +68,6 @@ function renderGameList() {
             actions.appendChild(actionBtn)
         }
 
-        const previewBtn = document.createElement('button')
-        previewBtn.className = 'preview'
-        previewBtn.textContent = 'Preview'
-        previewBtn.onclick = () => {
-            const w = window.open()
-            w.document.write('<pre>' + JSON.stringify(game, null, 2) + '</pre>')
-        }
-        actions.appendChild(previewBtn)
-
         if (game.owner == me.id) {
             const actionBtn = document.createElement('button')
             actionBtn.className = 'delete'

@@ -15,7 +15,7 @@ const db = new sqlite3.Database('database/database.db', sqlite3.OPEN_READWRITE, 
     if (err) return console.error('Error connecting to database:', err.message)
 })
 
-const PLAY_PRICE = 1
+const PLAY_PRICE = 25
 // const WIN_AMOUNT = 110
 
 //! For digipogs
