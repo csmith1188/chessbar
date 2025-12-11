@@ -194,6 +194,18 @@ function attachSocket(io, games) {
                         if (dest) board.captured.push({ name: dest.name, side: dest.side })
                         board.layout[y2][x2] = foo
                         foo.moves++
+                        // Handle castling rook movement when the king moves two squares.
+                        if (foo.name === 'King' && Math.abs(x2 - x1) === 2) {
+                            const dir = x2 - x1 > 0 ? 1 : -1
+                            const rookX = dir > 0 ? 7 : 0
+                            const newRookX = x1 + dir
+                            const rook = board.layout[y1][rookX]
+                            if (rook && rook.name === 'Rook' && rook.side === foo.side) {
+                                board.layout[y1][newRookX] = rook
+                                board.layout[y1][rookX] = 0
+                                rook.moves++
+                            }
+                        }
                         board.turn = board.turn == 'white' ? 'black' : 'white'
                         // console.log(`Move successful, it's now ${board.turn}'s turn.`)
 
