@@ -9,41 +9,43 @@ function findKing() {
 }
 
 let isRightClickHeld = false;
-let startX = null;
-let startY = null;
+let mouseStartX = null;
+let mouseStartY = null;
 
 document.addEventListener('mousedown', (event) => {
-    if (event.button === 2) { // Right mouse button
+    if (event.button === 2) { 
         isRightClickHeld = true;
 
-        // Convert screen coordinates to board coordinates
-        startX = Math.floor(event.clientX / Settings.boardSquareSize);
-        startY = Math.floor(event.clientY / Settings.boardSquareSize);
+        //screen coordinates to board coordinates
+        MouseStartX = Math.floor(event.clientX / Settings.boardSquareSize);
+        MouseStartY = Math.floor(event.clientY / Settings.boardSquareSize);
 
-        console.log('Right click started at:', startX, startY);
+        console.log('Right click started at:', mouseStartX, mouseStartY);
     }
 })
 
 document.addEventListener('mousemove', (event) => {
     if (isRightClickHeld) {
-        // Convert screen coordinates to board coordinates
-        const endX = Math.floor(event.clientX / Settings.boardSquareSize);
-        const endY = Math.floor(event.clientY / Settings.boardSquareSize);
-        console.log('Right click dragging at:', endX, endY);
+        //screen coordinates to board coordinates
+        const mouseEndX = Math.floor(event.clientX / Settings.boardSquareSize);
+        const mouseEndY = Math.floor(event.clientY / Settings.boardSquareSize);
+
+        console.log('Right click dragging at:', mouseEndX, mouseEndY);
     }
 });
 
 document.addEventListener('mouseup', (event) => {
-    if (event.button === 2) { // Right mouse button
+    if (event.button === 2) { 
         isRightClickHeld = false;
 
         // Convert screen coordinates to board coordinates
-        const endX = Math.floor(event.clientX / Settings.boardSquareSize);
-        const endY = Math.floor(event.clientY / Settings.boardSquareSize);
+        const mouseEndX = Math.floor(event.clientX / Settings.boardSquareSize);
+        const mouseEndY = Math.floor(event.clientY / Settings.boardSquareSize);
 
-        console.log('Right click released at:', endX, endY);
+        console.log('Right click released at:', mouseEndX, mouseEndY);
+        //set a variable to the arrow or something, and if the arrow exists, draw it every frame
 
-        drawArrow(ctx, startX, startY, endX, endY, Settings.arrowColor);
+        
     }
 });
 
