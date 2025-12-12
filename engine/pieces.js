@@ -116,16 +116,36 @@ class King extends Piece {
                     if (board[y1][x]) return false
                 }
 
+                return 'castle'
+            }
+        }
+
+        return false
+    }
+
+    castle(board, x1, y1, x2, y2) {
+        // Castling attempt: determine side (kingside if x2>x1, queenside if x2<x1)
+                const dir = x2 - x1 > 0 ? 1 : -1
+                const rookX = dir > 0 ? 7 : 0
+                const rook = board[y1][rookX]
+
+                // rook must exist, be a rook, same side, and not have moved
+                if (!rook || rook.name !== 'Rook' || rook.side !== this.side || rook.moves !== 0) {
+                    return false
+                }
+
+                // squares between king and rook must be empty
+                const start = Math.min(x1, rookX) + 1
+                const end = Math.max(x1, rookX) - 1
+                for (let x = start; x <= end; x++) {
+                    if (board[y1][x]) return false
+                }
+
                 // Move the rook to its castled square (next to the king's destination)
                 const newRookX = x1 + dir
                 board[y1][newRookX] = rook
                 board[y1][rookX] = 0
 
-                return true
-            }
-        }
-
-        return false
     }
 }
 /*
@@ -297,20 +317,20 @@ class Queen extends Piece {
             iy++
             ix--
             if (iy > 7) {
-                ne = false
+                sw = false
                 break
             }
             if (ix < 0) {
-                ne = false
+                sw = false
                 break
             }
 
             if (board[iy][ix]) {
                 if (board[iy][ix].side == this.side) {
-                    ne = false
+                    sw = false
                 } else {
                     validMoves.push({ x: ix, y: iy })
-                    ne = false
+                    sw = false
                 }
             } else {
                 validMoves.push({ x: ix, y: iy })
@@ -436,16 +456,16 @@ class Bishop extends Piece {
                 break
             }
             if (ix < 0) {
-                ne = false
+                sw = false
                 break
             }
 
             if (board[iy][ix]) {
                 if (board[iy][ix].side == this.side) {
-                    ne = false
+                    sw = false
                 } else {
                     validMoves.push({ x: ix, y: iy })
-                    ne = false
+                    sw = false
                 }
             } else {
                 validMoves.push({ x: ix, y: iy })

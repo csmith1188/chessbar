@@ -35,11 +35,6 @@ fbSocket.on('connect', () => {
     // Send the transfer
 })
 
-// fbSocket.on('transferResponse', (response) => {
-// console.log('Transfer Response:', response)
-// response will be: { success: true/false, message: '...' }
-// })
-
 //! End digipogs
 
 const jwt = require('jsonwebtoken')
@@ -158,7 +153,13 @@ server.listen(PORT, () => {
 function logUsers() {
     console.clear()
     console.log('Users:')
-    users.forEach(u => console.log(`${u.displayName || u.id} (${u.active ? 'Active' : 'Inactive'})`))
+    users.forEach(u => console.log(`Name: ${u.displayName} | ID: ${u.id} | Active: ${u.active ? ' Active ' : 'Inactive'} | Tokens: ${u.tokens}`))
+    console.log()
+    console.log('Games:')
+    games.forEach(g => {
+        console.log(`Owner: ${g.owner.displayName} | Name: ${g.name} | ID: ${g.id} | Visibility: ${g.visibility} | Users:`)
+        g.users.forEach(u => console.log(`  Name: ${u.displayName}`))
+    })
     console.log()
 }
 
@@ -176,7 +177,8 @@ io.on('connection', (socket) => {
         user.socket = socket
         user.sessionUser = sessionUser
         user.active = true
-        console.log(`User ${user.displayName || user.id} reconnected`)
+        // console.log(`User ${user.displayName || user.id} reconnected`)
+        user.getInfo(db)
     } else {
         users.push(user)
         console.log(`Created new user: ${user.displayName || user.id}`)
@@ -278,6 +280,7 @@ io.on('connection', (socket) => {
         }
 
         socket.emit('noGame')
+        logUsers()
     })
 
     //! Disconnection
@@ -323,11 +326,13 @@ io.on('connection', (socket) => {
         } else {
             socket.emit('redirect', '/login')
         }
+        logUsers()
     })
 
     socket.on('updateBoard', (data) => {
         // console.log('updateBoard event received')
         io.emit('updateBoard', data)
+        logUsers()
     })
 
     // kayden's chat limiter
@@ -380,6 +385,7 @@ io.on('connection', (socket) => {
             // console.log(`Game ${gameId} deleted by owner ${user.id}.`)
             io.emit('refreshGames')
         }
+        logUsers()
     })
 })
 

@@ -33,10 +33,12 @@ class User {
         this.game = null
         this.active = true
 
+        this.getInfo(db)
         this.youAre()
     }
 
     youAre() {
+        this.getInfo(db)
         this.displayName = this.sessionUser && this.sessionUser.displayName ? this.sessionUser.displayName : `Guest${this.id}`
         this.socket.emit('youAre', this.serialize())
     }
@@ -111,12 +113,15 @@ class User {
     }
 
     pay() {
+        // console.log(`Pay function called for ${this.displayName}. They currently have ${this.tokens} tokens`)
         this.getInfo(db)
         if (this.tokens > 0) {
             this.tokens--
             db.run(`UPDATE users SET tokens = ${this.tokens} WHERE formbar_id = ${this.id}`)
+            this.getInfo(db)
             return true
         }
+        this.getInfo(db)
         return false
     }
 
