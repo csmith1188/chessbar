@@ -169,11 +169,10 @@ function attachSocket(io, games) {
                 y2 = 7 - y2
             }
 
-            // console.log(`\n${board.turn}'s turn.`)
-            // console.log(`${piece.side} ${piece.name.toLowerCase()} (${x1}, ${y1}) is attempting to move to (${x2}, ${y2})`)
-
+            // Check if the the emission comes from the right player, and also make sure the piece actually moves
             if (board.turn == player.side && !(x1 == x2 && y1 == y2)) {
 
+                // Move must be on the board
                 if (board.layout[y1] && board.layout[y1][x1] && y2 <= 7 && x2 <= 7 && x2 >= 0 && y2 >= 0) {
 
                     let foo = new classes[piece.name](piece.side, piece.moves)
@@ -189,6 +188,8 @@ function attachSocket(io, games) {
                             game.emptyUpdate(socket)
                             return
                         }
+
+                        if (foo.validMove(board.layout, x1, y1, x2, y2) == 'castle') foo.castle(board.layout, x1, y1, x2, y2)
 
                         board.layout[y1][x1] = 0
                         if (dest) board.captured.push({ name: dest.name, side: dest.side })
