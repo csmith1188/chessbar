@@ -20,6 +20,7 @@ document.addEventListener('mousedown', (event) => {
         mouseStartX = Math.floor(event.clientX / Settings.boardSquareSize);
         mouseStartY = Math.floor(event.clientY / Settings.boardSquareSize);
 
+        console.log(event.clientX, event.clientY);
         console.log('Right click started at:', mouseStartX, mouseStartY);
     }
 })
@@ -84,7 +85,7 @@ class Arrow {
         ctx.stroke();
 
         // Draw the arrowhead
-        drawArrowhead(ctx, lineEndX, lineEndY, angle, Settings.boardSquareSize / 4, color);
+        this.drawArrowhead(ctx, lineEndX, lineEndY, angle, Settings.boardSquareSize / 4, color);
     }
 
     drawArrowhead(ctx, x, y, angle, size, color) {
