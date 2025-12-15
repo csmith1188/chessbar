@@ -8,10 +8,11 @@
 ###       ########### ########## ########  ##########
 */
 class Piece {
-    constructor(side, moves = 0) {
+    constructor(side, moves = 0, enPassant = false) {
         this.side = side
         this.name = this.constructor.name
         this.moves = moves
+        this.enPassant = enPassant
     }
 
     move() { }
@@ -52,7 +53,7 @@ class Pawn extends Piece {
                     return true
 
                     // En-passant
-                } else if (!board[y2][x2] && board[y1][x2] && !board[x2][y2] &&
+                } else if (!board[y2][x2] && board[y1][x2] &&
                     board[y1][x2].constructor.name == 'Pawn' &&
                     board[y2][x1].side !== this.side && board[y1][x2].moves == 1 &&
                     (y1 + 2 == 6 && board[y1][x2].side == 'white') || (y1 - 2 == 1)) {
