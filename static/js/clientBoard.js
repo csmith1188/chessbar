@@ -13,12 +13,12 @@ let mouseStartX = null;
 let mouseStartY = null;
 
 document.addEventListener('mousedown', (event) => {
-    if (event.button === 2) { 
+    if (event.button === 2) {
         isRightClickHeld = true;
 
         //screen coordinates to board coordinates
-        MouseStartX = Math.floor(event.clientX / Settings.boardSquareSize);
-        MouseStartY = Math.floor(event.clientY / Settings.boardSquareSize);
+        mouseStartX = Math.floor(event.clientX / Settings.boardSquareSize);
+        mouseStartY = Math.floor(event.clientY / Settings.boardSquareSize);
 
         console.log('Right click started at:', mouseStartX, mouseStartY);
     }
@@ -35,7 +35,7 @@ document.addEventListener('mousemove', (event) => {
 });
 
 document.addEventListener('mouseup', (event) => {
-    if (event.button === 2) { 
+    if (event.button === 2) {
         isRightClickHeld = false;
 
         // Convert screen coordinates to board coordinates
@@ -45,7 +45,7 @@ document.addEventListener('mouseup', (event) => {
         console.log('Right click released at:', mouseEndX, mouseEndY);
         //set a variable to the arrow or something, and if the arrow exists, draw it every frame
 
-        
+
     }
 });
 
@@ -53,41 +53,53 @@ document.addEventListener('contextmenu', (event) => {
     event.preventDefault();
 });
 
-function drawArrow(ctx, startX, startY, endX, endY, color) {
-    // Convert board coordinates to pixel coordinates
+class Arrow {
+    constructor(ctx, startX, startY, endX, endY, color) {
+        this.startX = startX
+        this.startY = startY
+        this.endX = endX
+        this.endY = endY
 
-    const pixelStartX = startX * Settings.boardSquareSize + Settings.boardSquareSize / 2;
-    const pixelStartY = startY * Settings.boardSquareSize + Settings.boardSquareSize / 2;
-    const pixelEndX = endX * Settings.boardSquareSize + Settings.boardSquareSize / 2;
-    const pixelEndY = endY * Settings.boardSquareSize + Settings.boardSquareSize / 2;
+        this.ctx = ctx
+        this.color = color
+    }
 
-    // Calculate the angle for the arrowhead
-    const angle = Math.atan2(pixelEndY - pixelStartY, pixelEndX - pixelStartX);
+    drawArrow(ctx, startX, startY, endX, endY, color) {
+        // Convert board coordinates to pixel coordinates
 
-    // Draw the line
-    ctx.strokeStyle = color; // Set the line color
-    ctx.lineWidth = 2; // Set the line width
-    ctx.beginPath();
-    ctx.moveTo(pixelStartX, pixelStartY);
-    ctx.lineTo(pixelEndX, pixelEndY);
-    ctx.stroke();
+        const lineStartX = startX * Settings.boardSquareSize + Settings.boardSquareSize / 2;
+        const lineStartY = startY * Settings.boardSquareSize + Settings.boardSquareSize / 2;
+        const lineEndX = endX * Settings.boardSquareSize + Settings.boardSquareSize / 2;
+        const lineEndY = endY * Settings.boardSquareSize + Settings.boardSquareSize / 2;
 
-    // Draw the arrowhead
-    drawArrowhead(ctx, pixelEndX, pixelEndY, angle, Settings.boardSquareSize / 4, color);
-}
+        // Calculate the angle for the arrowhead
+        const angle = Math.atan2(lineEndY - lineStartY, lineEndX - lineStartX);
 
-function drawArrowhead(ctx, x, y, angle, size, color) {
-    ctx.save();
-    ctx.translate(x, y); // pixel coordinates 
-    ctx.rotate(angle); // the angle
-    ctx.beginPath(); //start
-    ctx.moveTo(size, 0); // Tip of the arrowhead
-    ctx.lineTo(0, -size / 2); // Left corner of the arrowhead
-    ctx.lineTo(0, size / 2); // Right corner of the arrowhead
-    ctx.closePath();
-    ctx.fillStyle = color; // Arrowhead color
-    ctx.fill();
-    ctx.restore();
+        // Draw the line
+        ctx.strokeStyle = color; // Set the line color
+        ctx.lineWidth = 2; // Set the line width
+        ctx.beginPath();
+        ctx.moveTo(lineStartX, lineStartY);
+        ctx.lineTo(lineEndX, lineEndY);
+        ctx.stroke();
+
+        // Draw the arrowhead
+        drawArrowhead(ctx, lineEndX, lineEndY, angle, Settings.boardSquareSize / 4, color);
+    }
+
+    drawArrowhead(ctx, x, y, angle, size, color) {
+        ctx.save();
+        ctx.translate(x, y); // pixel coordinates 
+        ctx.rotate(angle); // the angle
+        ctx.beginPath(); //start
+        ctx.moveTo(size, 0); // Tip of the arrowhead
+        ctx.lineTo(0, -size / 2); // Left corner of the arrowhead
+        ctx.lineTo(0, size / 2); // Right corner of the arrowhead
+        ctx.closePath();
+        ctx.fillStyle = color; // Arrowhead color
+        ctx.fill();
+        ctx.restore();
+    }
 }
 
 class Piece {
@@ -246,10 +258,10 @@ function drawBoard() {
             }
 
             // Draw the selected piece highlight
-                if (selected && selected.bx == x && selected.by == y) {
-                    ctx.fillStyle = Settings.moveColor
-                    ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
-                }
+            if (selected && selected.bx == x && selected.by == y) {
+                ctx.fillStyle = Settings.moveColor
+                ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
+            }
 
         }
         // Alternate colors at the edge of the board
