@@ -12,31 +12,10 @@ let isRightClickHeld = false;
 let mouseStartX = null;
 let mouseStartY = null;
 let PreArrow = null;
+let mouseEndX = Math.floor(event.clientX / Settings.boardSquareSize);
+let mouseEndY = Math.floor(event.clientY / Settings.boardSquareSize);
 
-document.addEventListener('mousedown', (event) => {
-    if (event.button === 2) {
-        isRightClickHeld = true;
-
-        //screen coordinates to board coordinates
-        mouseStartX = Math.floor(event.clientX / Settings.boardSquareSize);
-        mouseStartY = Math.floor(event.clientY / Settings.boardSquareSize);
-
-        console.log(event.clientX, event.clientY);
-        console.log('Right click started at:', mouseStartX, mouseStartY);
-    }
-})
-
-document.addEventListener('mousemove', (event) => {
-    if (isRightClickHeld) {
-        //screen coordinates to board coordinates
-        const mouseEndX = Math.floor(event.clientX / Settings.boardSquareSize);
-        const mouseEndY = Math.floor(event.clientY / Settings.boardSquareSize);
-
-        console.log('Right click dragging at:', mouseEndX, mouseEndY);
-    }
-});
-
-document.addEventListener('mouseup', (event) => {
+document.addEventListener('thankyou', (event) => {
     if (event.button === 2) {
         isRightClickHeld = false;
 
@@ -49,10 +28,6 @@ document.addEventListener('mouseup', (event) => {
         PreArrow = new Arrow(ctx, mouseStartX, mouseStartY, mouseEndX, mouseEndY, Settings.arrowColor);
 
     }
-});
-
-document.addEventListener('contextmenu', (event) => {
-    event.preventDefault();
 });
 
 class Arrow {

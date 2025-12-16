@@ -135,3 +135,11 @@
 
 ### kayden
 -nocti
+
+## 12/16
+
+### truit
+-
+
+### kayden
+-need to do docs bro
