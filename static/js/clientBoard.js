@@ -11,6 +11,7 @@ function findKing() {
 let isRightClickHeld = false;
 let mouseStartX = null;
 let mouseStartY = null;
+let PreArrow = null;
 
 document.addEventListener('mousedown', (event) => {
     if (event.button === 2) {
@@ -45,7 +46,7 @@ document.addEventListener('mouseup', (event) => {
 
         console.log('Right click released at:', mouseEndX, mouseEndY);
         //set a variable to the arrow or something, and if the arrow exists, draw it every frame
-
+        PreArrow = new Arrow(ctx, mouseStartX, mouseStartY, mouseEndX, mouseEndY, Settings.arrowColor);
 
     }
 });
