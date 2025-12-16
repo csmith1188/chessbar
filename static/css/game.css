@@ -77,8 +77,11 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Lavishly Yours', cursive;
-    font-size: 46px;
+    /* changed: use page font so InfoBox matches other UI */
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1.1;
     color: #e9f8fb;
     border: 1px solid rgba(255, 255, 255, 0.03);
     box-shadow: 0 8px 28px rgba(2, 8, 20, 0.6)
@@ -158,6 +161,46 @@ body {
     /* compact spacing under the sender */
 }
 
+#InfoBox {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.04));
+    border-radius: var(--radius);
+    width: auto;
+    height: auto;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* changed: use same system font as the rest of the page */
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 25px;
+    line-height: 1.1;
+    color: #e9f8fb;
+    /* border: 1px solid rgba(255, 255, 255, 0.03); */
+    box-shadow: 0 8px 28px rgba(2, 8, 20, 0.6);
+    text-align: center;
+    line-height: 1;
+    transition: transform 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+
+/* Responsive tweak for smaller screens */
+@media (max-width: 920px) {
+    #InfoBox {
+        width: calc(100% - 40px);
+        /* slightly smaller on mobile so it doesn't dominate */
+        font-size: 16px;
+    }
+}
+
+/* Light-theme variant */
+@media (prefers-color-scheme: light) {
+    #InfoBox {
+        background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(245,245,245,0.96));
+        color: #10212b;
+        border: 1px solid rgba(0,0,0,0.06);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    }
+}
 
 /* chatOff: hidden by default using opacity so transitions work. JS will toggle the `show` class. */
 #chatOff {

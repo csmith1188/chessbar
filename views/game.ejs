@@ -14,8 +14,8 @@
     <div id='container'>
         <canvas id='canvas'></canvas>
         <div id='sidebar'>
-            <div id='CapturedW' class='captureBox'></div>
-            <div id='CapturedB' class='captureBox'></div>
+            <!-- <div id='CapturedW' class='captureBox'></div>
+            <div id='CapturedB' class='captureBox'></div> -->
             <div id='InfoBox'></div>
         </div>
     </div>
@@ -212,9 +212,9 @@
         socket.on('updateBoard', (data) => {
             updateBoard(data)
             populateUsers()
-            InfoBox.innerHTML = data.board.turn;
-            CapturedW.innerHTML = '';
-            CapturedB.innerHTML = '';
+            InfoBox.innerText = data.board.turn = "white" ? "White's turn" : "Black's turn";
+            // CapturedW.innerHTML = '';
+            // CapturedB.innerHTML = '';
         });
 
         // Listen for server-sent identity info which includes game joinCode when in a game
