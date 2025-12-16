@@ -171,3 +171,75 @@ input:focus { outline: 3px solid rgba(94, 234, 212, 0.12); outline-offset: 2px }
     color: var(--muted);
 }
 .back-link:hover { color: #eaf4fb; background: rgba(255,255,255,0.01); }
+
+/* === Checkbox Group === */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    /* space between each checkbox row */
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkbox-item:hover label {
+    font-size: 1.05rem;
+}
+
+.checkbox-item * {
+    transition: font-size 0.25s ease, color 0.2s ease;
+}
+
+/* Default label color (unchecked) */
+.checkbox-item label {
+    font-size: 1rem;
+    cursor: pointer;
+    color: #aaa;
+}
+
+/* Checkbox styling */
+.checkbox-item input[type='checkbox'] {
+    width: 18px;
+    height: 18px;
+    appearance: none;
+    border: 2px solid #888;
+    border-radius: 4px;
+    background-color: #555;
+    cursor: pointer;
+    position: relative;
+    transform-origin: center center;
+    transition: transform 0.18s ease, background-color 0.2s, border-color 0.2s;
+}
+
+/* Checked state */
+.checkbox-item input[type='checkbox']:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+/* Grow checkbox when hovering the whole checkbox row (including label) */
+.checkbox-item:hover input[type='checkbox'] {
+    transform: scale(1.15);
+}
+
+/* Checkmark for checked boxes */
+.checkbox-item input[type='checkbox']:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Change label color when checkbox is checked */
+.checkbox-item input[type='checkbox']:checked+label {
+    color: #fff;
+}
