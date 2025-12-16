@@ -12,11 +12,15 @@
     <div id='join-code-badge' role='button' tabindex='0' aria-live='polite' aria-label='Copy join code'
         title='Click to copy join code' style='display:none'></div>
     <div id='container'>
-        <canvas id='canvas'></canvas>
+        <!-- new wrapper to stack canvas and InfoBox vertically -->
+        <div id="board-column">
+            <canvas id='canvas'></canvas>
+            <div id='InfoBox'></div>
+        </div>
+
         <div id='sidebar'>
             <!-- <div id='CapturedW' class='captureBox'></div>
             <div id='CapturedB' class='captureBox'></div> -->
-            <div id='InfoBox'></div>
         </div>
     </div>
 

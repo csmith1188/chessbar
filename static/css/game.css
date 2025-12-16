@@ -42,6 +42,16 @@ body {
     margin: 0 auto
 }
 
+/* new: stack canvas and info box vertically and center them */
+#board-column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    /* allow the column to shrink/grow alongside the sidebar */
+    flex: 0 0 auto;
+}
+
 /* Canvas: only visual styling here — JS must set width/height attributes for drawing */
 #canvas {
     background: linear-gradient(180deg, #0b1724, #081424);
