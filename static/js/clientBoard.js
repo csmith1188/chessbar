@@ -8,27 +8,14 @@ function findKing() {
     if (king) return king
 }
 
-let isRightClickHeld = false;
-let mouseStartX = null;
-let mouseStartY = null;
-let PreArrow = null;
-let mouseEndX = Math.floor(event.clientX / Settings.boardSquareSize);
-let mouseEndY = Math.floor(event.clientY / Settings.boardSquareSize);
-
-document.addEventListener('thankyou', (event) => {
-    if (event.button === 2) {
-        isRightClickHeld = false;
-
-        // Convert screen coordinates to board coordinates
-        const mouseEndX = Math.floor(event.clientX / Settings.boardSquareSize);
-        const mouseEndY = Math.floor(event.clientY / Settings.boardSquareSize);
-
-        console.log('Right click released at:', mouseEndX, mouseEndY);
-        //set a variable to the arrow or something, and if the arrow exists, draw it every frame
-        PreArrow = new Arrow(ctx, mouseStartX, mouseStartY, mouseEndX, mouseEndY, Settings.arrowColor);
-
-    }
-});
+let isRightClickHeld = false
+let mouseStartX = null
+let mouseStartY = null
+let PreArrow = null
+let mouseEndX = null
+let mouseEndY = null
+    
+//set a variable to the arrow or something, and if the arrow exists, draw it every frame
 
 class Arrow {
     constructor(ctx, startX, startY, endX, endY, color) {
