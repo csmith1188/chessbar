@@ -331,7 +331,11 @@ io.on('connection', (socket) => {
 
     socket.on('updateBoard', (data) => {
         // console.log('updateBoard event received')
-        io.emit('updateBoard', data)
+        if (data) {
+            user.game.update(data)
+        } else {
+            user.game.emptyUpdate()
+        }
         logUsers()
     })
 
