@@ -15,7 +15,7 @@ let PreArrow = null
 let mouseEndX = null
 let mouseEndY = null
     
-//set a variable to the arrow or something, and if the arrow exists, draw it every frame
+//set a variable to the arrow or something, and if the arrow exists, draw it every frame 
 
 class Arrow {
     constructor(ctx, startX, startY, endX, endY, color) {
