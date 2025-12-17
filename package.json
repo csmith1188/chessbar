@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-session": "^1.18.2",
@@ -13,7 +14,6 @@
   "version": "1.0.0",
   "description": "1. In the command prompt, run `init.bat`.\r 2. In `INFO.js`, fill out the correct information.",
   "main": "app.js",
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

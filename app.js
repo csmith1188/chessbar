@@ -7,7 +7,7 @@ const path = require('path')
 const { Board, attachSocket, classes } = require('./engine/main')
 const { User, takenUserIds, userSocket } = require('./online/user')
 let { Game, games, takenGameIds, serializeGame } = require('./online/game')
-const { EMPLOYEE_ID_1, EMPLOYEE_ID_2, EMPLOYEE_PIN_1, EMPLOYEE_PIN_2, POOL_ID, FORMBAR_URL, THIS_URL, FORMBAR_API_KEY, FB_MIDDLEWARE_SECRET } = require('./INFO.js')
+const { POOL_ID, FORMBAR_URL, THIS_URL, FORMBAR_API_KEY, FB_MIDDLEWARE_SECRET } = require('./config.js')
 const sqlite3 = require('sqlite3')
 let sql
 

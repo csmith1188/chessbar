@@ -1,6 +1,5 @@
 /node_modules
 test.js
-# profitCalc.js
 database/database.db
-INFO.js
 database/freeTokens.js
+.env
