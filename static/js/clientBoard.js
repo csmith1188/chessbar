@@ -8,15 +8,6 @@ function findKing() {
     if (king) return king
 }
 
-let isRightClickHeld = false
-let mouseStartX = null
-let mouseStartY = null
-let PreArrow = null
-let mouseEndX = null
-let mouseEndY = null
-    
-//set a variable to the arrow or something, and if the arrow exists, draw it every frame 
-
 class Arrow {
     constructor(ctx, startX, startY, endX, endY, color) {
         this.startX = startX
@@ -226,6 +217,15 @@ function drawBoard() {
                 ctx.fillStyle = Settings.moveColor
                 ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
             }
+
+            // here, draw the arrow if it exists?
+            //set a variable to the arrow or something, and if the arrow exists, draw it every frame 
+            let arrow = new Arrow(ctx, 0, 0, 0, 0, arrowColor);
+
+            if(Mouse.right = true) {
+                
+            }
+            arrow.drawArrow(ctx, arrow.startX, arrow.startY, arrow.endX, arrow.endY, arrow.color);
 
         }
         // Alternate colors at the edge of the board
