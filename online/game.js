@@ -45,6 +45,11 @@ class Game {
 
         this.paid = []
 
+        // Promotion state: whether a promotion is awaiting resolution and which side owns it
+        this.promotionPending = false
+        this.promotionSide = null
+        this.promotionCoords = null
+
         // generate a unique 6-digit join code
         let code = Math.floor(Math.random() * 900000) + 100000
         while (takenGameCodes.includes(code)) {
@@ -192,9 +197,22 @@ class Game {
 
             user.youAre()
 
+            // Only request promotion once per move: use a flag on the move object
             if (move && move.side == user.side && (move.y2 == 7 || move.y2 === 0) && move.name == 'Pawn') {
-                user.socket.emit('promotion', move.x2, move.y2)
-                promotion = true
+                // If we haven't already requested promotion for this move and it's not already handled
+                if (!move._promotionRequested && !move._promotionHandled) {
+                    // notify the mover client to pick promotion
+                    user.socket.emit('promotion', move.x2, move.y2)
+                    move._promotionRequested = true
+                    promotion = true
+
+                    // set server-side promotion state (only once)
+                    if (!this.promotionPending) {
+                        this.promotionPending = true
+                        this.promotionSide = move.side
+                        this.promotionCoords = { x: move.x2, y: move.y2 }
+                    }
+                }
             }
 
             // Update for the users
@@ -235,6 +253,71 @@ class Game {
         }
     }
 
+    // Helper to clear promotion state after server-side promotion handling completes
+    startPromotion(x, y, side) {
+        this.promotionPending = true
+        this.promotionSide = side
+        this.promotionCoords = { x, y }
+        this.update() // broadcast updated state
+    }
+
+    endPromotion() {
+        this.promotionPending = false
+        this.promotionSide = null
+        this.promotionCoords = null
+        this.update() // broadcast updated state
+    }
+
+    // Apply a promotion choice coming from a client.
+    // Validate the user is allowed to promote, attempt to update the Board,
+    // then clear the promotion lock so the opponent can move.
+    applyPromotionChoice(user, x, y, pieceName) {
+        // Only accept if a promotion is pending and the requester is the promoting side
+        if (!this.promotionPending) return
+        if (!user || user.side !== this.promotionSide) return
+
+        // Try to apply promotion using engine API if available
+        try {
+            if (this.board && typeof this.board.promote === 'function') {
+                // engine-specific promote: signature may vary; try common shapes
+                try {
+                    // Prefer (x,y,pieceName,side)
+                    this.board.promote(x, y, pieceName, user.side)
+                } catch (e) {
+                    // fallback to (x,y,pieceName)
+                    this.board.promote(x, y, pieceName)
+                }
+            } else if (this.board && this.board.layout && Array.isArray(this.board.layout)) {
+                // Best-effort fallback: replace layout cell with a simple object
+                if (this.board.layout[y] && this.board.layout[y][x]) {
+                    this.board.layout[y][x] = { name: pieceName, side: user.side, moves: [] }
+                }
+            }
+
+            // Ensure the board turn advances so the opponent can move.
+            if (this.board) {
+                if (typeof this.board.turn !== 'undefined') {
+                    this.board.turn = (user.side === 'white') ? 'black' : 'white'
+                } else if (this.board.currentPlayer) {
+                    this.board.currentPlayer = (user.side === 'white') ? 'black' : 'white'
+                }
+            }
+        } catch (err) {
+            console.error('applyPromotionChoice error:', err)
+        }
+
+        // Mark prevMove as handled so update() won't re-request promotion for the same move
+        if (this.prevMove) {
+            this.prevMove._promotionHandled = true
+            // remove the requested flag to avoid confusion on future moves
+            delete this.prevMove._promotionRequested
+        }
+
+        // Clear promotion state and broadcast the updated game so the opponent can move
+        this.endPromotion()
+        // endPromotion calls update(), broadcasting the cleared promotion and board state
+    }
+
     activeUsers() {
         return this.users.filter(u => u.active == true)
     }
@@ -263,7 +346,11 @@ function serializeGame(game) {
         owner: game.owner.id,
         visibility: game.visibility,
         prevBlack: game.prevBlack ? game.prevBlack.serialize() : null,
-        prevWhite: game.prevWhite ? game.prevWhite.serialize() : null
+        prevWhite: game.prevWhite ? game.prevWhite.serialize() : null,
+        // Promotion metadata so clients can disable moves while promotion is unresolved
+        promotionPending: game.promotionPending || false,
+        promotionSide: game.promotionSide || null,
+        promotionCoords: game.promotionCoords || null
     }
 }
 

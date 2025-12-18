@@ -11,8 +11,9 @@
     <!-- Join code badge (top-left) -->
     <div id='join-code-badge' role='button' tabindex='0' aria-live='polite' aria-label='Copy join code'
         title='Click to copy join code' style='display:none'></div>
+
     <div id='container'>
-        <!-- new wrapper to stack canvas and InfoBox vertically -->
+        <!-- Game canvas -->
         <div id="board-column">
             <canvas id='canvas'></canvas>
             <div id='InfoBox'></div>
@@ -22,6 +23,14 @@
             <!-- <div id='CapturedW' class='captureBox'></div>
             <div id='CapturedB' class='captureBox'></div> -->
         </div>
+    </div>
+
+    <!-- Pawn promotion menu (hidden, fixed top-center) -->
+    <div id="promotion" aria-hidden="true">
+        <img src="" id="queen">
+        <img src="" id="rook">
+        <img src="" id="bishop">
+        <img src="" id="knight">
     </div>
 
     <!-- === Chat Section === -->
@@ -79,7 +88,7 @@
             <div class='setting-row'>
                 <label for='arrowColor'>Move Arrow Color:</label>
                 <input type='color' id='arrowColor'>
-                <label for='arrowAlpha'>Transparency (0–1):</label>
+                <label for='arrowAlpha'>Transparency (0-1):</label>
                 <input type='number' id='arrowAlpha' min='0' max='1' step='0.01' value='0.6'>
 
             </div>
@@ -128,7 +137,7 @@
     <script src='/socket.io/socket.io.js'></script>
     <script src='js/socket.js'></script>
 
-    <!-- Your game scripts -->
+    <!-- Game scripts -->
     <script src='js/chat.js'></script>
     <script src='js/settings.js'></script>
     <script src='js/docEvents.js'></script>

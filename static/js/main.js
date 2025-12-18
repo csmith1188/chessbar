@@ -29,14 +29,83 @@ socket.on('mate', (d) => {
     alert(`Checkmate. ${d.winner} wins!`)
 })
 
-socket.on('promotion', (x, y) => {
-    let piece = ''
+// pending promotion coords and listener-guard
+window.pendingPromotionX = null
+window.pendingPromotionY = null
+let promotionListenersAdded = false
 
-    while (!(piece == 'Knight' || piece == 'Queen' || piece == 'Rook' || piece == 'Bishop')) {
-        piece = prompt('Queen Rook Bishop Knight (capitol letter to start)', 'Queen')
+// Pawn promotion menu
+function showPromoteMenu(overrideSide) {
+    const menu = document.getElementById('promotion');
+    const queen = document.getElementById('queen');
+    const rook = document.getElementById('rook');
+    const bishop = document.getElementById('bishop');
+    const knight = document.getElementById('knight');
+
+    queen.width = Settings.boardSquareSize
+    queen.height = Settings.boardSquareSize
+    rook.width = Settings.boardSquareSize
+    rook.height = Settings.boardSquareSize
+    bishop.width = Settings.boardSquareSize
+    bishop.height = Settings.boardSquareSize
+    knight.width = Settings.boardSquareSize
+    knight.height = Settings.boardSquareSize
+
+    // determine piece style and side with safe fallbacks
+    const pieceStyle = (typeof Settings !== 'undefined' && Settings.pieceStyle) ? Settings.pieceStyle : 'basic';
+    // Use safe default if "me" isn't set yet
+    let side = (me && me.side) ? me.side : 'white';
+    if (overrideSide) side = overrideSide;
+    else if (typeof obj !== 'undefined' && obj && obj.side) side = obj.side;
+
+    // unhide menu and update accessibility flag
+    menu.style.display = 'flex'; // use flex so images layout horizontally
+    menu.style.justifyContent = 'center';
+    menu.setAttribute('aria-hidden', 'false');
+
+    queen.src = `img/${pieceStyle}/${side}_queen.png`;
+    rook.src = `img/${pieceStyle}/${side}_rook.png`;
+    bishop.src = `img/${pieceStyle}/${side}_bishop.png`;
+    knight.src = `img/${pieceStyle}/${side}_knight.png`;
+
+    // Add click handlers once to avoid duplication
+    if (!promotionListenersAdded) {
+        promotionListenersAdded = true
+        const choose = (pieceName) => {
+            if (window.pendingPromotionX === null || window.pendingPromotionY === null) return
+            socket.emit('promotion', window.pendingPromotionX, window.pendingPromotionY, pieceName)
+            hidePromoteMenu()
+            window.pendingPromotionX = window.pendingPromotionY = null
+        }
+        if (queen) queen.addEventListener('click', () => choose('Queen'))
+        if (rook) rook.addEventListener('click', () => choose('Rook'))
+        if (bishop) bishop.addEventListener('click', () => choose('Bishop'))
+        if (knight) knight.addEventListener('click', () => choose('Knight'))
     }
+}
 
-    socket.emit('promotion', x, y, piece)
+// Hide promotion menu
+function hidePromoteMenu() {
+    const menu = document.getElementById('promotion');
+    if (!menu) return;
+    // hide and update accessibility
+    menu.style.display = 'none';
+    menu.setAttribute('aria-hidden', 'true');
+
+    // clear images to avoid leftover visuals / resource usage
+    ['queen', 'rook', 'bishop', 'knight'].forEach(id => {
+        const img = document.getElementById(id);
+        if (img) img.src = '';
+    });
+
+    // clear pending coords just in case
+    window.pendingPromotionX = window.pendingPromotionY = null
+}
+
+socket.on('promotion', (x, y) => {
+    window.pendingPromotionX = x
+    window.pendingPromotionY = y
+    showPromoteMenu()
 })
 
 function updateBoard(data) {
@@ -48,7 +117,10 @@ function updateBoard(data) {
     newBoard = data.board
     // console.log(data)
     prevMove = data.move
-    if (prevMove && prevMove.x2 !== null && prevMove.y2 !== null && prevMove.name && prevMove.side && me.side != prevMove.side) {
+
+    // Guard against "me" not being set yet before checking me.side
+    const isOpponentMove = me && prevMove && prevMove.x2 !== null && prevMove.y2 !== null && prevMove.name && prevMove.side && me.side != prevMove.side
+    if (isOpponentMove) {
         const pieceImg = `img/${Settings.pieceStyle}/${prevMove.side}_${prevMove.name.toLowerCase()}.png`
         moveAnimation = me.side == 'white' ? new MovePiece(prevMove.x1, prevMove.y1, prevMove.x2, prevMove.y2, pieceImg, prevMove.name, prevMove.side) : new MovePiece(prevMove.x1, 7 - prevMove.y1, prevMove.x2, 7 - prevMove.y2, pieceImg, prevMove.name, prevMove.side)
     }
