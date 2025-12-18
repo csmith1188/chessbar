@@ -216,7 +216,7 @@
         socket.on('updateBoard', (data) => {
             updateBoard(data)
             populateUsers()
-            InfoBox.innerText = data.board.turn = "white" ? "White's turn" : "Black's turn";
+            InfoBox.innerText = data.board.turn == "white" ? "White's turn" : "Black's turn";
             // CapturedW.innerHTML = '';
             // CapturedB.innerHTML = '';
         });

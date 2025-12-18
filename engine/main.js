@@ -189,7 +189,7 @@ function attachSocket(io, games) {
                             return
                         }
 
-                        for (let y of board) {
+                        for (let y of board.layout) {
                             for (let x of y) {
                                 if (x.enPassant) x.enPassant = false
                             }

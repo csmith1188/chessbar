@@ -184,7 +184,7 @@ class Game {
         this.update()
     }
 
-    update(move = {}, check = false, mate = false, opponent = null, winner = null, takenPiece) {
+    update(move = {}, check = false, mate = false, opponent = null, winner = null, takenPiece = null) {
         if (move) this.prevMove = move
 
         let promotion = false
