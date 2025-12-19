@@ -258,64 +258,13 @@ class Game {
         this.promotionPending = true
         this.promotionSide = side
         this.promotionCoords = { x, y }
-        this.update() // broadcast updated state
+        this.emptyUpdate() // broadcast updated state
     }
 
     endPromotion() {
         this.promotionPending = false
         this.promotionSide = null
         this.promotionCoords = null
-        this.update() // broadcast updated state
-    }
-
-    // Apply a promotion choice coming from a client.
-    // Validate the user is allowed to promote, attempt to update the Board,
-    // then clear the promotion lock so the opponent can move.
-    applyPromotionChoice(user, x, y, pieceName) {
-        // Only accept if a promotion is pending and the requester is the promoting side
-        if (!this.promotionPending) return
-        if (!user || user.side !== this.promotionSide) return
-
-        // Try to apply promotion using engine API if available
-        try {
-            if (this.board && typeof this.board.promote === 'function') {
-                // engine-specific promote: signature may vary; try common shapes
-                try {
-                    // Prefer (x,y,pieceName,side)
-                    this.board.promote(x, y, pieceName, user.side)
-                } catch (e) {
-                    // fallback to (x,y,pieceName)
-                    this.board.promote(x, y, pieceName)
-                }
-            } else if (this.board && this.board.layout && Array.isArray(this.board.layout)) {
-                // Best-effort fallback: replace layout cell with a simple object
-                if (this.board.layout[y] && this.board.layout[y][x]) {
-                    this.board.layout[y][x] = { name: pieceName, side: user.side, moves: [] }
-                }
-            }
-
-            // Ensure the board turn advances so the opponent can move.
-            if (this.board) {
-                if (typeof this.board.turn !== 'undefined') {
-                    this.board.turn = (user.side === 'white') ? 'black' : 'white'
-                } else if (this.board.currentPlayer) {
-                    this.board.currentPlayer = (user.side === 'white') ? 'black' : 'white'
-                }
-            }
-        } catch (err) {
-            console.error('applyPromotionChoice error:', err)
-        }
-
-        // Mark prevMove as handled so update() won't re-request promotion for the same move
-        if (this.prevMove) {
-            this.prevMove._promotionHandled = true
-            // remove the requested flag to avoid confusion on future moves
-            delete this.prevMove._promotionRequested
-        }
-
-        // Clear promotion state and broadcast the updated game so the opponent can move
-        this.endPromotion()
-        // endPromotion calls update(), broadcasting the cleared promotion and board state
     }
 
     activeUsers() {

@@ -15,7 +15,7 @@ const db = new sqlite3.Database('database/database.db', sqlite3.OPEN_READWRITE, 
     if (err) return console.error('Error connecting to database:', err.message)
 })
 
-const PLAY_PRICE = 25
+const PLAY_PRICE = 1
 // const WIN_AMOUNT = 110
 
 //! For digipogs
@@ -303,11 +303,13 @@ io.on('connection', (socket) => {
     })
 
     socket.on('promotion', (x, y, newPiece) => {
+        if (!user.game.promotionPending) return
         if (user.game.board.layout[y][x].constructor.name == 'Pawn') {
             user.game.board.layout[y][x] = new classes[newPiece](user.side, 0)
             const opponent = user.side == 'white' ? 'black' : 'white'
             const inCheck = user.game.board.inCheck(opponent)
             const isMate = inCheck && !user.game.board.hasLegalMoves(opponent)
+            user.game.endPromotion()
             user.game.update({}, inCheck, isMate, opponent, user.side, null)
         }
     })
