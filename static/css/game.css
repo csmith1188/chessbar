@@ -205,10 +205,10 @@ body {
 /* Light-theme variant */
 @media (prefers-color-scheme: light) {
     #InfoBox {
-        background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(245,245,245,0.96));
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(245, 245, 245, 0.96));
         color: #10212b;
-        border: 1px solid rgba(0,0,0,0.06);
-        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
     }
 }
 
@@ -361,6 +361,56 @@ input:focus {
 
 ::-webkit-scrollbar {
     display: none;
+}
+
+#promotion {
+    padding: 8px 24px 2px 24px;
+    width: min-content;
+    display: none;
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    border: solid 5px black;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    z-index: 1000;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Promotion piece hover / focus "pop" effect */
+#promotion img {
+    display: inline-block;
+    cursor: pointer;
+    transition: transform 180ms cubic-bezier(.2,.9,.3,1), box-shadow 180ms ease;
+    will-change: transform, box-shadow;
+    border-radius: 6px;
+    /* provide a subtle elevation baseline */
+    /* box-shadow: 0 2px 6px rgba(0,0,0,0.08); */
+    outline: none;
+}
+
+#promotion img:hover,
+#promotion img:focus {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 10px 22px rgba(2,8,20,0.18);
+}
+
+#promotion img:active {
+    /* don't apply the hover pop while the user is actively clicking */
+    transform: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    #promotion img {
+        transition: none;
+        transform: none !important;
+    }
 }
 
 /* Settings button + modal */
@@ -521,11 +571,13 @@ input:focus {
 }
 
 .status-dot.online {
-    background-color: #57d95b; /* Green for online */
+    background-color: #57d95b;
+    /* Green for online */
 }
 
 .status-dot.offline {
-    background-color: #888888; /* Gray for offline */
+    background-color: #888888;
+    /* Gray for offline */
 }
 
 .userdiv {

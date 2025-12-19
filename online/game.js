@@ -45,6 +45,11 @@ class Game {
 
         this.paid = []
 
+        // Promotion state: whether a promotion is awaiting resolution and which side owns it
+        this.promotionPending = false
+        this.promotionSide = null
+        this.promotionCoords = null
+
         // generate a unique 6-digit join code
         let code = Math.floor(Math.random() * 900000) + 100000
         while (takenGameCodes.includes(code)) {
@@ -184,7 +189,7 @@ class Game {
         this.update()
     }
 
-    update(move = {}, check = false, mate = false, opponent = null, winner = null, takenPiece) {
+    update(move = {}, check = false, mate = false, opponent = null, winner = null, takenPiece = null) {
         if (move) this.prevMove = move
 
         let promotion = false
@@ -192,9 +197,22 @@ class Game {
 
             user.youAre()
 
+            // Only request promotion once per move: use a flag on the move object
             if (move && move.side == user.side && (move.y2 == 7 || move.y2 === 0) && move.name == 'Pawn') {
-                user.socket.emit('promotion', move.x2, move.y2)
-                promotion = true
+                // If we haven't already requested promotion for this move and it's not already handled
+                if (!move._promotionRequested && !move._promotionHandled) {
+                    // notify the mover client to pick promotion
+                    user.socket.emit('promotion', move.x2, move.y2)
+                    move._promotionRequested = true
+                    promotion = true
+
+                    // set server-side promotion state (only once)
+                    if (!this.promotionPending) {
+                        this.promotionPending = true
+                        this.promotionSide = move.side
+                        this.promotionCoords = { x: move.x2, y: move.y2 }
+                    }
+                }
             }
 
             // Update for the users
@@ -235,6 +253,20 @@ class Game {
         }
     }
 
+    // Helper to clear promotion state after server-side promotion handling completes
+    startPromotion(x, y, side) {
+        this.promotionPending = true
+        this.promotionSide = side
+        this.promotionCoords = { x, y }
+        this.emptyUpdate() // broadcast updated state
+    }
+
+    endPromotion() {
+        this.promotionPending = false
+        this.promotionSide = null
+        this.promotionCoords = null
+    }
+
     activeUsers() {
         return this.users.filter(u => u.active == true)
     }
@@ -263,7 +295,11 @@ function serializeGame(game) {
         owner: game.owner.id,
         visibility: game.visibility,
         prevBlack: game.prevBlack ? game.prevBlack.serialize() : null,
-        prevWhite: game.prevWhite ? game.prevWhite.serialize() : null
+        prevWhite: game.prevWhite ? game.prevWhite.serialize() : null,
+        // Promotion metadata so clients can disable moves while promotion is unresolved
+        promotionPending: game.promotionPending || false,
+        promotionSide: game.promotionSide || null,
+        promotionCoords: game.promotionCoords || null
     }
 }
 
