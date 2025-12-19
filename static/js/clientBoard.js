@@ -1,5 +1,6 @@
 let pieces = []
 let selected = null
+let arrows = []
 
 function findKing() {
     let king
@@ -7,6 +8,8 @@ function findKing() {
     // console.log(king)
     if (king) return king
 }
+
+
 
 class Arrow {
     constructor(ctx, startX, startY, endX, endY, color) {
@@ -220,12 +223,9 @@ function drawBoard() {
 
             // here, draw the arrow if it exists?
             //set a variable to the arrow or something, and if the arrow exists, draw it every frame 
-            let arrow = new Arrow(ctx, 0, 0, 0, 0, arrowColor);
-
-            if(Mouse.right = true) {
-                
-            }
-            arrow.drawArrow(ctx, arrow.startX, arrow.startY, arrow.endX, arrow.endY, arrow.color);
+            arrows.push(new Arrow())
+            Mouse.dragstartX = null
+            Mouse.dragstartY = null
 
         }
         // Alternate colors at the edge of the board

@@ -15,7 +15,11 @@ let Mouse = {
     x: 0,
     y: 0,
     left: false,
-    right: false
+    right: false,
+    dragStartX: null,
+    dragStartY: null,
+    dragEndX: null,
+    dragEndY: null,
 }
 
 let keys = {}
