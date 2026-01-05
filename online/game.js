@@ -45,6 +45,8 @@ class Game {
 
         this.paid = []
 
+        this.finished = false
+
         // Promotion state: whether a promotion is awaiting resolution and which side owns it
         this.promotionPending = false
         this.promotionSide = null
@@ -223,6 +225,7 @@ class Game {
             }
 
             if (mate) {
+                this.finished = true
                 user.socket.emit('mate', { winner: winner })
                 if (!this.winner) {
                     let foo = this.users.find(u => u.side == winner)
@@ -259,6 +262,26 @@ class Game {
         this.promotionSide = side
         this.promotionCoords = { x, y }
         this.emptyUpdate() // broadcast updated state
+    }
+
+    resign(user) {
+        if (!this.finished && (user.side == 'white' || user.side == 'black')) {
+            this.loser = user
+            if (user.side == 'white') {
+                this.winner = this.prevBlack
+            } else {
+                this.winner = this.prevWhite
+            }
+
+            if (this.winner && this.loser) {
+                this.winner.win()
+                this.loser.lose()
+
+                this.users.forEach(u => u.socket.emit('resign', user.serialize()))
+
+                this.finished = true
+            }
+        }
     }
 
     endPromotion() {
@@ -299,7 +322,8 @@ function serializeGame(game) {
         // Promotion metadata so clients can disable moves while promotion is unresolved
         promotionPending: game.promotionPending || false,
         promotionSide: game.promotionSide || null,
-        promotionCoords: game.promotionCoords || null
+        promotionCoords: game.promotionCoords || null,
+        finished: game.finished
     }
 }
 

@@ -157,6 +157,9 @@ function attachSocket(io, games) {
                 // send back a no-op board to the requesting socket so client can re-sync
                 socket.emit('updateBoard', {})
                 return
+            } else if (game.finished) {
+                game.emptyUpdate(socket)
+                return
             }
 
             const board = game.board
