@@ -79,24 +79,6 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.03)
 }
 
-#InfoBox {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.04));
-    border-radius: 12px;
-    width: 180px;
-    height: 110px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    /* changed: use page font so InfoBox matches other UI */
-    font-family: inherit;
-    font-weight: 700;
-    font-size: 18px;
-    line-height: 1.1;
-    color: #e9f8fb;
-    border: 1px solid rgba(255, 255, 255, 0.03);
-    box-shadow: 0 8px 28px rgba(2, 8, 20, 0.6)
-}
-
 /* Chat (fixed) - keep visible; container hides overflow, only messages scroll */
 #chat-container {
     position: fixed;
@@ -172,8 +154,6 @@ body {
 }
 
 #InfoBox {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.04));
-    border-radius: var(--radius);
     width: auto;
     height: auto;
     padding: 12px;
@@ -187,10 +167,43 @@ body {
     line-height: 1.1;
     color: #e9f8fb;
     /* border: 1px solid rgba(255, 255, 255, 0.03); */
-    box-shadow: 0 8px 28px rgba(2, 8, 20, 0.6);
     text-align: center;
     line-height: 1;
     transition: transform 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+
+/* Row containing info text and the resign button */
+#info-resign-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Resign button (icon-only) */
+#resign-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    border: 2px solid var(--bg-2);
+    background-color: var(--bg-2);
+    background-image: url('../img/resign.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 60% 60%;
+    cursor: pointer;
+    transition: transform 140ms ease, background-size 100ms ease
+}
+
+#resign-btn:hover {
+    /* transform: translateY(-2px); */
+    background-size: 70% 70%;
+    box-shadow: 0 10px 22px rgba(2,8,20,0.18);
+}
+
+#resign-btn:focus {
+    outline: 3px solid rgba(94, 234, 212, 0.14);
+    outline-offset: 2px;
+    /* transform: translateY(-2px); */
 }
 
 /* Responsive tweak for smaller screens */

@@ -33,6 +33,10 @@ socket.on('mate', (d) => {
     alert(`Checkmate. ${d.winner} wins!`)
 })
 
+socket.on('resign', (u) => {
+    alert(`${u.displayName} has resigned.`)
+})
+
 // pending promotion coords and listener-guard
 window.pendingPromotionX = null
 window.pendingPromotionY = null

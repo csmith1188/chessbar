@@ -16,7 +16,6 @@ const db = new sqlite3.Database('database/database.db', sqlite3.OPEN_READWRITE, 
 })
 
 const PLAY_PRICE = 25
-// const WIN_AMOUNT = 110
 
 //! For digipogs
 
@@ -32,7 +31,6 @@ const fbSocket = fbIo(FORMBAR_URL, {
 // Wait for successful connection
 fbSocket.on('connect', () => {
     console.log('Connected to Formbar server')
-    // Send the transfer
 })
 
 //! End digipogs
@@ -259,7 +257,12 @@ io.on('connection', (socket) => {
         socket.emit('gamesList', getVisibleGames())
     })
 
-    // console.log('A user connected:', user.id)
+    // When a user resigns
+    socket.on(('resign'), () => {
+        if (user.game) {
+            user.game.resign(user)
+        }
+    }) 
 
     socket.on('join', (gameId) => {
         for (let game of games) {
