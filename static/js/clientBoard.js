@@ -1,5 +1,6 @@
 let pieces = []
 let selected = null
+let arrows = []
 
 function findKing() {
     // Return undefined if we don't yet know who "me" is
@@ -11,14 +12,7 @@ function findKing() {
     if (king) return king
 }
 
-let isRightClickHeld = false
-let mouseStartX = null
-let mouseStartY = null
-let PreArrow = null
-let mouseEndX = null
-let mouseEndY = null
-    
-//set a variable to the arrow or something, and if the arrow exists, draw it every frame 
+
 
 class Arrow {
     constructor(ctx, startX, startY, endX, endY, color) {
@@ -235,6 +229,12 @@ function drawBoard() {
                 ctx.fillStyle = Settings.moveColor
                 ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
             }
+
+            // here, draw the arrow if it exists?
+            //set a variable to the arrow or something, and if the arrow exists, draw it every frame 
+            arrows.push(new Arrow())
+            Mouse.dragstartX = null
+            Mouse.dragstartY = null
 
         }
         // Alternate colors at the edge of the board

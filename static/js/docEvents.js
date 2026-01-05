@@ -19,6 +19,8 @@ document.addEventListener('keyup', (e) => {
 document.addEventListener('mousedown', (e) => {
     if (e.button == 0) {
         Mouse.left = true
+        Mouse.dragStartX = Mouse.x
+        Mouse.dragStartY = Mouse.y
     } else if (e.button == 2) {
         Mouse.right = true
     }
