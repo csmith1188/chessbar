@@ -79,24 +79,6 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.03)
 }
 
-#InfoBox {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.04));
-    border-radius: 12px;
-    width: 180px;
-    height: 110px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    /* changed: use page font so InfoBox matches other UI */
-    font-family: inherit;
-    font-weight: 700;
-    font-size: 18px;
-    line-height: 1.1;
-    color: #e9f8fb;
-    border: 1px solid rgba(255, 255, 255, 0.03);
-    box-shadow: 0 8px 28px rgba(2, 8, 20, 0.6)
-}
-
 /* Chat (fixed) - keep visible; container hides overflow, only messages scroll */
 #chat-container {
     position: fixed;
@@ -172,8 +154,6 @@ body {
 }
 
 #InfoBox {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.04));
-    border-radius: var(--radius);
     width: auto;
     height: auto;
     padding: 12px;
@@ -187,10 +167,43 @@ body {
     line-height: 1.1;
     color: #e9f8fb;
     /* border: 1px solid rgba(255, 255, 255, 0.03); */
-    box-shadow: 0 8px 28px rgba(2, 8, 20, 0.6);
     text-align: center;
     line-height: 1;
     transition: transform 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+
+/* Row containing info text and the resign button */
+#info-resign-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Resign button (icon-only) */
+#resign-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    border: 2px solid var(--bg-2);
+    background-color: var(--bg-2);
+    background-image: url('../img/resign.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 60% 60%;
+    cursor: pointer;
+    transition: transform 140ms ease, background-size 100ms ease
+}
+
+#resign-btn:hover {
+    /* transform: translateY(-2px); */
+    background-size: 70% 70%;
+    box-shadow: 0 10px 22px rgba(2,8,20,0.18);
+}
+
+#resign-btn:focus {
+    outline: 3px solid rgba(94, 234, 212, 0.14);
+    outline-offset: 2px;
+    /* transform: translateY(-2px); */
 }
 
 /* Responsive tweak for smaller screens */
@@ -205,10 +218,10 @@ body {
 /* Light-theme variant */
 @media (prefers-color-scheme: light) {
     #InfoBox {
-        background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(245,245,245,0.96));
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(245, 245, 245, 0.96));
         color: #10212b;
-        border: 1px solid rgba(0,0,0,0.06);
-        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
     }
 }
 
@@ -361,6 +374,56 @@ input:focus {
 
 ::-webkit-scrollbar {
     display: none;
+}
+
+#promotion {
+    padding: 8px 24px 2px 24px;
+    width: min-content;
+    display: none;
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    border: solid 5px black;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    z-index: 1000;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Promotion piece hover / focus "pop" effect */
+#promotion img {
+    display: inline-block;
+    cursor: pointer;
+    transition: transform 180ms cubic-bezier(.2,.9,.3,1), box-shadow 180ms ease;
+    will-change: transform, box-shadow;
+    border-radius: 6px;
+    /* provide a subtle elevation baseline */
+    /* box-shadow: 0 2px 6px rgba(0,0,0,0.08); */
+    outline: none;
+}
+
+#promotion img:hover,
+#promotion img:focus {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 10px 22px rgba(2,8,20,0.18);
+}
+
+#promotion img:active {
+    /* don't apply the hover pop while the user is actively clicking */
+    transform: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    #promotion img {
+        transition: none;
+        transform: none !important;
+    }
 }
 
 /* Settings button + modal */
@@ -521,11 +584,13 @@ input:focus {
 }
 
 .status-dot.online {
-    background-color: #57d95b; /* Green for online */
+    background-color: #57d95b;
+    /* Green for online */
 }
 
 .status-dot.offline {
-    background-color: #888888; /* Gray for offline */
+    background-color: #888888;
+    /* Gray for offline */
 }
 
 .userdiv {

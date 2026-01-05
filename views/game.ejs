@@ -11,14 +11,16 @@
     <!-- Join code badge (top-left) -->
     <div id='join-code-badge' role='button' tabindex='0' aria-live='polite' aria-label='Copy join code'
         title='Click to copy join code' style='display:none'></div>
+
     <div id='container'>
-        <!-- new wrapper to stack canvas and InfoBox vertically -->
+        <!-- Game canvas -->
         <div id="board-column">
             <canvas id='canvas'></canvas>
             <div id="row">
                 <div id="whiteClock"></div>
                 <div id='InfoBox'></div>
                 <div id="blackClock"></div>
+                <button id="resign-btn" type="button" title="Resign" aria-label="Resign"></button>
             </div>
         </div>
 
@@ -26,6 +28,14 @@
             <!-- <div id='CapturedW' class='captureBox'></div>
             <div id='CapturedB' class='captureBox'></div> -->
         </div>
+    </div>
+
+    <!-- Pawn promotion menu (hidden, fixed top-center) -->
+    <div id="promotion" aria-hidden="true">
+        <img src="" id="queen">
+        <img src="" id="rook">
+        <img src="" id="bishop">
+        <img src="" id="knight">
     </div>
 
     <!-- === Chat Section === -->
@@ -83,7 +93,7 @@
             <div class='setting-row'>
                 <label for='arrowColor'>Move Arrow Color:</label>
                 <input type='color' id='arrowColor'>
-                <label for='arrowAlpha'>Transparency (0–1):</label>
+                <label for='arrowAlpha'>Transparency (0-1):</label>
                 <input type='number' id='arrowAlpha' min='0' max='1' step='0.01' value='0.6'>
 
             </div>
@@ -127,174 +137,182 @@
             </div>
         </div>
     </div>
+</body>
+<!-- Socket.IO client -->
+<script src='/socket.io/socket.io.js'></script>
+<script src='js/socket.js'></script>
 
-    <!-- Socket.IO client -->
-    <script src='/socket.io/socket.io.js'></script>
-    <script src='js/socket.js'></script>
+<!-- Game scripts -->
+<script src='js/chat.js'></script>
+<script src='js/settings.js'></script>
+<script src='js/docEvents.js'></script>
+<script src='js/clientBoard.js'></script>
+<script src='js/main.js'></script>
 
-    <!-- Your game scripts -->
-    <script src='js/chat.js'></script>
-    <script src='js/settings.js'></script>
-    <script src='js/docEvents.js'></script>
-    <script src='js/clientBoard.js'></script>
-    <script src='js/main.js'></script>
+<script>
+    // Resign button
+    const resign = document.getElementById('resign-btn')
 
-    <script>
-        const message = document.getElementById('chatOff')
+    resign.onclick = function () {
+        socket.emit('resign')
+    }
+</script>
 
-        socket.on('chatOff', () => {
-            if (!message) return;
+<script>
+    const message = document.getElementById('chatOff')
 
-            // Add visible class to trigger CSS transition
-            message.classList.add('show');
-            message.setAttribute('aria-hidden', 'false');
+    socket.on('chatOff', () => {
+        if (!message) return;
 
-            // clear any previous hide timer
-            if (message._chatOffTimeout) clearTimeout(message._chatOffTimeout);
+        // Add visible class to trigger CSS transition
+        message.classList.add('show');
+        message.setAttribute('aria-hidden', 'false');
 
-            // hide after a few seconds
-            message._chatOffTimeout = setTimeout(() => {
-                // remove class so CSS transitions the element out
-                message.classList.remove('show');
-                message.setAttribute('aria-hidden', 'true');
-                message._chatOffTimeout = null;
-            }, 3000);
-        });
-    </script>
+        // clear any previous hide timer
+        if (message._chatOffTimeout) clearTimeout(message._chatOffTimeout);
 
-    <script>
-        // User list population
-        const users = document.getElementById('chat-sidebar')
+        // hide after a few seconds
+        message._chatOffTimeout = setTimeout(() => {
+            // remove class so CSS transitions the element out
+            message.classList.remove('show');
+            message.setAttribute('aria-hidden', 'true');
+            message._chatOffTimeout = null;
+        }, 3000);
+    });
+</script>
 
-        function populateUsers() {
-            if (gameData && gameData.users) {
-                users.innerHTML = ''
+<script>
+    // User list population
+    const users = document.getElementById('chat-sidebar')
 
-                let usersToShow = []
-                if (gameData.prevWhite) usersToShow.push(gameData.prevWhite)
-                if (gameData.prevBlack) usersToShow.push(gameData.prevBlack)
+    function populateUsers() {
+        if (gameData && gameData.users) {
+            users.innerHTML = ''
 
-                gameData.users.forEach(u => {
-                    if (!usersToShow.some(user => user.id == u.id)) usersToShow.push(u)
-                })
+            let usersToShow = []
+            if (gameData.prevWhite) usersToShow.push(gameData.prevWhite)
+            if (gameData.prevBlack) usersToShow.push(gameData.prevBlack)
 
-                usersToShow.forEach(u => {
-                    const userDiv = document.createElement('div')
-                    userDiv.classList.add('userdiv')
-                    const name = document.createElement('h3')
-                    const statusDot = document.createElement('div')
-                    name.classList.add('username')
+            gameData.users.forEach(u => {
+                if (!usersToShow.some(user => user.id == u.id)) usersToShow.push(u)
+            })
 
-                    statusDot.classList.add('status-dot')
-                    statusDot.classList.add(u.active ? 'online' : 'offline')
+            usersToShow.forEach(u => {
+                const userDiv = document.createElement('div')
+                userDiv.classList.add('userdiv')
+                const name = document.createElement('h3')
+                const statusDot = document.createElement('div')
+                name.classList.add('username')
 
-                    if (u.id == me.id) {
-                        name.innerText = `You (${u.side})`
-                    } else {
-                        name.innerText = `${u.displayName} (${u.side})`
-                    }
+                statusDot.classList.add('status-dot')
+                statusDot.classList.add(u.active ? 'online' : 'offline')
 
-                    userDiv.appendChild(name)
-                    userDiv.appendChild(statusDot)
-
-                    users.appendChild(userDiv)
-                })
-            }
-        }
-    </script>
-
-    <script>
-        socket.on('noGame', () => {
-            window.location.href = '/'
-        })
-
-        const joinCode = new URLSearchParams(window.location.search).get('code');
-        if (joinCode) {
-            socket.emit('join', joinCode);
-        }
-
-        // Join-code badge element (will be populated from server `youAre` or the URL)
-        const joinBadge = document.getElementById('join-code-badge');
-
-        const InfoBox = document.getElementById('InfoBox');
-        socket.on('updateBoard', (data) => {
-            updateBoard(data)
-            populateUsers()
-            InfoBox.innerText = data.board.turn = "white" ? "White's turn" : "Black's turn";
-            // CapturedW.innerHTML = '';
-            // CapturedB.innerHTML = '';
-        });
-
-        // Listen for server-sent identity info which includes game joinCode when in a game
-        socket.on('youAre', (me) => {
-            try {
-                let code = null;
-                if (me && me.game && me.game.joinCode) {
-                    code = String(me.game.joinCode);
-                } else if (joinCode) {
-                    code = String(joinCode);
-                }
-
-                if (code) {
-                    joinBadge.textContent = `Join code: ${code}`;
-                    joinBadge.dataset.code = code;
-                    joinBadge.style.display = 'block';
+                if (u.id == me.id) {
+                    name.innerText = `You (${u.side})`
                 } else {
-                    joinBadge.dataset.code = '';
-                    joinBadge.style.display = 'none';
+                    name.innerText = `${u.displayName} (${u.side})`
                 }
-            } catch (e) {
-                // Ignore errors and hide badge
+
+                userDiv.appendChild(name)
+                userDiv.appendChild(statusDot)
+
+                users.appendChild(userDiv)
+            })
+        }
+    }
+</script>
+
+<script>
+    socket.on('noGame', () => {
+        window.location.href = '/'
+    })
+
+    const joinCode = new URLSearchParams(window.location.search).get('code');
+    if (joinCode) {
+        socket.emit('join', joinCode);
+    }
+
+    // Join-code badge element (will be populated from server `youAre` or the URL)
+    const joinBadge = document.getElementById('join-code-badge');
+
+    const InfoBox = document.getElementById('InfoBox');
+    socket.on('updateBoard', (data) => {
+        updateBoard(data)
+        populateUsers()
+        InfoBox.innerText = data.board.turn == "white" ? "White's turn" : "Black's turn";
+        // CapturedW.innerHTML = '';
+        // CapturedB.innerHTML = '';
+    });
+
+    // Listen for server-sent identity info which includes game joinCode when in a game
+    socket.on('youAre', (me) => {
+        try {
+            let code = null;
+            if (me && me.game && me.game.joinCode) {
+                code = String(me.game.joinCode);
+            } else if (joinCode) {
+                code = String(joinCode);
+            }
+
+            if (code) {
+                joinBadge.textContent = `Join code: ${code}`;
+                joinBadge.dataset.code = code;
+                joinBadge.style.display = 'block';
+            } else {
                 joinBadge.dataset.code = '';
                 joinBadge.style.display = 'none';
             }
-        });
-
-        // Copy-to-clipboard helper with fallback
-        async function copyJoinCode(code) {
-            if (!code) return;
-            const prev = joinBadge.textContent;
-            try {
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    await navigator.clipboard.writeText(code);
-                } else {
-                    // Fallback for older browsers
-                    const ta = document.createElement('textarea');
-                    ta.value = code;
-                    ta.style.position = 'fixed';
-                    ta.style.left = '-9999px';
-                    document.body.appendChild(ta);
-                    ta.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(ta);
-                }
-                // show visual confirmation
-                joinBadge.textContent = 'Copied!';
-                setTimeout(() => {
-                    joinBadge.textContent = prev;
-                }, 1400);
-            } catch (err) {
-                console.error('Copy failed', err);
-                // brief error feedback
-                joinBadge.textContent = 'Copy failed';
-                setTimeout(() => {
-                    joinBadge.textContent = prev;
-                }, 1400);
-            }
+        } catch (e) {
+            // Ignore errors and hide badge
+            joinBadge.dataset.code = '';
+            joinBadge.style.display = 'none';
         }
+    });
 
-        // Click and keyboard handlers for accessibility
-        joinBadge.addEventListener('click', () => {
-            copyJoinCode(joinBadge.dataset.code);
-        });
-
-        joinBadge.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
-                e.preventDefault();
-                copyJoinCode(joinBadge.dataset.code);
+    // Copy-to-clipboard helper with fallback
+    async function copyJoinCode(code) {
+        if (!code) return;
+        const prev = joinBadge.textContent;
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(code);
+            } else {
+                // Fallback for older browsers
+                const ta = document.createElement('textarea');
+                ta.value = code;
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
             }
-        });
-    </script>
-</body>
+            // show visual confirmation
+            joinBadge.textContent = 'Copied!';
+            setTimeout(() => {
+                joinBadge.textContent = prev;
+            }, 1400);
+        } catch (err) {
+            console.error('Copy failed', err);
+            // brief error feedback
+            joinBadge.textContent = 'Copy failed';
+            setTimeout(() => {
+                joinBadge.textContent = prev;
+            }, 1400);
+        }
+    }
+
+    // Click and keyboard handlers for accessibility
+    joinBadge.addEventListener('click', () => {
+        copyJoinCode(joinBadge.dataset.code);
+    });
+
+    joinBadge.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+            e.preventDefault();
+            copyJoinCode(joinBadge.dataset.code);
+        }
+    });
+</script>
 
 </html>

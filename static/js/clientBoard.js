@@ -3,6 +3,9 @@ let selected = null
 let arrows = []
 
 function findKing() {
+    // Return undefined if we don't yet know who "me" is
+    if (!me) return
+
     let king
     king = pieces.find(piece => piece.name == 'King' && piece.side == me.side)
     // console.log(king)
@@ -88,6 +91,12 @@ class Piece {
     }
 
     update() {
+        // If we don't know "me" yet or the server reports a promotion pending by the other side, block selection/dragging
+        if (!me) return
+        if (gameData && gameData.promotionPending && gameData.promotionSide && gameData.promotionSide !== me.side) {
+            return
+        }
+
         if (!selected && this.hover() && Mouse.left && this.side == me.side) {
             selected = this
             this.selected = true
@@ -235,38 +244,43 @@ function drawBoard() {
     if (board) {
         // If the mouse is up and there IS a selected piece, (dragged, then dropped), then emit the move
         if (!Mouse.left && selected) {
-            // Make sure the piece I'm moving is one of mine
-            if (me.side == selected.side) {
-                // If I'm playing as black, make the move on the opposite side of the board.
-                if (me.side == 'white') {
-                    socket.emit('move', me,
-                        // Piece
-                        {
-                            name: selected.name,
-                            side: selected.side,
-                            x: selected.bx,
-                            y: selected.by,
-                            moves: selected.moves
-                        },
-                        Math.floor((selected.x + selected.w / 2) / Settings.boardSquareSize), Math.floor((selected.y + selected.h / 2) / Settings.boardSquareSize))
-                } else {
-                    socket.emit('move', me,
-                        {
-                            name: selected.name,
-                            side: selected.side,
-                            x: selected.bx,
-                            y: selected.by,
-                            moves: selected.moves
-                        },
-                        Math.floor((selected.x + selected.w / 2) / Settings.boardSquareSize), Math.floor((selected.y + selected.h / 2) / Settings.boardSquareSize))
-                }
+            // If we don't know "me" yet or the server reports a promotion pending by the other side, do NOT emit any move — wait for promotion choice
+            if (!me || (gameData && gameData.promotionPending && gameData.promotionSide && gameData.promotionSide !== me.side)) {
+                // keep the piece selected until the promotion is resolved
             } else {
-                // socket.emit('updateBoard', {board: board, move: {}})
-            }
+                // Make sure the piece I'm moving is one of mine
+                if (me.side == selected.side) {
+                    // If I'm playing as black, make the move on the opposite side of the board.
+                    if (me.side == 'white') {
+                        socket.emit('move', me,
+                            // Piece
+                            {
+                                name: selected.name,
+                                side: selected.side,
+                                x: selected.bx,
+                                y: selected.by,
+                                moves: selected.moves
+                            },
+                            Math.floor((selected.x + selected.w / 2) / Settings.boardSquareSize), Math.floor((selected.y + selected.h / 2) / Settings.boardSquareSize))
+                    } else {
+                        socket.emit('move', me,
+                            {
+                                name: selected.name,
+                                side: selected.side,
+                                x: selected.bx,
+                                y: selected.by,
+                                moves: selected.moves
+                            },
+                            Math.floor((selected.x + selected.w / 2) / Settings.boardSquareSize), Math.floor((selected.y + selected.h / 2) / Settings.boardSquareSize))
+                    }
+                } else {
+                    // socket.emit('updateBoard', {board: board, move: {}})
+                }
 
-            // Nullify selected
-            selected.selected = false
-            selected = null
+                // Nullify selected
+                selected.selected = false
+                selected = null
+            }
         }
 
         //check

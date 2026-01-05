@@ -157,6 +157,9 @@ function attachSocket(io, games) {
                 // send back a no-op board to the requesting socket so client can re-sync
                 socket.emit('updateBoard', {})
                 return
+            } else if (game.finished) {
+                game.emptyUpdate(socket)
+                return
             }
 
             const board = game.board
@@ -189,7 +192,14 @@ function attachSocket(io, games) {
                             return
                         }
 
+                        for (let y of board.layout) {
+                            for (let x of y) {
+                                if (x.enPassant) x.enPassant = false
+                            }
+                        }
+
                         if (foo.validMove(board.layout, x1, y1, x2, y2) == 'castle') foo.castle(board.layout, x1, y1, x2, y2)
+                        if (foo.validMove(board.layout, x1, y1, x2, y2) == 'enPassant') foo.enPassant = true
 
                         board.layout[y1][x1] = 0
                         if (dest) board.captured.push({ name: dest.name, side: dest.side })
@@ -204,7 +214,7 @@ function attachSocket(io, games) {
                         const isMate = inCheck && !board.hasLegalMoves(opponent)
 
                         // Only emit update to users in this game, plus check/mate events
-                        game.update({x1: x1, y1: y1, x2: x2, y2: y2, name: foo.name, side: foo.side}, inCheck, isMate, opponent, foo.side, dest.name || null)
+                        game.update({ x1: x1, y1: y1, x2: x2, y2: y2, name: foo.name, side: foo.side }, inCheck, isMate, opponent, foo.side, dest.name || null)
                     } else {
                         // console.log(`Still ${board.turn}'s turn, move failed (Invalid).`)
                         game.emptyUpdate(socket)
