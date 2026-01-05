@@ -20,3 +20,5 @@
 - rook gets balistca or cannon attack in any foward direction
 - queen get machine gun
 - king get rpg
+
+- sorcercers
