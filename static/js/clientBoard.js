@@ -100,6 +100,7 @@ class Piece {
         if (!selected && this.hover() && Mouse.left && this.side == me.side) {
             selected = this
             this.selected = true
+            validMoves = []
             socket.emit('requestValidMoves', this.serialize())
         }
 
@@ -183,7 +184,6 @@ class MovePiece {
 let validMoves = []
 
 socket.on('validMoves', moves => {
-    console.log('Valid moves:', moves)
     if (moves) validMoves = moves
 })
 
@@ -254,9 +254,9 @@ function drawBoard() {
                 if (move) {
                     const cx = x * Settings.boardSquareSize + Settings.boardSquareSize / 2;
                     const cy = y * Settings.boardSquareSize + Settings.boardSquareSize / 2;
-                    const r = Settings.boardSquareSize / 6;     
+                    const r = Settings.boardSquareSize / 8;     
 
-                    ctx.fillStyle = 'lightgrey';
+                    ctx.fillStyle = 'rgba(114, 114, 114, 0.85)';
                     ctx.beginPath();
                     ctx.arc(cx, cy, r, 0, Math.PI * 2);
                     ctx.fill();

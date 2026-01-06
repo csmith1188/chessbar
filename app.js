@@ -401,7 +401,6 @@ io.on('connection', (socket) => {
     })
 
     socket.on('requestValidMoves', (piece) => {
-    console.log(piece)
     // Ensure we have a game and valid numeric coordinates (0 is valid)
     if (
         piece && piece.name && piece.side &&
@@ -415,7 +414,7 @@ io.on('connection', (socket) => {
             for (let y = 0; y < 8; y++) {
                 for (let x = 0; x < 8; x++) {
                     // pass the actual 2D array layout, not the Board object
-                    if (pieceObj.validMove(user.game.board.layout, piece.x, piece.y, x, y)) {
+                    if (pieceObj.validMove(user.game.board.layout, piece.x, piece.y, x, y) && user.game.board.layout[y][x].side != user.side) {
                         validMoves.push({ x, y })
                     }
                 }
