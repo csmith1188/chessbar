@@ -262,7 +262,7 @@ io.on('connection', (socket) => {
         if (user.game) {
             user.game.resign(user)
         }
-    }) 
+    })
 
     socket.on('join', (gameId) => {
         for (let game of games) {
@@ -399,6 +399,31 @@ io.on('connection', (socket) => {
         }
         logUsers()
     })
+
+    socket.on('requestValidMoves', (piece) => {
+    console.log(piece)
+    // Ensure we have a game and valid numeric coordinates (0 is valid)
+    if (
+        piece && piece.name && piece.side &&
+        user && user.game && !user.game.finished &&
+        Number.isInteger(piece.x) && Number.isInteger(piece.y)
+    ) {
+        let validMoves = []
+        // instantiate with side/moves so `this.side` is set in piece methods
+        const pieceObj = new classes[piece.name](piece.side, piece.moves || 0)
+        if (pieceObj) {
+            for (let y = 0; y < 8; y++) {
+                for (let x = 0; x < 8; x++) {
+                    // pass the actual 2D array layout, not the Board object
+                    if (pieceObj.validMove(user.game.board.layout, piece.x, piece.y, x, y)) {
+                        validMoves.push({ x, y })
+                    }
+                }
+            }
+        }
+        socket.emit('validMoves', validMoves)
+    }
+})
 })
 
 
