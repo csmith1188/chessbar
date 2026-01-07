@@ -9,7 +9,7 @@
 - knight can double move or move twice as big (bigger l shape or move twice)
 - bishop can backstab or magic or sidestep idk
 - rook can move though or block or 1 turn invinclbe (ironwall)
-- queen can pull (rizz(control) a piece)
+- queen can pull (rizz(control) a piece) idk
 - king can teleport 1 time (rewarp)
 
 ### FPS guns CHESS
@@ -22,3 +22,4 @@
 - king get rpg
 
 - sorcercers
+- i frames when castling
