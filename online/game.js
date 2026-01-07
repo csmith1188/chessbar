@@ -29,8 +29,9 @@ class Game {
 
         takenGameIds.push(this.id)
 
-        //time
-        this.time = this.time 
+        //kayden's time
+        this.whiteClock = time
+        this.blackClock = time
 
         this.users = []
         this.board = new Board()

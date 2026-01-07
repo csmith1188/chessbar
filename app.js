@@ -387,6 +387,13 @@ io.on('connection', (socket) => {
 
     })
 
+    //kayden's clock
+    socket.on('updateClock', () => {
+        if (user.game) {
+            user.side
+        }
+    })
+
     socket.on('deleteGame', (gameId) => {
         const game = games.find(g => g.id === gameId)
 
