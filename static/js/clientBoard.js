@@ -125,7 +125,8 @@ class Piece {
             x: this.bx,
             y: this.by,
             name: this.name,
-            side: this.side
+            side: this.side,
+            moves: this.moves
         }
     }
 }
@@ -248,7 +249,8 @@ function drawBoard() {
                 ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
             }
 
-            if (selected && validMoves) {
+            // Dots to show where the pieces can move
+            if (selected && validMoves && !pieces.some(piece => piece.bx == x && piece.by == y)) {
                 const move = validMoves.find(m => m.x == x && m.y == y)
 
                 if (move) {
@@ -256,7 +258,7 @@ function drawBoard() {
                     const cy = y * Settings.boardSquareSize + Settings.boardSquareSize / 2;
                     const r = Settings.boardSquareSize / 8;     
 
-                    ctx.fillStyle = 'rgba(114, 114, 114, 0.85)';
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
                     ctx.beginPath();
                     ctx.arc(cx, cy, r, 0, Math.PI * 2);
                     ctx.fill();
