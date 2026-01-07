@@ -262,7 +262,7 @@ io.on('connection', (socket) => {
         if (user.game) {
             user.game.resign(user)
         }
-    }) 
+    })
 
     socket.on('join', (gameId) => {
         for (let game of games) {
@@ -398,6 +398,50 @@ io.on('connection', (socket) => {
             io.emit('refreshGames')
         }
         logUsers()
+    })
+
+    socket.on('requestValidMoves', (piece) => {
+        // Ensure we have a game and valid numeric coordinates (0 is valid)
+        if (
+            piece && piece.name && piece.side &&
+            user && user.game && !user.game.finished &&
+            Number.isInteger(piece.x) && Number.isInteger(piece.y)
+        ) {
+            let validMoves = []
+            if (user.side == 'white') {
+                // instantiate with side/moves so `this.side` is set in piece methods
+                const pieceObj = new classes[piece.name](piece.side, piece.moves)
+                if (pieceObj) {
+                    for (let y = 0; y < 8; y++) {
+                        for (let x = 0; x < 8; x++) {
+                            // pass the actual 2D array layout, not the Board object
+                            if (pieceObj.validMove(user.game.board.layout, piece.x, piece.y, x, y) &&
+                                user.game.board.layout[y][x].side != user.side &&
+                                !user.game.board.wouldBeInCheckAfterMove(piece.x, piece.y, x, y)) {
+                                validMoves.push({ x, y })
+                            }
+                        }
+                    }
+                }
+            } else if (user.side == 'black') {
+                piece.y = 7 - piece.y
+                // instantiate with side/moves so `this.side` is set in piece methods
+                const pieceObj = new classes[piece.name](piece.side, piece.moves)
+                if (pieceObj) {
+                    for (let y = 0; y < 8; y++) {
+                        for (let x = 0; x < 8; x++) {
+                            // pass the actual 2D array layout, not the Board object
+                            if (pieceObj.validMove(user.game.board.layout, piece.x, piece.y, x, y) &&
+                                user.game.board.layout[y][x].side != user.side &&
+                                !user.game.board.wouldBeInCheckAfterMove(piece.x, piece.y, x, y)) {
+                                validMoves.push({ x: x, y: 7 - y })
+                            }
+                        }
+                    }
+                }
+            }
+            socket.emit('validMoves', validMoves)
+        }
     })
 })
 

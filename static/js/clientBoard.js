@@ -100,6 +100,8 @@ class Piece {
         if (!selected && this.hover() && Mouse.left && this.side == me.side) {
             selected = this
             this.selected = true
+            validMoves = []
+            socket.emit('requestValidMoves', this.serialize())
         }
 
         if (this.selected) {
@@ -115,6 +117,16 @@ class Piece {
             } else {
                 ctx.drawImage(this.img, this.x, this.y, this.w, this.h)
             }
+        }
+    }
+
+    serialize() {
+        return {
+            x: this.bx,
+            y: this.by,
+            name: this.name,
+            side: this.side,
+            moves: this.moves
         }
     }
 }
@@ -168,6 +180,13 @@ class MovePiece {
 #+#    #+# #+#    #+# #+#     #+#  #+#+# #+#+#
 #########  ###    ### ###     ###   ###   ###
 */
+
+// Valid moves for dots to draw
+let validMoves = []
+
+socket.on('validMoves', moves => {
+    if (moves) validMoves = moves
+})
 
 function drawBoard() {
 
@@ -230,11 +249,21 @@ function drawBoard() {
                 ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
             }
 
-            // here, draw the arrow if it exists?
-            //set a variable to the arrow or something, and if the arrow exists, draw it every frame 
-            arrows.push(new Arrow())
-            Mouse.dragstartX = null
-            Mouse.dragstartY = null
+            // Dots to show where the pieces can move
+            if (selected && validMoves && !pieces.some(piece => piece.bx == x && piece.by == y)) {
+                const move = validMoves.find(m => m.x == x && m.y == y)
+
+                if (move) {
+                    const cx = x * Settings.boardSquareSize + Settings.boardSquareSize / 2;
+                    const cy = y * Settings.boardSquareSize + Settings.boardSquareSize / 2;
+                    const r = Settings.boardSquareSize / 8;     
+
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
 
         }
         // Alternate colors at the edge of the board

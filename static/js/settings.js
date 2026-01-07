@@ -13,7 +13,7 @@ const DEFAULT_SETTINGS = {
 
 const DEFAULT_DEBUG = {
     logMouseEvents: false,
-    showHoverSquare: false,
+    showHoverSquare: true,
     showClickSquare: false,
     logMoveEvents: false
 }
