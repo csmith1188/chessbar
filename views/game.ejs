@@ -19,8 +19,8 @@
             <div id="underBoard">
                 <div id="whiteClock"></div>
                 <div id='InfoBox'></div>
-                <div id="blackClock"></div>
                 <button id="resign-btn" type="button" title="Resign" aria-label="Resign"></button>
+                <div id="blackClock"></div>
             </div>
         </div>
 
@@ -313,6 +313,25 @@
             copyJoinCode(joinBadge.dataset.code);
         }
     });
+</script>
+
+<--timer!->
+<script>
+    var whiteTime = null;
+    var blackTime = null;
+
+    socket.on('updateClock', (data) => {
+        if (data.whiteTime !== undefined) {
+            whiteTime = data.whiteTime;
+            document.getElementById('whiteClock').innerText = formatTime(whiteTime);
+        }
+        if (data.blackTime !== undefined) {
+            blackTime = data.blackTime;
+            document.getElementById('blackClock').innerText = formatTime(blackTime);
+        }
+
+    });
+
 </script>
 
 </html>

@@ -14,7 +14,7 @@ let takenGameCodes = []
 */
 
 class Game {
-    constructor(visibility, name = null, chatOn = true, startWhite = true) {
+    constructor(visibility, name = null, chatOn = true, startWhite = true, time = null) {
         this.visibility = visibility
         this.id = 1
 
@@ -28,6 +28,9 @@ class Game {
         this.name = name ? name : this.id
 
         takenGameIds.push(this.id)
+
+        //time
+        this.time = this.time 
 
         this.users = []
         this.board = new Board()

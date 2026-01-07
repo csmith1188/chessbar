@@ -598,3 +598,12 @@ input:focus {
     align-items: center;
     padding: 0 10px;
 }
+
+#underBoard {
+    display: flex;
+    justify-content: center;
+    width: min-content;
+    margin: 0 auto;
+    gap: 20px;
+    font-size: 14px;
+}
