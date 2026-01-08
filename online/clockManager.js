@@ -15,10 +15,19 @@ function startClockManager(io, games, tickMs = 1000) {
                 // only operate on games with clocks configured
                 if (typeof game.whiteClock !== 'number' || typeof game.blackClock !== 'number') continue
 
-                // Only tick when both players (white and black) are present in the game
+                // Determine presence of both sides
                 const whitePlayer = game.users.find(u => u.side === 'white')
                 const blackPlayer = game.users.find(u => u.side === 'black')
-                if (!whitePlayer || !blackPlayer) continue
+
+                // Start the clock only once both players have been assigned to sides.
+                // Once started, the clock continues ticking even if a player becomes inactive.
+                if (!game._clockStarted) {
+                    if (whitePlayer && blackPlayer) {
+                        game._clockStarted = true
+                    } else {
+                        continue
+                    }
+                }
 
                 const side = game.board && game.board.turn
                 if (!side) continue
@@ -47,12 +56,24 @@ function startClockManager(io, games, tickMs = 1000) {
                         const loser = game.users.find(u => u.side === loserSide)
                         const winner = game.users.find(u => u.side === winnerSide)
 
+                        // record winner/loser on the game object
+                        if (winner) game.winner = winner
+                        if (loser) game.loser = loser
+
                         if (winner && typeof winner.win === 'function') winner.win()
                         if (loser && typeof loser.lose === 'function') loser.lose()
 
-                        // Notify players about time loss. Reuse existing client event handlers where appropriate.
+                        // Notify players about time loss with a dedicated event (so client doesn't show checkmate)
+                        const payload = { winner: winnerSide, winnerId: winner ? winner.id : null, winnerName: winner ? winner.displayName : null }
                         for (const u of game.users) {
-                            if (u && u.socket) u.socket.emit('mate', { winner: winnerSide })
+                            if (u && u.socket) u.socket.emit('timeUp', payload)
+                        }
+
+                        // send a final board/clock update to sync clients
+                        try {
+                            if (typeof game.update === 'function') game.update()
+                        } catch (e) {
+                            // ignore
                         }
                     }
                 }

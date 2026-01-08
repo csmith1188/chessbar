@@ -42,6 +42,12 @@ socket.on('mate', (d) => {
     alert(`Checkmate. ${d.winner} wins!`)
 })
 
+// Time-up event (different from checkmate)
+socket.on('timeUp', (d) => {
+    const name = (d && d.winnerName) ? d.winnerName : (d && d.winner) ? d.winner : 'Player'
+    alert(`Time. ${name} wins on time!`)
+})
+
 socket.on('resign', (u) => {
     alert(`${u.displayName} has resigned.`)
 })
