@@ -61,6 +61,8 @@
                 </div>
             </div>
 
+            <input type='text' class='input' id='time' placeholder='How many minutes?'>
+
             <!-- <input type='text' class='input' id='payPin' placeholder='Enter your Formbar payment PIN...'> -->
             <div id='overlayMessage' class='overlay-message' aria-live='polite' role='status'></div>
 
@@ -139,9 +141,10 @@
     const gameName = document.getElementById('gameName')
     const chatOn = document.getElementById('chatOn')
     const startWhite = document.getElementById('startWhite')
+    const timeAmount = document.getElementById('time')
 
     function newGame(visibility) {
-        socket.emit('newGame', visibility, gameName.value.trim(), chatOn.checked, startWhite.checked)
+        socket.emit('newGame', visibility, gameName.value.trim(), chatOn.checked, startWhite.checked, timeAmount.value * 60)
         // if (payPin.value) {
         // }
     }

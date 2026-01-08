@@ -598,3 +598,35 @@ input:focus {
     align-items: center;
     padding: 0 10px;
 }
+
+#underBoard {
+    display: flex;
+    justify-content: center;
+    width: min-content;
+    margin: 0 auto;
+    gap: 20px;
+    font-size: 14px;
+}
+
+/* Clock displays under the board: match page typography and appearance */
+#whiteClock,
+#blackClock {
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 20px;
+    color: #e9f8fb;
+    padding: 6px 10px;
+    background: transparent;
+    text-align: center;
+    line-height: 1;
+    min-width: 72px;
+}
+
+/* Slightly smaller on small screens to keep layout compact */
+@media (max-width: 920px) {
+    #whiteClock,
+    #blackClock {
+        font-size: 14px;
+        min-width: 48px;
+    }
+}

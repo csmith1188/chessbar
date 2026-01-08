@@ -162,6 +162,11 @@ function attachSocket(io, games) {
                 return
             }
 
+            if (!(game.prevWhite && game.prevBlack)) {
+                game.emptyUpdate(socket)
+                return
+            }
+
             const board = game.board
 
             let x1 = piece.x

@@ -27,10 +27,25 @@ let keys = {}
 let board
 let gameData
 
+// Format seconds to MM:SS or show infinity symbol for null/undefined
+function formatTime(seconds) {
+    if (seconds === null || seconds === undefined) return '∞'
+    const s = Math.max(0, Math.floor(Number(seconds) || 0))
+    const mm = Math.floor(s / 60)
+    const ss = s % 60
+    return `${mm}:${ss.toString().padStart(2, '0')}`
+}
+
 let freshBoard = false
 
 socket.on('mate', (d) => {
     alert(`Checkmate. ${d.winner} wins!`)
+})
+
+// Time-up event (different from checkmate)
+socket.on('timeUp', (d) => {
+    const name = (d && d.winnerName) ? d.winnerName : (d && d.winner) ? d.winner : 'Player'
+    alert(`Time. ${name} wins on time!`)
 })
 
 socket.on('resign', (u) => {
@@ -161,6 +176,22 @@ function updateBoard(data) {
     }
 
     board = newBoard
+
+    // Update clock display if provided
+    try {
+        if (data.whiteClock !== undefined) {
+            const el = document.getElementById('whiteClock')
+            if (el) el.innerText = formatTime(data.whiteClock)
+            if (typeof whiteTime !== 'undefined') whiteTime = data.whiteClock
+        }
+        if (data.blackClock !== undefined) {
+            const el = document.getElementById('blackClock')
+            if (el) el.innerText = formatTime(data.blackClock)
+            if (typeof blackTime !== 'undefined') blackTime = data.blackClock
+        }
+    } catch (e) {
+        // ignore DOM errors
+    }
 }
 
 // check socket go here

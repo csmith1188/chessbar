@@ -14,7 +14,7 @@ let takenGameCodes = []
 */
 
 class Game {
-    constructor(visibility, name = null, chatOn = true, startWhite = true) {
+    constructor(visibility, name = null, chatOn = true, startWhite = true, time = null) {
         this.visibility = visibility
         this.id = 1
 
@@ -28,6 +28,10 @@ class Game {
         this.name = name ? name : this.id
 
         takenGameIds.push(this.id)
+
+        //kayden's time
+        this.whiteClock = time
+        this.blackClock = time
 
         this.users = []
         this.board = new Board()
@@ -219,6 +223,12 @@ class Game {
 
             // Update for the users
             user.socket.emit('updateBoard', serializeGame(this))
+            // Also send clocks so clients get immediate clock values on updates
+            try {
+                user.socket.emit('updateClock', { whiteTime: this.whiteClock, blackTime: this.blackClock })
+            } catch (e) {
+                // ignore socket errors
+            }
 
             if (check) {
                 user.socket.emit('check', { side: opponent })
@@ -312,6 +322,8 @@ function serializeGame(game) {
         id: game.id,
         users: game.users.map(u => (u.serialize())),
         board: game.board,
+        whiteClock: typeof game.whiteClock === 'number' ? game.whiteClock : null,
+        blackClock: typeof game.blackClock === 'number' ? game.blackClock : null,
         joinCode: game.joinCode,
         messages: game.messages,
         name: game.name,
