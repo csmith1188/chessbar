@@ -15,51 +15,102 @@ function findKing() {
 
 
 class Arrow {
-    constructor(ctx, startX, startY, endX, endY, color) {
-        this.startX = startX
-        this.startY = startY
-        this.endX = endX
-        this.endY = endY
-
-        this.ctx = ctx
-        this.color = color
+    constructor(x1, y1, x2, y2) {
+        this.x1 = x1
+        this.y1 = y1
+        this.x2 = x2
+        this.y2 = y2
     }
 
-    drawArrow(ctx, startX, startY, endX, endY, color) {
-        // Convert board coordinates to pixel coordinates
+    draw() {
+        if (!(this.x1 == this.x2 && this.y1 == this.y2)) {
+            // Map board coordinates to canvas coordinates (center of square)
+            let sx = this.x1
+            let sy = this.y1
+            let ex = this.x2
+            let ey = this.y2
 
-        const lineStartX = startX * Settings.boardSquareSize + Settings.boardSquareSize / 2;
-        const lineStartY = startY * Settings.boardSquareSize + Settings.boardSquareSize / 2;
-        const lineEndX = endX * Settings.boardSquareSize + Settings.boardSquareSize / 2;
-        const lineEndY = endY * Settings.boardSquareSize + Settings.boardSquareSize / 2;
+            // If player is black, the board is drawn flipped vertically elsewhere — match that here
+            if (me && me.side === 'black') {
+                sy = 7 - sy
+                ey = 7 - ey
+            }
 
-        // Calculate the angle for the arrowhead
-        const angle = Math.atan2(lineEndY - lineStartY, lineEndX - lineStartX);
+            const startX = sx * Settings.boardSquareSize + Settings.boardSquareSize / 2
+            const startY = sy * Settings.boardSquareSize + Settings.boardSquareSize / 2
+            const endX = ex * Settings.boardSquareSize + Settings.boardSquareSize / 2
+            const endY = ey * Settings.boardSquareSize + Settings.boardSquareSize / 2
 
-        // Draw the line
-        ctx.strokeStyle = color; // Set the line color
-        ctx.lineWidth = 2; // Set the line width
-        ctx.beginPath();
-        ctx.moveTo(lineStartX, lineStartY);
-        ctx.lineTo(lineEndX, lineEndY);
-        ctx.stroke();
+            // Visual style: thick orange line with filled arrowhead
+            const baseWidth = Math.max(6, Math.round(Settings.boardSquareSize * .25))
+            let headLen = Math.max(10, Math.round(Settings.boardSquareSize * 0.3))
 
-        // Draw the arrowhead
-        this.drawArrowhead(ctx, lineEndX, lineEndY, angle, Settings.boardSquareSize / 4, color);
-    }
+            ctx.save()
+            ctx.strokeStyle = 'rgba(255, 157, 0, 0.7)'
+            ctx.fillStyle = 'rgba(255, 157, 0, 0.7)'
+            ctx.lineWidth = baseWidth
+            ctx.lineCap = 'butt'
 
-    drawArrowhead(ctx, x, y, angle, size, color) {
-        ctx.save();
-        ctx.translate(x, y); // pixel coordinates 
-        ctx.rotate(angle); // the angle
-        ctx.beginPath(); //start
-        ctx.moveTo(size, 0); // Tip of the arrowhead
-        ctx.lineTo(0, -size / 2); // Left corner of the arrowhead
-        ctx.lineTo(0, size / 2); // Right corner of the arrowhead
-        ctx.closePath();
-        ctx.fillStyle = color; // Arrowhead color
-        ctx.fill();
-        ctx.restore();
+            // Compute angle and arrowhead geometry
+            const angle = Math.atan2(endY - startY, endX - startX)
+
+            // Offset the start a bit so the arrow doesn't draw over the piece at the origin
+            const startOffset = Math.max(Math.round(Settings.boardSquareSize * 0.22), Math.round(baseWidth * 1.5))
+            const offsetStartX = startX + Math.cos(angle) * startOffset
+            const offsetStartY = startY + Math.sin(angle) * startOffset
+
+            // Compute an end offset so the arrow tip doesn't overlap the target piece,
+            // but guarantee there's room for a visible shaft (base) and the head
+            const requestedEndOffset = Math.max(Math.round(Settings.boardSquareSize * 0.16), Math.round(baseWidth * 1.5))
+            const len = Math.hypot(endX - startX, endY - startY)
+            const desiredMinShaft = Math.max(baseWidth, Math.round(Settings.boardSquareSize * 0.08))
+
+            // Max allowed endOffset so that: shaftLength = len - startOffset - endOffset - headLen >= desiredMinShaft
+            const maxEndOffset = Math.max(0, Math.floor(len - startOffset - headLen - desiredMinShaft))
+            let endOffset = Math.min(requestedEndOffset, maxEndOffset)
+
+            // If there's little to no room even with endOffset reduced, shrink headLen (but keep a small minimum)
+            if (len - startOffset - endOffset < desiredMinShaft + 4) {
+                const newHead = Math.max(4, Math.floor(len - startOffset - endOffset - desiredMinShaft))
+                if (newHead > 0) headLen = Math.min(headLen, newHead)
+            }
+
+            const tipX = endX - Math.cos(angle) * endOffset
+            const tipY = endY - Math.sin(angle) * endOffset
+
+            // Arrowhead (triangle) - compute base width from settings if available
+            const arrowWidth = (typeof Settings !== 'undefined' && Settings.arrowHeadBaseWidth) ? Settings.arrowHeadBaseWidth : Math.max(10, Math.round(Settings.boardSquareSize * 0.3))
+
+            // Base center is located `headLen` back from the tip along the shaft
+            const baseCenterX = tipX - headLen * Math.cos(angle)
+            const baseCenterY = tipY - headLen * Math.sin(angle)
+
+            // Main shaft (start from the offset point, end at the base of the head)
+            ctx.beginPath()
+            ctx.moveTo(offsetStartX, offsetStartY)
+            ctx.lineTo(baseCenterX, baseCenterY)
+            ctx.stroke()
+
+            // Perpendicular unit vector
+            const perpX = Math.cos(angle + Math.PI / 2)
+            const perpY = Math.sin(angle + Math.PI / 2)
+
+            const half = arrowWidth / 2
+            const p1x = baseCenterX + perpX * half
+            const p1y = baseCenterY + perpY * half
+
+            const p2x = baseCenterX - perpX * half
+            const p2y = baseCenterY - perpY * half
+
+            ctx.beginPath()
+            ctx.moveTo(tipX, tipY)
+            ctx.lineTo(p1x, p1y)
+            ctx.lineTo(p2x, p2y)
+            ctx.closePath()
+            ctx.fill()
+
+            ctx.restore()
+        }
     }
 }
 
@@ -100,6 +151,8 @@ class Piece {
         if (!selected && this.hover() && Mouse.left && this.side == me.side) {
             selected = this
             this.selected = true
+            validMoves = []
+            socket.emit('requestValidMoves', this.serialize())
         }
 
         if (this.selected) {
@@ -115,6 +168,16 @@ class Piece {
             } else {
                 ctx.drawImage(this.img, this.x, this.y, this.w, this.h)
             }
+        }
+    }
+
+    serialize() {
+        return {
+            x: this.bx,
+            y: this.by,
+            name: this.name,
+            side: this.side,
+            moves: this.moves
         }
     }
 }
@@ -168,6 +231,13 @@ class MovePiece {
 #+#    #+# #+#    #+# #+#     #+#  #+#+# #+#+#
 #########  ###    ### ###     ###   ###   ###
 */
+
+// Valid moves for dots to draw
+let validMoves = []
+
+socket.on('validMoves', moves => {
+    if (moves) validMoves = moves
+})
 
 function drawBoard() {
 
@@ -230,11 +300,32 @@ function drawBoard() {
                 ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
             }
 
-            // here, draw the arrow if it exists?
-            //set a variable to the arrow or something, and if the arrow exists, draw it every frame 
-            arrows.push(new Arrow())
-            Mouse.dragstartX = null
-            Mouse.dragstartY = null
+            // Draw right-click highlights (red overlay) if present
+            try {
+                if (typeof highlightedSquares !== 'undefined') {
+                    const key = `${x},${y}`
+                    if (highlightedSquares.has(key)) {
+                        ctx.fillStyle = 'rgba(255, 0, 0, 0.35)'
+                        ctx.fillRect(x * Settings.boardSquareSize, y * Settings.boardSquareSize, Settings.boardSquareSize, Settings.boardSquareSize)
+                    }
+                }
+            } catch (err) { }
+
+            // Dots to show where the pieces can move
+            if (selected && validMoves && !pieces.some(piece => piece.bx == x && piece.by == y)) {
+                const move = validMoves.find(m => m.x == x && m.y == y)
+
+                if (move) {
+                    const cx = x * Settings.boardSquareSize + Settings.boardSquareSize / 2;
+                    const cy = y * Settings.boardSquareSize + Settings.boardSquareSize / 2;
+                    const r = Settings.boardSquareSize / 8;
+
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
 
         }
         // Alternate colors at the edge of the board
@@ -305,6 +396,31 @@ function drawBoard() {
                 piece.draw()
             }
         }
+
+        // Draw any arrows (on top of pieces)
+        if (arrows && arrows.length) {
+            for (let a of arrows) {
+                a.draw()
+            }
+        }
+
+        // Temporary arrow while right-dragging (not persisted until mouseup)
+        try {
+            if (Mouse && Mouse.right && Mouse.dragStartX !== null) {
+                const sx = Math.floor(Mouse.dragStartX / Settings.boardSquareSize)
+                const sy = Math.floor(Mouse.dragStartY / Settings.boardSquareSize)
+                const ex = Math.floor(Mouse.x / Settings.boardSquareSize)
+                const ey = Math.floor(Mouse.y / Settings.boardSquareSize)
+                const clamp = (v) => Math.max(0, Math.min(7, v))
+                let temp
+                if (me.side == 'white') {
+                    temp = new Arrow(clamp(sx), clamp(sy), clamp(ex), clamp(ey))
+                } else {
+                    temp = new Arrow(clamp(sx), clamp(7 - sy), clamp(ex), clamp(7 - ey))
+                }
+                temp.draw()
+            }
+        } catch (err) { }
     }
 
 }

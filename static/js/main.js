@@ -217,8 +217,9 @@ function main() {
     }
 
     if (Debug.showHoverSquare) {
-        if (Mouse.x < canvas.width && Mouse.y < canvas.height) {
-            ctx.strokeStyle = 'black'
+        ctx.lineWidth = 5
+        if (Mouse.x < canvas.width && Mouse.y < canvas.height && selected) {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.54)'
 
             if (Debug.showClickSquare && Mouse.left) {
                 ctx.fillStyle = 'rgba(255, 0, 0, 0.25)'
@@ -228,10 +229,12 @@ function main() {
                     Settings.boardSquareSize)
             }
 
-            ctx.strokeRect(Math.floor(Mouse.x / Settings.boardSquareSize) * Settings.boardSquareSize,
-                Math.floor(Mouse.y / Settings.boardSquareSize) * Settings.boardSquareSize,
-                Settings.boardSquareSize,
-                Settings.boardSquareSize)
+            // 2.5 & 5 are for stroke width offsets
+
+            ctx.strokeRect(Math.floor(Mouse.x / Settings.boardSquareSize) * Settings.boardSquareSize + 2.5,
+                Math.floor(Mouse.y / Settings.boardSquareSize) * Settings.boardSquareSize + 2.5,
+                Settings.boardSquareSize - 5,
+                Settings.boardSquareSize - 5)
 
         }
     }

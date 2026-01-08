@@ -9,11 +9,14 @@ const DEFAULT_SETTINGS = {
     moveColor: 'rgba(255, 230, 0, 0.39)',
     checkColor: 'rgba(255, 0, 0, 0.39)',
     arrowColor: 'rgba(0, 0, 0, 0.6)'
+    ,
+    // Width in pixels for the base of the arrowhead triangle
+    arrowHeadBaseWidth: 30
 }
 
 const DEFAULT_DEBUG = {
     logMouseEvents: false,
-    showHoverSquare: false,
+    showHoverSquare: true,
     showClickSquare: false,
     logMoveEvents: false
 }
@@ -119,6 +122,13 @@ function populateUI() {
     const arrowAlphaInput = el('arrowAlpha')
     if (arrowAlphaInput) arrowAlphaInput.value = arrowAlpha
 
+    // optional arrow head base width input
+    const arrowBaseEl = el('arrowHeadBaseWidth')
+    if (arrowBaseEl) {
+        arrowBaseEl.value = Settings.arrowHeadBaseWidth
+        arrowBaseEl.placeholder = Settings.arrowHeadBaseWidth
+    }
+
 
     el('defaultPieceMargin').value = Settings.defaultPieceMargin
     el('defaultPieceMargin').placeholder = Settings.defaultPieceMargin
@@ -164,6 +174,9 @@ function readUIToSettings() {
     const arrowAlphaEl = el('arrowAlpha')
     const arrowAlpha = arrowAlphaEl ? parseFloat(arrowAlphaEl.value || 0.6) : 0.6
     if (arrowEl && arrowEl.value) Settings.arrowColor = hexToRgba(arrowEl.value, isNaN(arrowAlpha) ? 0.6 : arrowAlpha)
+
+    const arrowBaseEl = el('arrowHeadBaseWidth')
+    if (arrowBaseEl) Settings.arrowHeadBaseWidth = parseInt(arrowBaseEl.value || Settings.arrowHeadBaseWidth, 10)
 
     const marginEl = el('defaultPieceMargin')
     if (marginEl) Settings.defaultPieceMargin = parseInt(marginEl.value || 0, 10)
