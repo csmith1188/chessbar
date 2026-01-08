@@ -7,6 +7,7 @@ const path = require('path')
 const { Board, attachSocket, classes } = require('./engine/main')
 const { User, takenUserIds, userSocket } = require('./online/user')
 let { Game, games, takenGameIds, serializeGame } = require('./online/game')
+const { startClockManager } = require('./online/clockManager')
 const { POOL_ID, FORMBAR_URL, THIS_URL, FORMBAR_API_KEY, FB_MIDDLEWARE_SECRET } = require('./config.js')
 const sqlite3 = require('sqlite3')
 let sql
@@ -142,6 +143,9 @@ io.use((socket, next) => {
 // Attack sockets
 attachSocket(io, games)
 userSocket(io, db)
+
+// Start the background clock manager (non-blocking)
+startClockManager(io, games)
 
 const PORT = process.env.PORT || 3000
 server.listen(PORT, () => {
@@ -317,13 +321,16 @@ io.on('connection', (socket) => {
         }
     })
 
-    socket.on('newGame', (visibility = 'public', name = '', chatOn = true, startWhite = true) => {
+    socket.on('newGame', (visibility = 'public', name = '', chatOn = true, startWhite = true, time = null) => {
         if (user.id > 0) {
             if (user.game) {
                 user.game.leave(user)
             }
             // console.log('newGame event received')
-            let game = new Game(visibility, name, chatOn, startWhite)
+            // Normalize time: treat non-finite and non-positive values (including 0) as null => infinite clock
+            const parsed = Number(time)
+            const t = Number.isFinite(parsed) && parsed > 0 ? parsed : null
+            let game = new Game(visibility, name, chatOn, startWhite, t)
             game.owner = user
             // console.log(game.id, game.joinCode, game.owner)
             game.update()
