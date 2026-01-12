@@ -606,6 +606,7 @@ input:focus {
     margin: 0 auto;
     gap: 20px;
     font-size: 14px;
+    align-items: center;
 }
 
 /* Clock displays under the board: match page typography and appearance */

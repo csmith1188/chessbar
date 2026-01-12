@@ -38,7 +38,7 @@ function renderGameList() {
         const sub = document.createElement('div')
         sub.className = 'sub'
         if (Array.isArray(game.users) && game.users.length) {
-            sub.textContent = 'Users: ' + game.users.map(u => `${u.id}${u.side ? ` (${u.side})` : ''}`).join(', ')
+            sub.textContent = 'Users: ' + game.users.map(u => `${u.displayName}${u.side ? ` (${u.side})` : ''}`).join(', ')
         } else {
             sub.textContent = 'Users: (none)'
         }
@@ -54,19 +54,24 @@ function renderGameList() {
         const actions = document.createElement('div')
         actions.className = 'actions'
 
+        let actionBtn = document.createElement('button')
+
         if (playersCount < 2) {
-            const actionBtn = document.createElement('button')
             actionBtn.className = 'join'
             actionBtn.textContent = 'Join'
             actionBtn.onclick = () => window.location.href = `/game?code=${encodeURIComponent(game.joinCode)}`
-            actions.appendChild(actionBtn)
         } else {
-            const actionBtn = document.createElement('button')
             actionBtn.className = 'join'
             actionBtn.textContent = 'Spectate'
             actionBtn.onclick = () => window.location.href = `/game?code=${encodeURIComponent(game.joinCode)}`
-            actions.appendChild(actionBtn)
         }
+
+        if (game.finished) {
+            actionBtn.className = 'join'
+            actionBtn.textContent = 'View Final'
+            actionBtn.onclick = () => window.location.href = `/game?code=${encodeURIComponent(game.joinCode)}`
+        }
+        actions.appendChild(actionBtn)
 
         if (game.owner == me.id) {
             const actionBtn = document.createElement('button')

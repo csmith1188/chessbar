@@ -77,6 +77,37 @@ class Pawn extends Piece {
         return false
     }
 }
+
+// Return true if square x,y is attacked by any piece of `attackingSide`.
+// NOTE: we avoid mutating the board while checking (pawn en-passant branch mutates),
+// so pawn attacks are checked explicitly.
+function squareAttacked(board, x, y, attackingSide) {
+    for (let iy = 0; iy < 8; iy++) {
+        for (let ix = 0; ix < 8; ix++) {
+            const piece = board[iy][ix]
+            if (!piece || piece.side !== attackingSide) continue
+
+            // Pawn captures must be checked explicitly to avoid enPassant side-effects
+            if (piece.constructor.name === 'Pawn') {
+                if (piece.side === 'white') {
+                    if ((ix - 1 === x && iy - 1 === y) || (ix + 1 === x && iy - 1 === y)) return true
+                } else {
+                    if ((ix - 1 === x && iy + 1 === y) || (ix + 1 === x && iy + 1 === y)) return true
+                }
+                continue
+            }
+
+            // For other pieces, rely on their validMove returning strict true (ignore other return tokens)
+            try {
+                const res = piece.validMove(board, ix, iy, x, y)
+                if (res === true) return true
+            } catch (e) {
+                // If a piece's validMove throws for some board state, ignore it for attack-checking
+            }
+        }
+    }
+    return false
+}
 /*
 :::    ::: ::::::::::: ::::    :::  ::::::::
 :+:   :+:      :+:     :+:+:   :+: :+:    :+:
@@ -116,6 +147,19 @@ class King extends Piece {
                 for (let x = start; x <= end; x++) {
                     if (board[y1][x]) return false
                 }
+
+                // Can't castle out of, through, or into check.
+                const opponent = this.side === 'white' ? 'black' : 'white'
+
+                // King is currently in check -> cannot castle
+                if (squareAttacked(board, x1, y1, opponent)) return false
+
+                // Square the king passes through
+                const passX = x1 + dir
+                if (squareAttacked(board, passX, y1, opponent)) return false
+
+                // Destination square must not be attacked
+                if (squareAttacked(board, x2, y1, opponent)) return false
 
                 return 'castle'
             }
