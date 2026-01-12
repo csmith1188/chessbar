@@ -176,6 +176,105 @@ function updateBoard(data) {
     }
 
     board = newBoard
+    // Render captured pieces (if provided): sort by worth and show material diff
+    try {
+        const blackCapturedEl = document.getElementById('blackCaptured')
+        const whiteCapturedEl = document.getElementById('whiteCaptured')
+        if (blackCapturedEl) blackCapturedEl.innerHTML = ''
+        if (whiteCapturedEl) whiteCapturedEl.innerHTML = ''
+
+        // value map
+        const valueMap = {
+            pawn: 1,
+            knight: 3,
+            bishop: 3,
+            rook: 5,
+            queen: 8
+        }
+
+        let blackList = []
+        let whiteList = []
+
+        if (data.board && Array.isArray(data.board.captured)) {
+            for (const cap of data.board.captured) {
+                const name = (cap && cap.name) ? String(cap.name).toLowerCase() : ''
+                const side = cap && cap.side ? String(cap.side) : ''
+                const val = valueMap[name] || 0
+                const item = { name, side, val }
+                if (side === 'black') blackList.push(item)
+                else if (side === 'white') whiteList.push(item)
+            }
+
+            // Sort ascending by value (reversed order: lower-value pieces first)
+            const sorter = (a, b) => a.val - b.val || a.name.localeCompare(b.name)
+            blackList.sort(sorter)
+            whiteList.sort(sorter)
+
+            // compute totals (points taken by white = sum of captured black pieces)
+            const pointsTakenByWhite = blackList.reduce((s, p) => s + p.val, 0)
+            const pointsTakenByBlack = whiteList.reduce((s, p) => s + p.val, 0)
+            const diff = pointsTakenByWhite - pointsTakenByBlack
+
+            const size = Math.max(14, Math.round(Settings.boardSquareSize * 0.5)) + 'px'
+
+            for (const cap of blackList) {
+                try {
+                    const img = document.createElement('img')
+                    img.src = `img/${Settings.pieceStyle}/black_${cap.name}.png`
+                    img.alt = `black ${cap.name}`
+                    img.title = `black ${cap.name}`
+                    img.className = 'captured-piece'
+                    if (blackCapturedEl) blackCapturedEl.appendChild(img)
+                } catch (e) { }
+            }
+
+            for (const cap of whiteList) {
+                try {
+                    const img = document.createElement('img')
+                    img.src = `img/${Settings.pieceStyle}/white_${cap.name}.png`
+                    img.alt = `white ${cap.name}`
+                    img.title = `white ${cap.name}`
+                    img.className = 'captured-piece'
+                    if (whiteCapturedEl) whiteCapturedEl.appendChild(img)
+                } catch (e) { }
+            }
+            // Remove any lingering advantage badges before deciding to add new ones
+            if (whiteCapturedEl) {
+                const old = whiteCapturedEl.querySelectorAll('.cap-adv')
+                old.forEach(n => n.remove())
+            }
+            if (blackCapturedEl) {
+                const old = blackCapturedEl.querySelectorAll('.cap-adv')
+                old.forEach(n => n.remove())
+            }
+
+            // advantage from black's perspective (black captured white pieces)
+            // Only create the badge when the advantage is strictly positive (> 0)
+            if (whiteCapturedEl && whiteList.length) {
+                const advB = -diff // pointsTakenByBlack - pointsTakenByWhite
+                if (advB > 0) {
+                    const advSpanB = document.createElement('span')
+                    advSpanB.className = 'cap-adv positive'
+                    advSpanB.innerText = `+${advB}`
+                    whiteCapturedEl.appendChild(advSpanB)
+                }
+            }
+
+            // advantage from white's perspective (white captured black pieces)
+            // Only create the badge when the advantage is strictly positive (> 0)
+            if (blackCapturedEl && blackList.length) {
+                const advW = diff // pointsTakenByWhite - pointsTakenByBlack
+                if (advW > 0) {
+                    const advSpanW = document.createElement('span')
+                    advSpanW.className = 'cap-adv positive'
+                    advSpanW.innerText = `+${advW}`
+                    blackCapturedEl.appendChild(advSpanW)
+                }
+            }
+        }
+    } catch (e) {
+        // ignore DOM errors
+    }
 
     // Update clock display if provided
     try {

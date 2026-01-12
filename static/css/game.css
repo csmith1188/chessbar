@@ -654,6 +654,65 @@ input:focus {
     margin: 0 auto;
     gap: 20px;
     font-size: 14px;
+    align-items: center;
+}
+
+/* Captured pieces: show as a small overlapping stack */
+#blackCaptured,
+#whiteCaptured {
+    display: flex;
+    align-items: center;
+    padding: 6px 8px;
+    /* max-width: 220px; */
+    background: rgb(73, 73, 73); /* light grey to contrast black pieces */
+    border-radius: 8px;
+    border: 1px solid rgba(0,0,0,0.06);
+}
+
+/* Hide capture containers when there are no pieces captured */
+#blackCaptured:empty,
+#whiteCaptured:empty {
+    display: none;
+}
+
+.captured-piece {
+    display: inline-block;
+    margin-left: -8px;
+    border-radius: 6px;
+    transition: transform 160ms ease, box-shadow 160ms ease;
+    width: 25px;
+    height: auto;
+    margin: 1px
+}
+
+#blackCaptured .captured-piece:first-child,
+#whiteCaptured .captured-piece:first-child {
+    margin-left: 0;
+}
+
+/* small score badge removed; using .cap-adv only */
+
+/* material diff display */
+#captureDiff {
+    margin-left: 10px;
+    color: #eaf5fb;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+/* advantage badge next to capture boxes */
+.cap-adv {
+    margin-left: 6px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-weight: 800;
+    font-size: 13px;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+}
+.cap-adv.positive {
+    background: #00000015; /* green */
 }
 
 /* Clock displays under the board: match page typography and appearance */

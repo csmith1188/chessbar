@@ -42,7 +42,7 @@ class Arrow {
             const endY = ey * Settings.boardSquareSize + Settings.boardSquareSize / 2
 
             // Visual style: thick orange line with filled arrowhead
-            const baseWidth = Math.max(6, Math.round(Settings.boardSquareSize * .25))
+            const baseWidth = Math.max(6, Math.round(Settings.boardSquareSize * .2))
             let headLen = Math.max(10, Math.round(Settings.boardSquareSize * 0.3))
 
             ctx.save()
@@ -52,62 +52,138 @@ class Arrow {
             ctx.lineCap = 'butt'
 
             // Compute angle and arrowhead geometry
+            const dxSquares = Math.abs(ex - sx)
+            const dySquares = Math.abs(ey - sy)
+            const isLShape = (dxSquares === 2 && dySquares === 1) || (dxSquares === 1 && dySquares === 2)
+
+            // For straight arrows use single angle; for L-shape we'll compute two segment angles
             const angle = Math.atan2(endY - startY, endX - startX)
 
             // Offset the start a bit so the arrow doesn't draw over the piece at the origin
-            const startOffset = Math.max(Math.round(Settings.boardSquareSize * 0.22), Math.round(baseWidth * 1.5))
-            const offsetStartX = startX + Math.cos(angle) * startOffset
-            const offsetStartY = startY + Math.sin(angle) * startOffset
+            const startOffset = Math.max(Math.round(Settings.boardSquareSize * 0.32), Math.round(baseWidth * 1.5))
+            // For L-shaped arrows we'll offset along the first leg, otherwise along the straight angle
+            let offsetStartX, offsetStartY
 
             // Compute an end offset so the arrow tip doesn't overlap the target piece,
             // but guarantee there's room for a visible shaft (base) and the head
             const requestedEndOffset = Math.max(Math.round(Settings.boardSquareSize * 0.16), Math.round(baseWidth * 1.5))
-            const len = Math.hypot(endX - startX, endY - startY)
             const desiredMinShaft = Math.max(baseWidth, Math.round(Settings.boardSquareSize * 0.08))
 
-            // Max allowed endOffset so that: shaftLength = len - startOffset - endOffset - headLen >= desiredMinShaft
-            const maxEndOffset = Math.max(0, Math.floor(len - startOffset - headLen - desiredMinShaft))
-            let endOffset = Math.min(requestedEndOffset, maxEndOffset)
+            let tipX, tipY, endOffset, baseCenterX, baseCenterY, angle2
 
-            // If there's little to no room even with endOffset reduced, shrink headLen (but keep a small minimum)
-            if (len - startOffset - endOffset < desiredMinShaft + 4) {
-                const newHead = Math.max(4, Math.floor(len - startOffset - endOffset - desiredMinShaft))
-                if (newHead > 0) headLen = Math.min(headLen, newHead)
+            if (!isLShape) {
+                const len = Math.hypot(endX - startX, endY - startY)
+                // Max allowed endOffset so that: shaftLength = len - startOffset - endOffset - headLen >= desiredMinShaft
+                const maxEndOffset = Math.max(0, Math.floor(len - startOffset - headLen - desiredMinShaft))
+                endOffset = Math.min(requestedEndOffset, maxEndOffset)
+
+                // If there's little to no room even with endOffset reduced, shrink headLen (but keep a small minimum)
+                if (len - startOffset - endOffset < desiredMinShaft + 4) {
+                    const newHead = Math.max(4, Math.floor(len - startOffset - endOffset - desiredMinShaft))
+                    if (newHead > 0) headLen = Math.min(headLen, newHead)
+                }
+
+                // Place tip at center of destination square
+                tipX = endX
+                tipY = endY
+
+                // Offset start along the straight angle
+                offsetStartX = startX + Math.cos(angle) * startOffset
+                offsetStartY = startY + Math.sin(angle) * startOffset
+
+                // Arrowhead (triangle) - compute base width from settings if available
+                const arrowWidth = (typeof Settings !== 'undefined' && Settings.arrowHeadBaseWidth) ? Settings.arrowHeadBaseWidth : Math.max(10, Math.round(Settings.boardSquareSize * 0.3))
+
+                // Base center is located `headLen` back from the tip along the shaft
+                baseCenterX = tipX - headLen * Math.cos(angle)
+                baseCenterY = tipY - headLen * Math.sin(angle)
+                angle2 = angle
+
+                // Main shaft (start from the offset point, end at the base of the head)
+                ctx.beginPath()
+                ctx.moveTo(offsetStartX, offsetStartY)
+                ctx.lineTo(baseCenterX, baseCenterY)
+                ctx.stroke()
+
+                // Perpendicular unit vector
+                const perpX = Math.cos(angle + Math.PI / 2)
+                const perpY = Math.sin(angle + Math.PI / 2)
+
+                const half = arrowWidth / 2
+                const p1x = baseCenterX + perpX * half
+                const p1y = baseCenterY + perpY * half
+
+                const p2x = baseCenterX - perpX * half
+                const p2y = baseCenterY - perpY * half
+
+                ctx.beginPath()
+                ctx.moveTo(tipX, tipY)
+                ctx.lineTo(p1x, p1y)
+                ctx.lineTo(p2x, p2y)
+                ctx.closePath()
+                ctx.fill()
+            } else {
+                // L-shaped arrow: route via a corner (like a knight's L). Choose horizontal-first if dx>dy
+                const horizontalFirst = Math.abs(ex - sx) > Math.abs(ey - sy)
+
+                const midX = horizontalFirst ? endX : startX
+                const midY = horizontalFirst ? startY : endY
+
+                const seg1Angle = Math.atan2(midY - startY, midX - startX)
+                const seg2Angle = Math.atan2(endY - midY, endX - midX)
+
+                // Offset start along first segment
+                offsetStartX = startX + Math.cos(seg1Angle) * startOffset
+                offsetStartY = startY + Math.sin(seg1Angle) * startOffset
+
+                // Compute length of second segment to determine endOffset/head fitting
+                const seg2Len = Math.hypot(endX - midX, endY - midY)
+                const maxEndOffset2 = Math.max(0, Math.floor(seg2Len - headLen - desiredMinShaft))
+                endOffset = Math.min(requestedEndOffset, maxEndOffset2)
+
+                // If necessary shrink headLen to fit
+                if (seg2Len - endOffset < desiredMinShaft + 4) {
+                    const newHead = Math.max(4, Math.floor(seg2Len - endOffset - desiredMinShaft))
+                    if (newHead > 0) headLen = Math.min(headLen, newHead)
+                }
+
+                // Place tip at center of destination square
+                tipX = endX
+                tipY = endY
+
+                // Arrowhead base center back from tip along final segment
+                baseCenterX = tipX - headLen * Math.cos(seg2Angle)
+                baseCenterY = tipY - headLen * Math.sin(seg2Angle)
+                angle2 = seg2Angle
+
+                // Compute arrowhead width
+                const arrowWidth = (typeof Settings !== 'undefined' && Settings.arrowHeadBaseWidth) ? Settings.arrowHeadBaseWidth : Math.max(10, Math.round(Settings.boardSquareSize * 0.3))
+
+                // Main shaft: draw two connected segments: offsetStart -> corner -> baseCenter
+                ctx.beginPath()
+                ctx.moveTo(offsetStartX, offsetStartY)
+                const cornerX = horizontalFirst ? endX : startX
+                const cornerY = horizontalFirst ? startY : endY
+                ctx.lineTo(cornerX, cornerY)
+                ctx.lineTo(baseCenterX, baseCenterY)
+                ctx.stroke()
+
+                // Perpendicular unit vector for final leg
+                const perpX2 = Math.cos(angle2 + Math.PI / 2)
+                const perpY2 = Math.sin(angle2 + Math.PI / 2)
+                const half2 = arrowWidth / 2
+                const q1x = baseCenterX + perpX2 * half2
+                const q1y = baseCenterY + perpY2 * half2
+                const q2x = baseCenterX - perpX2 * half2
+                const q2y = baseCenterY - perpY2 * half2
+
+                ctx.beginPath()
+                ctx.moveTo(tipX, tipY)
+                ctx.lineTo(q1x, q1y)
+                ctx.lineTo(q2x, q2y)
+                ctx.closePath()
+                ctx.fill()
             }
-
-            const tipX = endX - Math.cos(angle) * endOffset
-            const tipY = endY - Math.sin(angle) * endOffset
-
-            // Arrowhead (triangle) - compute base width from settings if available
-            const arrowWidth = (typeof Settings !== 'undefined' && Settings.arrowHeadBaseWidth) ? Settings.arrowHeadBaseWidth : Math.max(10, Math.round(Settings.boardSquareSize * 0.3))
-
-            // Base center is located `headLen` back from the tip along the shaft
-            const baseCenterX = tipX - headLen * Math.cos(angle)
-            const baseCenterY = tipY - headLen * Math.sin(angle)
-
-            // Main shaft (start from the offset point, end at the base of the head)
-            ctx.beginPath()
-            ctx.moveTo(offsetStartX, offsetStartY)
-            ctx.lineTo(baseCenterX, baseCenterY)
-            ctx.stroke()
-
-            // Perpendicular unit vector
-            const perpX = Math.cos(angle + Math.PI / 2)
-            const perpY = Math.sin(angle + Math.PI / 2)
-
-            const half = arrowWidth / 2
-            const p1x = baseCenterX + perpX * half
-            const p1y = baseCenterY + perpY * half
-
-            const p2x = baseCenterX - perpX * half
-            const p2y = baseCenterY - perpY * half
-
-            ctx.beginPath()
-            ctx.moveTo(tipX, tipY)
-            ctx.lineTo(p1x, p1y)
-            ctx.lineTo(p2x, p2y)
-            ctx.closePath()
-            ctx.fill()
 
             ctx.restore()
         }
@@ -404,23 +480,6 @@ function drawBoard() {
             }
         }
 
-        // Temporary arrow while right-dragging (not persisted until mouseup)
-        try {
-            if (Mouse && Mouse.right && Mouse.dragStartX !== null) {
-                const sx = Math.floor(Mouse.dragStartX / Settings.boardSquareSize)
-                const sy = Math.floor(Mouse.dragStartY / Settings.boardSquareSize)
-                const ex = Math.floor(Mouse.x / Settings.boardSquareSize)
-                const ey = Math.floor(Mouse.y / Settings.boardSquareSize)
-                const clamp = (v) => Math.max(0, Math.min(7, v))
-                let temp
-                if (me.side == 'white') {
-                    temp = new Arrow(clamp(sx), clamp(sy), clamp(ex), clamp(ey))
-                } else {
-                    temp = new Arrow(clamp(sx), clamp(7 - sy), clamp(ex), clamp(7 - ey))
-                }
-                temp.draw()
-            }
-        } catch (err) { }
     }
 
 }
