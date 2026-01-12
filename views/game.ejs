@@ -32,6 +32,13 @@
         </div>
     </div>
 
+    <!-- Waiting overlay shown when opponent hasn't joined -->
+    <div id="waitingOverlay" aria-live="polite" aria-hidden="true">
+        <div class="waiting-inner" role="status">
+            <div class="waiting-text">Waiting for opponent...</div>
+        </div>
+    </div>
+
     <!-- Pawn promotion menu (hidden, fixed top-center) -->
     <div id="promotion" aria-hidden="true">
         <img src="" id="queen">
@@ -225,8 +232,55 @@
 
                 users.appendChild(userDiv)
             })
+            // update waiting overlay after repopulating users
+            try { updateWaitingOverlay(); } catch (e) {}
         }
     }
+</script>
+
+<script>
+    // Show/hide the waiting-for-opponent overlay based on current users
+    function updateWaitingOverlay() {
+        const overlay = document.getElementById('waitingOverlay')
+        if (!overlay) return
+
+        // Determine whether an opponent (a different, active player) is present
+        let hasOpponent = false
+        try {
+            if (typeof me !== 'undefined' && me && gameData && Array.isArray(gameData.users)) {
+                // Prefer a user on the opposite side if side is known
+                if (me.side) {
+                    hasOpponent = gameData.prevBlack && gameData.prevWhite
+                }
+                // Fallback: any other connected user counts as an opponent
+                if (!hasOpponent) hasOpponent = gameData.users.some(u => u.id !== me.id)
+            } else if (gameData && Array.isArray(gameData.users)) {
+                hasOpponent = gameData.users.length >= 2
+            }
+        } catch (e) {
+            hasOpponent = true
+        }
+
+        if (!hasOpponent) {
+            overlay.classList.add('show')
+            overlay.setAttribute('aria-hidden', 'false')
+        } else {
+            overlay.classList.remove('show')
+            overlay.setAttribute('aria-hidden', 'true')
+        }
+    }
+
+    // Ensure overlay updates when board and identity info arrive
+    socket.on('updateBoard', (data) => {
+        // existing handler in this file already calls updateBoard and populateUsers;
+        // call updateWaitingOverlay again in case users changed
+        try { updateWaitingOverlay(); } catch (e) {}
+    })
+
+    socket.on('youAre', () => {
+        // identity may have changed; refresh overlay
+        try { updateWaitingOverlay(); } catch (e) {}
+    })
 </script>
 
 <script>

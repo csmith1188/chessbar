@@ -138,7 +138,7 @@
     })
 
     function updateInfo(user) {
-        winPercent.innerText = user.wins / user.finished * 100 || 0
+        winPercent.innerText = Math.round(user.wins / user.finished * 100 || 0)
         if (user.wins / user.finished * 100 == Infinity) {
             winPercent.innerText = '100'
         }
