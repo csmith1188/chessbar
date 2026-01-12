@@ -16,9 +16,11 @@
         <!-- Game canvas -->
         <div id="board-column">
             <canvas id='canvas'></canvas>
-            <div id="info-resign-row">
+            <div id="underBoard">
+                <div id="whiteClock"></div>
                 <div id='InfoBox'></div>
                 <button id="resign-btn" type="button" title="Resign" aria-label="Resign"></button>
+                <div id="blackClock"></div>
             </div>
         </div>
 
@@ -316,6 +318,24 @@
             copyJoinCode(joinBadge.dataset.code);
         }
     });
+</script>
+
+<script>
+    var whiteTime = null;
+    var blackTime = null;
+
+    socket.on('updateClock', (data) => {
+        if (data.whiteTime !== undefined) {
+            whiteTime = data.whiteTime;
+            document.getElementById('whiteClock').innerText = formatTime(whiteTime);
+        }
+        if (data.blackTime !== undefined) {
+            blackTime = data.blackTime;
+            document.getElementById('blackClock').innerText = formatTime(blackTime);
+        }
+
+    });
+
 </script>
 
 </html>
