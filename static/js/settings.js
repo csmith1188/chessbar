@@ -11,7 +11,7 @@ const DEFAULT_SETTINGS = {
     arrowColor: 'rgba(0, 0, 0, 0.6)'
     ,
     // Width in pixels for the base of the arrowhead triangle
-    arrowHeadBaseWidth: 30
+    arrowHeadBaseWidth: 50
 }
 
 const DEFAULT_DEBUG = {
