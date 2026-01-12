@@ -59,11 +59,26 @@ document.addEventListener('mouseup', (e) => {
                         else highlightedSquares.add(key)
                     } catch (err) { }
                 } else {
-                    if (me.side == 'white') {
-                        arrows.push(new Arrow(csx, csy, cex, cey))
-                    } else {
-                        arrows.push(new Arrow(csx, 7 - csy, cex, 7 - cey))
-                    }
+                    try {
+                        // Determine the coordinates as they will be stored in the Arrow instance
+                        let ax1, ay1, ax2, ay2
+                        if (me && me.side == 'white') {
+                            ax1 = csx; ay1 = csy; ax2 = cex; ay2 = cey
+                        } else {
+                            ax1 = csx; ay1 = 7 - csy; ax2 = cex; ay2 = 7 - cey
+                        }
+
+                        // Ensure arrows array exists
+                        if (typeof arrows === 'undefined') arrows = []
+
+                        // Look for an identical arrow and remove it if found (toggle behavior)
+                        const existingIndex = arrows.findIndex(a => a.x1 === ax1 && a.y1 === ay1 && a.x2 === ax2 && a.y2 === ay2)
+                        if (existingIndex !== -1) {
+                            arrows.splice(existingIndex, 1)
+                        } else {
+                            arrows.push(new Arrow(ax1, ay1, ax2, ay2))
+                        }
+                    } catch (err) { }
                 }
             }
         } catch (err) { }
