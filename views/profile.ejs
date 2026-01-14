@@ -9,33 +9,39 @@
 </head>
 
 <body>
-    <a href='/' class='small back-link'
-        style='margin:8px 0 0 18px;display:inline-block;text-decoration:none;color:var(--muted); height:min-content'>←
-        Back to games</a>
-    <div id='profile'>
+    <div id="player">
+        <div id="avatar" class="avatar-large">
+            <img src="/img/basic_avatar.png">
+        </div>
 
+        <div id="name" class="player-name">
+            Player
+        </div>
+    </div>
+
+    <div id='profile'>
         <!-- Right column: main profile info -->
         <div class='profile-info'>
-            <div style='margin-top:12px; display:grid; grid-template-columns: repeat(3,1fr); gap:12px;'>
+            <div style='margin-top:12px; display:grid; grid-template-columns: repeat(2,1fr); gap:12px;'>
                 <div class='panel'>
                     <div class='small'>Win %</div>
-                    <div style='font-weight:700;font-size:18px;margin-top:6px;' id='winPercent'>0</div>
+                    <div id='winPercent'>0</div>
                 </div>
                 <div class='panel'>
                     <div class='small'>Tokens</div>
-                    <div style='font-weight:700;font-size:18px;margin-top:6px;' id='tokens'>0</div>
+                    <div id='tokens'>0</div>
                 </div>
                 <div class='panel'>
                     <div class='small'>Games started</div>
-                    <div style='font-weight:700;font-size:18px;margin-top:6px;' id='started'>0</div>
+                    <div id='started'>0</div>
                 </div>
                 <div class='panel'>
                     <div class='small'>Games finished</div>
-                    <div style='font-weight:700;font-size:18px;margin-top:6px;' id='finished'>0</div>
+                    <div id='finished'>0</div>
                 </div>
                 <div class='panel'>
                     <div class='small'>W/D/L</div>
-                    <div style='font-weight:700;font-size:18px;margin-top:6px;' id='wdl'>0/0/0</div>
+                    <div id='wdl'>0/0/0</div>
                 </div>
             </div>
         </div>
@@ -58,6 +64,9 @@
         </div>
     </div>
 
+    <a href='/' class='small back-link'
+        style='margin:8px 0 0 18px;display:inline-block;text-decoration:none;color:var(--muted); height:min-content'>←
+        Back to games</a>
 </body>
 
 <script src='/socket.io/socket.io.js'></script>
