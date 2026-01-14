@@ -222,10 +222,19 @@
                 statusDot.classList.add('status-dot')
                 statusDot.classList.add(u.active ? 'online' : 'offline')
 
+                // Make the name clickable to open the user's profile in a new tab
                 if (u.id == me.id) {
                     name.innerText = `You (${u.side})`
+                    name.style.cursor = 'pointer'
+                    name.setAttribute('role', 'link')
+                    name.setAttribute('title', 'View your profile page')
+                    name.addEventListener('click', () => { window.open('/profile', '_blank') })
                 } else {
                     name.innerText = `${u.displayName} (${u.side})`
+                    name.style.cursor = 'pointer'
+                    name.setAttribute('role', 'link')
+                    name.setAttribute('title', `View ${u.displayName}'s profile page`)
+                    name.addEventListener('click', () => { window.open(`/profile?usr=${u.id}`, '_blank') })
                 }
 
                 userDiv.appendChild(name)
