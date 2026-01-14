@@ -466,17 +466,17 @@ function drawBoard() {
             }
         }
 
-        // Draw any arrows (after red/check squares but before pieces)
-        if (arrows && arrows.length) {
-            for (let a of arrows) {
-                a.draw()
-            }
-        }
-
         // Draw the pieces
         for (let piece of pieces) {
             if (piece.img && piece.img.complete) {
                 piece.draw()
+            }
+        }
+
+        // Draw any arrows (after pieces)
+        if (arrows && arrows.length) {
+            for (let a of arrows) {
+                a.draw()
             }
         }
 
