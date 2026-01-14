@@ -32,6 +32,8 @@ class User {
 
         this.game = null
         this.active = true
+        // timestamp (ms since epoch) when the user went inactive; null when active
+        this.lastActiveAt = null
 
         this.getInfo(db)
         this.youAre()
@@ -160,7 +162,9 @@ class User {
             wins: this.wins,
             losses: this.losses,
             draws: this.draws,
-            active: this.active,
+            // derive `active` from the current socket connection state when possible
+            active: (this.socket && this.socket.connected === true) ? true : !!this.active,
+            lastActiveAt: this.lastActiveAt || null,
             displayName: this.displayName
         }
     }

@@ -159,7 +159,8 @@ function logUsers() {
     console.log()
     console.log('Games:')
     games.forEach(g => {
-        console.log(`Owner: ${g.owner.displayName} | Name: ${g.name} | ID: ${g.id} | Visibility: ${g.visibility} | Users:`)
+        const ownerName = g.owner && g.owner.displayName ? g.owner.displayName : 'None'
+        console.log(`Owner: ${ownerName} | Name: ${g.name} | ID: ${g.id} | Visibility: ${g.visibility} | Users:`)
         g.users.forEach(u => console.log(`  Name: ${u.displayName}`))
     })
     console.log()
@@ -179,6 +180,9 @@ io.on('connection', (socket) => {
         user.socket = socket
         user.sessionUser = sessionUser
         user.active = true
+        // clear inactivity timestamp when the user reconnects
+        try { user.lastActiveAt = null } catch (e) {}
+        try { user.youAre() } catch (e) {}
         // console.log(`User ${user.displayName || user.id} reconnected`)
         user.getInfo(db)
     } else {
@@ -192,8 +196,7 @@ io.on('connection', (socket) => {
         // console.log(games)
         return games.filter(g => {
             if (g.visibility === 'public') return true
-            if (g.owner == user) return true
-            if (g.owner.id == user.id) return true
+            if (g.owner && (g.owner == user || g.owner.id == user.id)) return true
             return false
         }).map(serializeGame)
     }
@@ -293,6 +296,10 @@ io.on('connection', (socket) => {
     //! Disconnection
     socket.on('disconnect', () => {
         user.active = false
+        // record when the user went inactive so clients can show duration
+        try { user.lastActiveAt = Date.now() } catch (e) {}
+        // clear the socket reference so serialize() can accurately reflect connection state
+        try { user.socket = null } catch (e) {}
         if (user.game) user.game.leave(user)
 
         if (user.id <= 0) {
@@ -404,7 +411,7 @@ io.on('connection', (socket) => {
     socket.on('deleteGame', (gameId) => {
         const game = games.find(g => g.id === gameId)
 
-        if (game && game.owner.id === user.id) {
+        if (game && game.owner && game.owner.id === user.id) {
             // mutate the shared array instead of reassigning the variable
             const idx = games.findIndex(g => g.id === gameId)
             if (idx !== -1) games.splice(idx, 1)

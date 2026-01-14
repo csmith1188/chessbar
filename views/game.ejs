@@ -204,6 +204,15 @@
         if (gameData && gameData.users) {
             users.innerHTML = ''
 
+            // Helper to format milliseconds to MM:SS
+            function formatMsToMMSS(ms) {
+                if (!ms || ms < 0) return '00:00'
+                const totalSeconds = Math.floor(ms / 1000)
+                const minutes = Math.floor(totalSeconds / 60)
+                const seconds = totalSeconds % 60
+                return String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0')
+            }
+
             let usersToShow = []
             if (gameData.prevWhite) usersToShow.push(gameData.prevWhite)
             if (gameData.prevBlack) usersToShow.push(gameData.prevBlack)
@@ -219,8 +228,29 @@
                 const statusDot = document.createElement('div')
                 name.classList.add('username')
 
+                // Only create and append the inactive timestamp when the user is offline.
+                // This keeps the status-dot flush against the username while online.
+                let inactiveSpan = null
+                if (!u.active && u.lastActiveAt) {
+                    inactiveSpan = document.createElement('span')
+                    inactiveSpan.classList.add('inactive-duration')
+                    const elapsed = Date.now() - u.lastActiveAt
+                    inactiveSpan.textContent = formatMsToMMSS(elapsed) + ' '
+                }
+
                 statusDot.classList.add('status-dot')
-                statusDot.classList.add(u.active ? 'online' : 'offline')
+                if (u == me || (gameData.users && Array.isArray(gameData.users) && (gameData.prevWhite == u && gameData.users.includes(u)) || (gameData.prevBlack == u && gameData.users.includes(u))|| (u.side == 'spectator' && u.active))) {
+                    statusDot.classList.add('online')
+                } else {
+                    statusDot.classList.add('offline')
+                }
+
+                // Add animation class when user is offline so CSS can sequence the slide + fade
+                if (!u.active) {
+                    userDiv.classList.add('went-offline')
+                } else {
+                    userDiv.classList.remove('went-offline')
+                }
 
                 // Make the name clickable to open the user's profile in a new tab
                 if (u.id == me.id) {
@@ -238,6 +268,8 @@
                 }
 
                 userDiv.appendChild(name)
+                // insert inactive duration before the colored status dot when present
+                if (inactiveSpan) userDiv.appendChild(inactiveSpan)
                 userDiv.appendChild(statusDot)
 
                 users.appendChild(userDiv)

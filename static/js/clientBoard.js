@@ -31,7 +31,7 @@ class Arrow {
             let ey = this.y2
 
             // If player is black, the board is drawn flipped vertically elsewhere — match that here
-            if (me && me.side === 'black') {
+            if (me && (me.side === 'black' || me.side === 'spectator')) {
                 sy = 7 - sy
                 ey = 7 - ey
             }
