@@ -36,20 +36,63 @@ function formatTime(seconds) {
     return `${mm}:${ss.toString().padStart(2, '0')}`
 }
 
+// Reusable client-side system alert popup helper
+function showSystemPopup(title, message, duration = 6000, player = null) {
+    try {
+        let container = document.getElementById('systemAlert')
+        if (!container) {
+            container = document.createElement('div')
+            container.id = 'systemAlert'
+            container.setAttribute('aria-live', 'polite')
+            container.setAttribute('aria-hidden', 'true')
+            container.className = 'system-alert'
+            const inner = document.createElement('div')
+            inner.className = 'system-alert-inner'
+            container.appendChild(inner)
+            document.body.appendChild(container)
+        }
+
+        const inner = container.querySelector('.system-alert-inner')
+        inner.innerHTML = ''
+        if (title) {
+            const h = document.createElement('div')
+            h.className = 'system-alert-title'
+            h.innerText = title
+            inner.appendChild(h)
+        }
+        const p = document.createElement('div')
+        p.className = 'system-alert-message'
+        p.innerText = message
+        inner.appendChild(p)
+
+        container.classList.add('show')
+        container.setAttribute('aria-hidden', 'false')
+
+        if (container._timeout) clearTimeout(container._timeout)
+        container._timeout = setTimeout(() => {
+            container.classList.remove('show')
+            container.setAttribute('aria-hidden', 'true')
+            container._timeout = null
+        }, duration)
+    } catch (e) {
+        try { alert(message) } catch (e) {}
+    }
+}
+
 let freshBoard = false
 
 socket.on('mate', (d) => {
-    alert(`Checkmate. ${d.winner} wins!`)
+    showSystemPopup('Checkmate', `Checkmate. ${d.winner} wins!`, 8000)
 })
 
 // Time-up event (different from checkmate)
 socket.on('timeUp', (d) => {
     const name = (d && d.winnerName) ? d.winnerName : (d && d.winner) ? d.winner : 'Player'
-    alert(`Time. ${name} wins on time!`)
+    showSystemPopup('Time Up', `Time. ${name} wins on time!`, 8000)
 })
 
 socket.on('resign', (u) => {
-    alert(`${u.displayName} has resigned.`)
+    showSystemPopup('Resign', `${u.displayName} has resigned.`, 6000, u)
 })
 
 // pending promotion coords and listener-guard
@@ -354,3 +397,10 @@ requestAnimationFrame(main)
 
 //Kayden should drop out of programming
 //bro
+
+// Handle server-sent system alerts (structured notifications)
+socket.on('systemAlert', (payload) => {
+    // delegate to shared popup helper
+    if (!payload) return
+    showSystemPopup(payload.title || '', payload.message || '', payload.duration || 6000, payload.player || null)
+})
