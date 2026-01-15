@@ -15,6 +15,10 @@
         </div>
 
         <div id="name"></div>
+        <div>
+            <button id="friends-btn" class="btn">friends</button>
+            <button id="challenge-btn" class="btn secondary">challenge</button>
+        </div>
     </div>
 
     <div id='profile'>
@@ -148,8 +152,8 @@
     })
 
     socket.on('noUser', () => {
-        window.location.href='/profile'
-    }) 
+        window.location.href = '/profile'
+    })
 
     if (viewingUser) {
         socket.emit('getUser', viewingUser)

@@ -25,6 +25,7 @@
     justify-content: flex-start;
     /* Center items along the horizontal/cross axis */
     align-items: center;
+    margin-top: 45px;
 }
 
 #pfp {
@@ -90,7 +91,6 @@ body {
 #tokens,
 #started,
 #finished,
-#player,
 #wdl {
     font-weight: 700;
     font-size: 40px;
@@ -217,9 +217,6 @@ body {
         margin: 0 auto;
     }
 }
-
-
-
 
 /* accessibility focus styles consistent with site */
 button:focus,
