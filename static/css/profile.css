@@ -59,12 +59,11 @@ body {
     z-index: 40;
 }
 
-
-
-
-
-
-
+#name {
+    font-size: 40px;
+    font-weight: 700;
+    margin: 0;
+}
 
 .panel {
     /* lower-contrast panel so profile feels lighter */
