@@ -123,19 +123,50 @@
     const wdl = document.getElementById('wdl')
     const nameBox = document.getElementById('name')
 
+    const query = window.location.search
+    let viewingUser = new URLSearchParams(query).get('usr')
+
+    // Hide purchase UI when viewing someone else's profile
+    function updateBuyTokensVisibility() {
+        const buy = document.getElementById('buyTokens')
+        if (!buy) return
+        // If we don't yet know the current user, wait for the server to tell us
+        if (typeof me === 'undefined' || me == null) {
+            socket.once('youAre', () => updateBuyTokensVisibility())
+            return
+        }
+        // viewingUser may be null when visiting own profile with no query param
+        if (viewingUser && String(viewingUser) !== String(me.id)) {
+            buy.style.display = 'none'
+        } else {
+            buy.style.display = ''
+        }
+    }
+
     // Get the user data
     socket.on('foundUser', (user) => {
-        console.log('db:', user)
         updateInfo(user)
+        console.log(user)
     })
 
-    socket.on('youAre', (u) => {
-        console.log(u)
-        socket.emit('getUser', u.id)
-    })
+    socket.on('noUser', () => {
+        window.location.href='/profile'
+    }) 
+
+    if (viewingUser) {
+        socket.emit('getUser', viewingUser)
+        updateBuyTokensVisibility()
+    } else {
+        socket.on('youAre', (u) => {
+            viewingUser = u.id
+            console.log(u)
+            socket.emit('getUser', u.id)
+            updateBuyTokensVisibility()
+        })
+    }
 
     function updateInfo(user) {
-        winPercent.innerText = user.wins / user.finished * 100 || 0
+        winPercent.innerText = Math.round(user.wins / user.finished * 100 || 0)
         if (user.wins / user.finished * 100 == Infinity) {
             winPercent.innerText = '100'
         }
@@ -143,7 +174,7 @@
         started.innerText = user.started
         finished.innerText = user.finished
         wdl.innerText = `${user.wins}/${user.draws}/${user.losses}`
-        nameBox.innerText = me.displayName
+        nameBox.innerText = user.display_name
     }
 </script>
 

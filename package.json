@@ -15,7 +15,8 @@
   "description": "1. In the command prompt, run `init.bat`.\r 2. In `INFO.js`, fill out the correct information.",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "migrate-db": "node database/migrate.js"
   },
   "keywords": [],
   "author": "",

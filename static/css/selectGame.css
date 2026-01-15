@@ -212,6 +212,11 @@ body {
     transition: transform 120ms ease
 }
 
+.btn:hover {
+    transform: translateY(-2px);
+    transition: transform 120ms ease
+}
+
 .empty {
     color: var(--muted);
     padding: 18px;

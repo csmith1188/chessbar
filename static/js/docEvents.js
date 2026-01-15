@@ -4,7 +4,20 @@ document.addEventListener('contextmenu', (e) => {
     if (Debug.logMouseEvents) console.log(e, Mouse)
 })
 
+// Helper: return true when the waiting-for-opponent overlay is visible
+function isWaitingOverlayVisible() {
+    try {
+        const o = document.getElementById('waitingOverlay')
+        return o && o.classList && o.classList.contains('show')
+    } catch (err) {
+        return false
+    }
+}
+
 document.addEventListener('mousemove', (e) => {
+    // If waiting overlay is shown, ignore pointer movement to prevent interactions
+    if (isWaitingOverlayVisible()) return
+
     Mouse.x = e.clientX - canvas.getBoundingClientRect().left
     Mouse.y = e.clientY - canvas.getBoundingClientRect().top
 
@@ -17,6 +30,9 @@ document.addEventListener('keyup', (e) => {
     keys[e.key] = false
 })
 document.addEventListener('mousedown', (e) => {
+    // If waiting overlay is shown, ignore pointer presses so pieces cannot be selected
+    if (isWaitingOverlayVisible()) return
+
     if (e.button == 0) {
         Mouse.left = true
         Mouse.dragStartX = Mouse.x
@@ -31,6 +47,9 @@ document.addEventListener('mousedown', (e) => {
     if (Debug.logMouseEvents) console.log(e, Mouse)
 })
 document.addEventListener('mouseup', (e) => {
+    // If waiting overlay is shown, ignore pointer releases
+    if (isWaitingOverlayVisible()) return
+
     if (e.button == 0) {
         Mouse.left = false
         // clear all arrows on left-click release

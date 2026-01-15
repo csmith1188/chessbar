@@ -44,23 +44,34 @@ class User {
     }
 
     getInfo(db) {
-        db.get(`SELECT * FROM users WHERE formbar_id = ${this.id}`, (err, user) => {
+        db.get(`SELECT * FROM users WHERE formbar_id = ?`, [this.id], (err, user) => {
+            if (err) return console.error('DB error in getInfo:', err)
             if (user) {
-                this.tokens = user.tokens
-                this.wins = user.wins
-                this.losses = user.losses
-                this.draws = user.draws
-                this.started = user.started
-                this.finished = user.finished
+                this.tokens = typeof user.tokens === 'number' ? user.tokens : this.tokens
+                this.wins = typeof user.wins === 'number' ? user.wins : this.wins
+                this.losses = typeof user.losses === 'number' ? user.losses : this.losses
+                this.draws = typeof user.draws === 'number' ? user.draws : this.draws
+                this.started = typeof user.started === 'number' ? user.started : this.started
+                this.finished = typeof user.finished === 'number' ? user.finished : this.finished
+                // prefer DB display_name, fallback to sessionUser or existing
+                if (typeof user.display_name === 'string') {
+                    this.displayName = user.display_name
+                } else if (this.sessionUser && this.sessionUser.displayName) {
+                    this.displayName = this.sessionUser.displayName
+                }
             }
         })
 
     }
     addTokens(db, amount = 1) {
         this.getInfo(db)
-        db.get(`SELECT * FROM users WHERE formbar_id = ${this.id}`, (err, user) => {
-            if (user) db.run(`UPDATE users SET tokens = ${this.tokens + amount} WHERE formbar_id = ${this.id}`)
-            this.tokens += amount
+        db.get(`SELECT * FROM users WHERE formbar_id = ?`, [this.id], (err, user) => {
+            if (err) return console.error('DB error in addTokens:', err)
+            if (user) {
+                const newTokens = this.tokens + amount
+                db.run(`UPDATE users SET tokens = ? WHERE formbar_id = ?`, [newTokens, this.id])
+                this.tokens = newTokens
+            }
         })
     }
 
@@ -73,16 +84,31 @@ class User {
                     if (err) return console.error('Error adding user to database:', err);
 
                     if (!user) {
+                        // Insert with display_name included. Use parameterized query.
                         db.run(
-                            `INSERT INTO users(formbar_id, tokens, wins, losses, draws, started, finished) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                            [this.id, 0, 0, 0, 0, 0, 0],
+                            `INSERT INTO users(formbar_id, tokens, wins, losses, draws, started, finished, display_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                            [this.id, 0, 0, 0, 0, 0, 0, this.displayName],
                             (err) => {
-                                if (err) return console.error('Error updating user in database:', err);
+                                if (err) return console.error('Error inserting new user in database:', err);
                                 console.log('Inserted new user:', this.id);
                             }
                         );
                     } else {
-                        // console.log('User already exists:', user);
+                        // If the DB row exists but lacks `display_name`, add the column and update it.
+                        if (typeof user.display_name === 'undefined') {
+                            db.run(`ALTER TABLE users ADD COLUMN display_name TEXT NOT NULL DEFAULT ''`, (alterErr) => {
+                                if (alterErr) return console.error('Failed to add display_name column:', alterErr)
+                                db.run(`UPDATE users SET display_name = ? WHERE formbar_id = ?`, [this.displayName, this.id], (updateErr) => {
+                                    if (updateErr) return console.error('Failed to set display_name for existing user:', updateErr)
+                                    console.log('Added display_name for existing user:', this.id)
+                                })
+                            })
+                        } else if (!user.display_name && this.displayName) {
+                            // Column exists but empty, set it to current displayName
+                            db.run(`UPDATE users SET display_name = ? WHERE formbar_id = ?`, [this.displayName, this.id], (updateErr) => {
+                                if (updateErr) return console.error('Failed to update display_name for existing user:', updateErr)
+                            })
+                        }
                     }
                 }
             )
