@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Admin - Chessbar</title>
+    <link rel='stylesheet' href='/css/profile.css'>
+    <style>
+        :root { --guideline-color: #3f3f3f; }
+        .admin-container {
+            max-width: 1000px;
+            margin: 24px auto;
+            padding: 12px;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 12px
+        }
+
+        .admin-card {
+            padding: 12px;
+            border-radius: 8px;
+            background: var(--panel-bg, #00000013);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.719)
+        }
+        /* Table styling: spaced rows with grey separators */
+        #usersTable {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            background: var(--panel-bg, #ffffff1c);
+            border: solid 3px var(--guideline-color);
+        }
+        #usersTable thead th {
+            text-align: left;
+            padding: 10px 12px;
+            background: rgba(0,0,0,0.04);
+            border-bottom: 2px solid var(--guideline-color);
+            font-weight: 600;
+            border-right: 1px solid var(--guideline-color);
+        }
+        #usersTable thead th:last-child {
+            border-right: none;
+        }
+        #usersTable tbody td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--guideline-color);
+            border-right: 1px solid var(--guideline-color);
+            vertical-align: middle;
+        }
+        /* Remove right border on the last column so table edges look clean */
+        #usersTable tbody td:last-child {
+            border-right: none;
+        }
+        #usersTable tbody tr:last-child td {
+            border-bottom: none;
+        }
+        #usersTable tbody tr:hover td {
+            background: rgba(255, 255, 255, 0.254);
+        }
+        /* Remove native number input spinners */
+        input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Clickable indicators: subtle pop & pointer for links and buttons */
+        .user-link {
+            text-decoration: none;
+            color: inherit;
+            display: inline-block;
+            cursor: pointer;
+            transition: transform .12s ease, box-shadow .12s ease, color .12s;
+        }
+        .user-link:hover {
+            transform: translateY(-1px) scale(1.1);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+            color: var(--muted);
+            text-decoration: underline;
+        }
+
+        .award-btn, .set-btn {
+            cursor: pointer;
+            transition: transform .12s ease, box-shadow .12s ease, background .12s;
+        }
+        .award-btn:hover, .set-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+        }
+        .award-btn:active, .set-btn:active, .user-link:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-container">
+        <h1>Admin dashboard</h1>
+        <p>Signed in as: <strong>
+                <%= (user && user.displayName) || (user && user.display_name) || (user && user.email) || 'Unknown' %>
+            </strong></p>
+
+        <section>
+            <h2>Players</h2>
+            <div style="overflow:auto;">
+                <table id="usersTable" style="width:100%; border-collapse:collapse">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left">ID</th>
+                            <th style="text-align:left">Name</th>
+                            <th style="text-align:right">Tokens</th>
+                            <th style="text-align:right">Wins</th>
+                            <th style="text-align:right">Losses</th>
+                            <th style="text-align:right">Started</th>
+                            <th style="text-align:right">Finished</th>
+                            <th style="text-align:center">Award</th>
+                            <th style="text-align:center">Set</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <a href='/' class='small back-link' style='margin-top:18px;display:inline-block;text-decoration:none;color:var(--muted)'>← Back to games</a>
+    </div>
+
+    <script>
+        async function loadUsers() {
+            const res = await fetch('/admin/users')
+            if (!res.ok) {
+                const txt = await res.text()
+                alert('Failed to load users: ' + txt)
+                return
+            }
+            const data = await res.json()
+            const tbody = document.querySelector('#usersTable tbody')
+            tbody.innerHTML = ''
+            data.users.forEach(u => {
+                const tr = document.createElement('tr')
+                tr.innerHTML = `
+                    <td>${u.formbar_id}</td>
+                    <td><a href="/profile?usr=${u.formbar_id}" class="user-link" title="View profile" target="_blank" rel="noopener noreferrer">${u.display_name || u.displayName || ''}</a></td>
+                    <td style="text-align:right">${u.tokens}</td>
+                    <td style="text-align:right">${u.wins || 0}</td>
+                    <td style="text-align:right">${u.losses || 0}</td>
+                    <td style="text-align:right">${u.started || 0}</td>
+                    <td style="text-align:right">${u.finished || 0}</td>
+                    <td style="text-align:center">
+                        <input type="number" value="1" min="1" style="width:50px" class="award-amt">
+                        <button class="award-btn">Award</button>
+                    </td>
+                    <td style="text-align:center">
+                        <input type="number" value="${u.tokens || 0}" min="0" style="width:100px" class="set-amt">
+                        <button class="set-btn">Set</button>
+                    </td>
+                `
+
+                // Award handler
+                tr.querySelector('.award-btn').addEventListener('click', async () => {
+                    const amt = Number(tr.querySelector('.award-amt').value) || 1
+                    const resp = await fetch(`/admin/users/${u.formbar_id}/add`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ amount: amt })
+                    })
+                    if (!resp.ok) return alert('Failed to award tokens')
+                    await loadUsers()
+                })
+
+                // Set handler
+                tr.querySelector('.set-btn').addEventListener('click', async () => {
+                    const tokens = Number(tr.querySelector('.set-amt').value) || 0
+                    const resp = await fetch(`/admin/users/${u.formbar_id}/set`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ tokens })
+                    })
+                    if (!resp.ok) return alert('Failed to set tokens')
+                    await loadUsers()
+                })
+
+                tbody.appendChild(tr)
+            })
+        }
+
+        loadUsers()
+    </script>
+</body>
+
+</html>

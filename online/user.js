@@ -36,12 +36,20 @@ class User {
         this.lastActiveAt = null
 
         this.getInfo(db)
+        // initialize a sensible displayName immediately, then emit it.
+        this.displayName = this.computeDefaultDisplayName()
         this.youAre()
     }
 
+    computeDefaultDisplayName() {
+        if (this.sessionUser) {
+            return this.sessionUser.displayName || this.sessionUser.display_name || this.sessionUser.name || this.sessionUser.email || `Guest${this.id}`
+        }
+        return `Guest${this.id}`
+    }
+
     youAre() {
-        this.getInfo(db)
-        this.displayName = this.sessionUser && this.sessionUser.displayName ? this.sessionUser.displayName : `Guest${this.id}`
+        // Emit current known info immediately; getInfo will re-emit if DB provides a different display_name.
         this.socket.emit('youAre', this.serialize())
     }
 
@@ -55,11 +63,23 @@ class User {
                 this.draws = typeof user.draws === 'number' ? user.draws : this.draws
                 this.started = typeof user.started === 'number' ? user.started : this.started
                 this.finished = typeof user.finished === 'number' ? user.finished : this.finished
-                // prefer DB display_name, fallback to sessionUser or existing
-                if (typeof user.display_name === 'string') {
+                // prefer DB display_name if non-empty, otherwise persist a sensible fallback
+                if (typeof user.display_name === 'string' && user.display_name.trim() !== '') {
                     this.displayName = user.display_name
-                } else if (this.sessionUser && this.sessionUser.displayName) {
-                    this.displayName = this.sessionUser.displayName
+                } else {
+                    // DB is missing a display_name; ensure we have a reasonable default and persist it
+                    const fallback = this.computeDefaultDisplayName()
+                    if (fallback && fallback !== user.display_name) {
+                        // update DB so future reads have the value
+                        db.run(`UPDATE users SET display_name = ? WHERE formbar_id = ?`, [fallback, this.id], (updateErr) => {
+                            if (updateErr) return console.error('Failed to set fallback display_name in getInfo:', updateErr)
+                            this.displayName = fallback
+                            this.socket.emit('youAre', this.serialize())
+                        })
+                    } else {
+                        this.displayName = fallback
+                        this.socket.emit('youAre', this.serialize())
+                    }
                 }
             }
         })
@@ -87,9 +107,10 @@ class User {
 
                     if (!user) {
                         // Insert with display_name included. Use parameterized query.
+                        const toInsertName = this.displayName || this.computeDefaultDisplayName()
                         db.run(
                             `INSERT INTO users(formbar_id, tokens, wins, losses, draws, started, finished, display_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-                            [this.id, 0, 0, 0, 0, 0, 0, this.displayName],
+                            [this.id, 0, 0, 0, 0, 0, 0, toInsertName],
                             (err) => {
                                 if (err) return console.error('Error inserting new user in database:', err);
                                 console.log('Inserted new user:', this.id);
@@ -100,14 +121,16 @@ class User {
                         if (typeof user.display_name === 'undefined') {
                             db.run(`ALTER TABLE users ADD COLUMN display_name TEXT NOT NULL DEFAULT ''`, (alterErr) => {
                                 if (alterErr) return console.error('Failed to add display_name column:', alterErr)
-                                db.run(`UPDATE users SET display_name = ? WHERE formbar_id = ?`, [this.displayName, this.id], (updateErr) => {
+                                const nameToSet = this.displayName || this.computeDefaultDisplayName()
+                                db.run(`UPDATE users SET display_name = ? WHERE formbar_id = ?`, [nameToSet, this.id], (updateErr) => {
                                     if (updateErr) return console.error('Failed to set display_name for existing user:', updateErr)
                                     console.log('Added display_name for existing user:', this.id)
                                 })
                             })
-                        } else if (!user.display_name && this.displayName) {
-                            // Column exists but empty, set it to current displayName
-                            db.run(`UPDATE users SET display_name = ? WHERE formbar_id = ?`, [this.displayName, this.id], (updateErr) => {
+                        } else if ((!user.display_name || user.display_name.trim() === '') && this.displayName) {
+                            // Column exists but empty, set it to current displayName or computed fallback
+                            const nameToSet = this.displayName || this.computeDefaultDisplayName()
+                            db.run(`UPDATE users SET display_name = ? WHERE formbar_id = ?`, [nameToSet, this.id], (updateErr) => {
                                 if (updateErr) return console.error('Failed to update display_name for existing user:', updateErr)
                             })
                         }
