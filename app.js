@@ -257,6 +257,8 @@ io.on('connection', (socket) => {
         try { user.lastActiveAt = null } catch (e) {}
         try { user.youAre() } catch (e) {}
         // console.log(`User ${user.displayName || user.id} reconnected`)
+        // Ensure the DB row exists and update display_name if missing on reload
+        try { user.addToDb(db) } catch (e) { console.error('addToDb error on reconnect:', e) }
         user.getInfo(db)
     } else {
         users.push(user)
