@@ -11,8 +11,10 @@
 <body>
     <div id="player">
         <div class="avatar-large">
-            <img id="pfp" src="/img/basic_avatar.png">
-
+                <div class="pfp-container" style="position:relative; display:inline-block"> 
+                    <img id="pfp" src="<%= typeof avatarUrl !== 'undefined' ? avatarUrl : '/img/basic_avatar.png' %>" style="display:block; border-radius:50%; max-width:250px;"> 
+                    <div id="pfp-overlay" style="position:absolute; inset:0; display:flex;align-items:center;justify-content:center; border-radius:50%; background:rgba(0,0,0,0.45); color:#fff; font-weight:700; opacity:0; transition:opacity .12s; pointer-events:none">Change profile picture</div>
+                </div>
         </div>
 
         <div id="name"></div>
@@ -89,6 +91,20 @@
 
 <script src='/socket.io/socket.io.js'></script>
 <script src='js/socket.js'></script>
+<script>
+    // Expose whether this page is the signed-in user's own profile.
+    // If `?usr=` is present and differs from the session user id, it's someone else's profile.
+    (function(){
+        try {
+            const params = new URLSearchParams(window.location.search)
+            const q = params.get('usr')
+            const sessionUserId = <%= user && user.id ? user.id : 'null' %>
+            // true if no query param (own profile) or query matches session id
+            window.isOwnProfile = (!q) || String(q) === String(sessionUserId)
+        } catch (e) { window.isOwnProfile = true }
+    })()
+</script>
+<script src='/js/profilePfp.js'></script>
 
 <script>
     const pinBox = document.getElementById('pinInput')
@@ -164,7 +180,6 @@
     // Get the user data
     socket.on('foundUser', (user) => {
         updateInfo(user)
-        console.log(user)
     })
 
     socket.on('noUser', () => {
@@ -177,7 +192,6 @@
     } else {
         socket.on('youAre', (u) => {
             viewingUser = u.id
-            console.log(u)
             socket.emit('getUser', u.id)
             updateBuyTokensVisibility()
         })
