@@ -44,6 +44,7 @@ const AUTH_URL = FORMBAR_URL
 
 const app = express()
 app.use(express.static('static')) // serve client files from /public
+app.use(express.json())
 
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs')
@@ -129,6 +130,78 @@ app.get('/profile', (req, res) => {
     res.render('profile')
 })
 
+// Admin page - restricted to users with an `admin` flag on their session user object
+app.get('/admin', (req, res) => {
+    if (!req.session || !req.session.user) {
+        return res.redirect('/login')
+    }
+    // Only allow specific Formbar IDs
+    const fbId = Number(req.session.user && (req.session.user.id || req.session.user.formbar_id || req.session.user.user_id)) || 0
+    const allowed = [37, 40]
+    if (!allowed.includes(fbId)) {
+        return res.status(403).send('Forbidden')
+    }
+
+    res.render('admin')
+})
+
+// Helper middleware to check admin by formbar id
+function requireAdmin(req, res, next) {
+    if (!req.session || !req.session.user) return res.status(401).json({ error: 'Not authenticated' })
+    const fbId = Number(req.session.user && (req.session.user.id || req.session.user.formbar_id || req.session.user.user_id)) || 0
+    const allowed = [37, 40]
+    if (!allowed.includes(fbId)) return res.status(403).json({ error: 'Forbidden' })
+    next()
+}
+
+// Return list of all users to admin
+app.get('/admin/users', requireAdmin, (req, res) => {
+    db.all('SELECT * FROM users ORDER BY display_name COLLATE NOCASE', [], (err, rows) => {
+        if (err) return res.status(500).json({ error: 'DB error' })
+        return res.json({ users: rows })
+    })
+})
+
+// Award tokens (increment) to a user by formbar_id. Body: { amount: 1 }
+app.post('/admin/users/:id/add', requireAdmin, (req, res) => {
+    const id = Number(req.params.id)
+    const amount = Number(req.body.amount) || 1
+    if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Invalid id' })
+
+    db.get('SELECT * FROM users WHERE formbar_id = ?', [id], (err, user) => {
+        if (err) return res.status(500).json({ error: 'DB error' })
+        if (!user) return res.status(404).json({ error: 'User not found' })
+        const newTokens = (typeof user.tokens === 'number' ? user.tokens : 0) + amount
+        db.run('UPDATE users SET tokens = ? WHERE formbar_id = ?', [newTokens, id], function (updateErr) {
+            if (updateErr) return res.status(500).json({ error: 'DB update error' })
+            db.get('SELECT * FROM users WHERE formbar_id = ?', [id], (err2, updated) => {
+                if (err2) return res.status(500).json({ error: 'DB error' })
+                return res.json({ user: updated })
+            })
+        })
+    })
+})
+
+// Set tokens to an exact value. Body: { tokens: 10 }
+app.post('/admin/users/:id/set', requireAdmin, (req, res) => {
+    const id = Number(req.params.id)
+    const tokens = Number(req.body.tokens)
+    if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Invalid id' })
+    if (!Number.isInteger(tokens) || tokens < 0) return res.status(400).json({ error: 'Invalid tokens' })
+
+    db.get('SELECT * FROM users WHERE formbar_id = ?', [id], (err, user) => {
+        if (err) return res.status(500).json({ error: 'DB error' })
+        if (!user) return res.status(404).json({ error: 'User not found' })
+        db.run('UPDATE users SET tokens = ? WHERE formbar_id = ?', [tokens, id], function (updateErr) {
+            if (updateErr) return res.status(500).json({ error: 'DB update error' })
+            db.get('SELECT * FROM users WHERE formbar_id = ?', [id], (err2, updated) => {
+                if (err2) return res.status(500).json({ error: 'DB error' })
+                return res.json({ user: updated })
+            })
+        })
+    })
+})
+
 const server = http.createServer(app)
 const io = new Server(server, {
     cors: { origin: '*' } // adjust for production
@@ -159,7 +232,8 @@ function logUsers() {
     console.log()
     console.log('Games:')
     games.forEach(g => {
-        console.log(`Owner: ${g.owner.displayName} | Name: ${g.name} | ID: ${g.id} | Visibility: ${g.visibility} | Users:`)
+        const ownerName = g.owner && g.owner.displayName ? g.owner.displayName : 'None'
+        console.log(`Owner: ${ownerName} | Name: ${g.name} | ID: ${g.id} | Visibility: ${g.visibility} | Users:`)
         g.users.forEach(u => console.log(`  Name: ${u.displayName}`))
     })
     console.log()
@@ -179,7 +253,12 @@ io.on('connection', (socket) => {
         user.socket = socket
         user.sessionUser = sessionUser
         user.active = true
+        // clear inactivity timestamp when the user reconnects
+        try { user.lastActiveAt = null } catch (e) {}
+        try { user.youAre() } catch (e) {}
         // console.log(`User ${user.displayName || user.id} reconnected`)
+        // Ensure the DB row exists and update display_name if missing on reload
+        try { user.addToDb(db) } catch (e) { console.error('addToDb error on reconnect:', e) }
         user.getInfo(db)
     } else {
         users.push(user)
@@ -192,8 +271,7 @@ io.on('connection', (socket) => {
         // console.log(games)
         return games.filter(g => {
             if (g.visibility === 'public') return true
-            if (g.owner == user) return true
-            if (g.owner.id == user.id) return true
+            if (g.owner && (g.owner == user || g.owner.id == user.id)) return true
             return false
         }).map(serializeGame)
     }
@@ -293,6 +371,10 @@ io.on('connection', (socket) => {
     //! Disconnection
     socket.on('disconnect', () => {
         user.active = false
+        // record when the user went inactive so clients can show duration
+        try { user.lastActiveAt = Date.now() } catch (e) {}
+        // clear the socket reference so serialize() can accurately reflect connection state
+        try { user.socket = null } catch (e) {}
         if (user.game) user.game.leave(user)
 
         if (user.id <= 0) {
@@ -404,7 +486,7 @@ io.on('connection', (socket) => {
     socket.on('deleteGame', (gameId) => {
         const game = games.find(g => g.id === gameId)
 
-        if (game && game.owner.id === user.id) {
+        if (game && game.owner && game.owner.id === user.id) {
             // mutate the shared array instead of reassigning the variable
             const idx = games.findIndex(g => g.id === gameId)
             if (idx !== -1) games.splice(idx, 1)
