@@ -93,8 +93,28 @@ body {
 #name {
     font-size: 40px;
     font-weight: 700;
-    margin-bottom: 15px;
+    margin-top: 2px;
+    margin-bottom: 16px;
+}
 
+#btn-wrap {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+#btn-wrap button {
+    flex: 1;
+    font-size: 16px;
+}
+
+.friend-emoji {
+    width: 1em;
+    height: auto;
+    margin-left: 7px;
+    margin-right: 7px;
+    margin-bottom: -3px;
 }
 
 #winPercent,
