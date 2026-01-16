@@ -158,6 +158,12 @@ class User {
         this.finishGame()
     }
 
+    draw() {
+        this.draws++
+        db.run(`UPDATE users SET draws = ${this.draws} WHERE formbar_id = ${this.id}`)
+        this.finishGame()
+    }
+
     finishGame() {
         this.finished++
         db.run(`UPDATE users SET finished = ${this.finished} WHERE formbar_id = ${this.id}`)

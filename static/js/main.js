@@ -85,6 +85,18 @@ socket.on('mate', (d) => {
     showSystemPopup('Checkmate', `Checkmate. ${d.winner} wins!`, 8000)
 })
 
+socket.on('stalemate', (d) => {
+    showSystemPopup('Stalemate', `Stalemate. Draw.`, 8000)
+})
+
+socket.on('draw', (d) => {
+    if (d && d.reason === 'lack-of-material') {
+        showSystemPopup('Draw: Lack of material', `Draw: Lack of material`, 8000)
+    } else {
+        showSystemPopup('Draw', `Draw.`, 8000)
+    }
+})
+
 // Time-up event (different from checkmate)
 socket.on('timeUp', (d) => {
     const name = (d && d.winnerName) ? d.winnerName : (d && d.winner) ? d.winner : 'Player'

@@ -142,6 +142,24 @@ class Board {
 
         return false
     }
+
+    // Return true if both sides only have kings (no other pieces)
+    onlyKingsLeft() {
+        let foundWhiteNonKing = false
+        let foundBlackNonKing = false
+        for (let y = 0; y < 8; y++) {
+            for (let x = 0; x < 8; x++) {
+                const p = this.layout[y][x]
+                if (!p) continue
+                if (p.name !== 'King') {
+                    if (p.side === 'white') foundWhiteNonKing = true
+                    if (p.side === 'black') foundBlackNonKing = true
+                }
+            }
+        }
+        // both sides have no non-king pieces
+        return !foundWhiteNonKing && !foundBlackNonKing
+    }
 }
 
 const classes = { Pawn, Rook, Knight, Bishop, Queen, King }
@@ -217,9 +235,11 @@ function attachSocket(io, games) {
                         const opponent = board.turn
                         const inCheck = board.inCheck(opponent)
                         const isMate = inCheck && !board.hasLegalMoves(opponent)
+                        const isStalemate = !inCheck && !board.hasLegalMoves(opponent)
+                        const isKingOnly = board.onlyKingsLeft()
 
-                        // Only emit update to users in this game, plus check/mate events
-                        game.update({ x1: x1, y1: y1, x2: x2, y2: y2, name: foo.name, side: foo.side }, inCheck, isMate, opponent, foo.side, dest.name || null)
+                        // Only emit update to users in this game, plus check/mate/stalemate/draw events
+                        game.update({ x1: x1, y1: y1, x2: x2, y2: y2, name: foo.name, side: foo.side }, inCheck, isMate, isStalemate, isKingOnly, opponent, foo.side, dest.name || null)
                     } else {
                         // console.log(`Still ${board.turn}'s turn, move failed (Invalid).`)
                         game.emptyUpdate(socket)

@@ -398,8 +398,10 @@ io.on('connection', (socket) => {
             const opponent = user.side == 'white' ? 'black' : 'white'
             const inCheck = user.game.board.inCheck(opponent)
             const isMate = inCheck && !user.game.board.hasLegalMoves(opponent)
+            const isStalemate = !inCheck && !user.game.board.hasLegalMoves(opponent)
+            const isKingOnly = user.game.board.onlyKingsLeft()
             user.game.endPromotion()
-            user.game.update({}, inCheck, isMate, opponent, user.side, null)
+            user.game.update({}, inCheck, isMate, isStalemate, isKingOnly, opponent, user.side, null)
         }
     })
 

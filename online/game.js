@@ -222,7 +222,7 @@ class Game {
         this.update()
     }
 
-    update(move = {}, check = false, mate = false, opponent = null, winner = null, takenPiece = null) {
+    update(move = {}, check = false, mate = false, stalemate = false, draw = false, opponent = null, winner = null, takenPiece = null) {
         if (move) this.prevMove = move
 
         let promotion = false
@@ -283,10 +283,39 @@ class Game {
                     this.leaveTimers = {}
                 }
             }
+            if (stalemate || draw) {
+                this.finished = true
+
+                // Emit a specific event for lack-of-material draws, keep 'stalemate' for true stalemate
+                if (stalemate) {
+                    user.socket.emit('stalemate', {})
+                } else if (draw) {
+                    user.socket.emit('draw', { reason: 'lack-of-material' })
+                }
+
+                // Record draws for both players once (prefer prevWhite/prevBlack if available)
+                if (!this.drawRecorded) {
+                    const whitePlayer = this.prevWhite || this.users.find(u => u.side == 'white')
+                    const blackPlayer = this.prevBlack || this.users.find(u => u.side == 'black')
+                    if (whitePlayer) whitePlayer.draw()
+                    if (blackPlayer) blackPlayer.draw()
+                    this.drawRecorded = true
+                }
+
+                // Clear any outstanding leave timers when the game finishes by stalemate/draw
+                if (this.leaveTimers) {
+                    for (let k in this.leaveTimers) {
+                        try { clearTimeout(this.leaveTimers[k]) } catch (e) {}
+                    }
+                    this.leaveTimers = {}
+                }
+            }
             if (takenPiece == 'Queen') {
                 user.socket.emit('sound', 'smash')
             } else if (mate) {
                 user.socket.emit('sound', 'explosion')
+            } else if (stalemate || draw) {
+                user.socket.emit('sound', 'tada')
             } else if (promotion) {
                 user.socket.emit('sound', 'tada')
             } else if (check) {
