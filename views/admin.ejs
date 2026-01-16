@@ -27,6 +27,22 @@
             background: var(--panel-bg, #00000013);
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.719)
         }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .admin-header p { margin: 0; }
+        .users-table-wrap {
+            max-height: calc(100vh - 180px);
+            overflow: auto;
+            /* Hide native scrollbars but keep scrolling */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE 10+ */
+        }
+        .users-table-wrap::-webkit-scrollbar { display: none; } /* Chrome, Safari */
         /* Table styling: spaced rows with grey separators */
         #usersTable {
             width: 100%;
@@ -104,26 +120,28 @@
 
 <body>
     <div class="admin-container">
-        <h1>Admin dashboard</h1>
-        <p>Signed in as: <strong>
+        <div class="admin-header">
+            <h1>Admin dashboard</h1>
+            <p>Signed in as: <strong>
                 <%= (user && user.displayName) || (user && user.display_name) || (user && user.email) || 'Unknown' %>
             </strong></p>
+        </div>
 
         <section>
             <h2>Players</h2>
-            <div style="overflow:auto;">
+            <div class="users-table-wrap">
                 <table id="usersTable" style="width:100%; border-collapse:collapse">
                     <thead>
                         <tr>
-                            <th style="text-align:left">ID</th>
                             <th style="text-align:left">Name</th>
-                            <th style="text-align:right">Tokens</th>
                             <th style="text-align:right">Wins</th>
                             <th style="text-align:right">Losses</th>
                             <th style="text-align:right">Started</th>
                             <th style="text-align:right">Finished</th>
+                            <th style="text-align:center">Tokens</th>
                             <th style="text-align:center">Award</th>
                             <th style="text-align:center">Set</th>
+                            <th style="text-align:right">ID</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -148,13 +166,12 @@
             data.users.forEach(u => {
                 const tr = document.createElement('tr')
                 tr.innerHTML = `
-                    <td>${u.formbar_id}</td>
                     <td><a href="/profile?usr=${u.formbar_id}" class="user-link" title="View profile" target="_blank" rel="noopener noreferrer">${u.display_name || u.displayName || ''}</a></td>
-                    <td style="text-align:right">${u.tokens}</td>
                     <td style="text-align:right">${u.wins || 0}</td>
                     <td style="text-align:right">${u.losses || 0}</td>
                     <td style="text-align:right">${u.started || 0}</td>
                     <td style="text-align:right">${u.finished || 0}</td>
+                    <td style="text-align:right">${u.tokens}</td>
                     <td style="text-align:center">
                         <input type="number" value="1" min="1" style="width:50px" class="award-amt">
                         <button class="award-btn">Award</button>
@@ -163,6 +180,7 @@
                         <input type="number" value="${u.tokens || 0}" min="0" style="width:100px" class="set-amt">
                         <button class="set-btn">Set</button>
                     </td>
+                    <td style="text-align:right">${u.formbar_id}</td>
                 `
 
                 // Award handler
