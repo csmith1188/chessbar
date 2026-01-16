@@ -31,7 +31,7 @@ class Arrow {
             let ey = this.y2
 
             // If player is black, the board is drawn flipped vertically elsewhere — match that here
-            if (me && me.side === 'black') {
+            if (me && (me.side === 'black' || me.side === 'spectator')) {
                 sy = 7 - sy
                 ey = 7 - ey
             }
@@ -46,8 +46,8 @@ class Arrow {
             let headLen = Math.max(10, Math.round(Settings.boardSquareSize * 0.3))
 
             ctx.save()
-            ctx.strokeStyle = 'rgba(255, 157, 0, 0.7)'
-            ctx.fillStyle = 'rgba(255, 157, 0, 0.7)'
+            ctx.strokeStyle = 'rgba(255, 157, 0, 0.5)'
+            ctx.fillStyle = 'rgba(255, 157, 0, 0.5)'
             ctx.lineWidth = baseWidth
             ctx.lineCap = 'butt'
 
@@ -394,9 +394,9 @@ function drawBoard() {
                 if (move) {
                     const cx = x * Settings.boardSquareSize + Settings.boardSquareSize / 2;
                     const cy = y * Settings.boardSquareSize + Settings.boardSquareSize / 2;
-                    const r = Settings.boardSquareSize / 8;
+                    const r = Settings.boardSquareSize / 7;
 
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                    ctx.fillStyle = 'rgba(88, 88, 88, 0.27)';
                     ctx.beginPath();
                     ctx.arc(cx, cy, r, 0, Math.PI * 2);
                     ctx.fill();
@@ -473,7 +473,7 @@ function drawBoard() {
             }
         }
 
-        // Draw any arrows (on top of pieces)
+        // Draw any arrows (after pieces)
         if (arrows && arrows.length) {
             for (let a of arrows) {
                 a.draw()

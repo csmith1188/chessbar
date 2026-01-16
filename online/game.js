@@ -36,6 +36,8 @@ class Game {
         this.users = []
         this.board = new Board()
 
+        // track leave timers keyed by user id so we can cancel if they rejoin
+        this.leaveTimers = {}
         this.owner = null
         this.prevWhite = null
         this.prevBlack = null
@@ -183,6 +185,12 @@ class Game {
 
     join(user) {
         user.side = 'unassigned'
+        // If the joining user had an outstanding leave timer, cancel it (they rejoined)
+        if (this.leaveTimers[user.id]) {
+            clearTimeout(this.leaveTimers[user.id])
+            delete this.leaveTimers[user.id]
+        }
+
         this.users.push(user)
         user.game = this
         this.assignSides()
@@ -190,7 +198,26 @@ class Game {
     }
 
     leave(user) {
+        // Remove the user from the game users list
         this.users = this.users.filter(u => u.id !== user.id)
+
+        // If the leaving user was a player (white/black), start a 60s timer to auto-resign them
+        if (user.side === 'white' || user.side === 'black') {
+            // Clear any existing timer for safety
+            if (this.leaveTimers[user.id]) {
+                clearTimeout(this.leaveTimers[user.id])
+            }
+
+            this.leaveTimers[user.id] = setTimeout(() => {
+                // Only auto-resign if they did not rejoin
+                const stillHere = this.users.some(u => u.id === user.id)
+                if (!stillHere) {
+                    this.autoResignById(user.id)
+                }
+                delete this.leaveTimers[user.id]
+            }, 60 * 1000) //! Timeout goes here
+        }
+
         this.assignSides()
         this.update()
     }
@@ -248,6 +275,13 @@ class Game {
                     foo2.lose()
                     this.loser = foo2
                 }
+                // Game finished by mate: clear any outstanding leave timers
+                if (this.leaveTimers) {
+                    for (let k in this.leaveTimers) {
+                        try { clearTimeout(this.leaveTimers[k]) } catch (e) {}
+                    }
+                    this.leaveTimers = {}
+                }
             }
             if (takenPiece == 'Queen') {
                 user.socket.emit('sound', 'smash')
@@ -290,7 +324,50 @@ class Game {
                 this.users.forEach(u => u.socket.emit('resign', user.serialize()))
 
                 this.finished = true
+
+                // Clear any outstanding leave timers when the game finishes by resign
+                if (this.leaveTimers) {
+                    for (let k in this.leaveTimers) {
+                        try { clearTimeout(this.leaveTimers[k]) } catch (e) {}
+                    }
+                    this.leaveTimers = {}
+                }
             }
+        }
+    }
+
+    autoResignById(userId) {
+        // If game already finished do nothing
+        if (this.finished) return
+
+        // If the user rejoined, cancel
+        if (this.users.some(u => u.id === userId)) return
+
+        // Try to find the user object in prevWhite/prevBlack
+        let userObj = null
+        if (this.prevWhite && this.prevWhite.id === userId) userObj = this.prevWhite
+        else if (this.prevBlack && this.prevBlack.id === userId) userObj = this.prevBlack
+
+        if (!userObj) return
+
+        // perform resign
+        this.resign(userObj)
+        
+        // Emit a dedicated socket event to active users to display an alert (separate from chat)
+        try {
+            const name = userObj.displayName || `Player${userObj.id}`
+            const payload = {
+                type: 'auto-resign',
+                title: 'Auto-Resign',
+                message: `${name} has auto-resigned because of inactivity`,
+                player: userObj.serialize()
+            }
+
+            for (let u of this.activeUsers()) {
+                try { u.socket.emit('systemAlert', payload) } catch (e) {}
+            }
+        } catch (e) {
+            // ignore failures
         }
     }
 
@@ -312,7 +389,15 @@ class Game {
     }
 
     emptyUpdate(socket) {
-        socket.emit('updateBoard', serializeGame(this))
+        if (socket) {
+            try { socket.emit('updateBoard', serializeGame(this)) } catch (e) {}
+            return
+        }
+
+        // Broadcast to all users so clients are kept in sync when no socket is provided
+        for (let u of this.users) {
+            try { u.socket.emit('updateBoard', serializeGame(this)) } catch (e) {}
+        }
     }
 }
 
@@ -327,7 +412,7 @@ function serializeGame(game) {
         joinCode: game.joinCode,
         messages: game.messages,
         name: game.name,
-        owner: game.owner.id,
+        owner: game.owner ? game.owner.id : null,
         visibility: game.visibility,
         prevBlack: game.prevBlack ? game.prevBlack.serialize() : null,
         prevWhite: game.prevWhite ? game.prevWhite.serialize() : null,

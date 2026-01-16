@@ -90,6 +90,9 @@
                                 <%= user.displayName %>
                             </strong></span>
                         <a class='small' href='/profile' style='margin-left:10px'>Profile</a>
+                        <% if ([37,40].includes(Number(user && (user.id || user.formbar_id || user.user_id)) || 0)) { %>
+                            <a class='small' href='/admin' style='margin-left:10px'>Admin</a>
+                        <% } %>
                         <% } else { %>
                             <a class='small' href='/login'>Sign in</a>
                             <% } %>
