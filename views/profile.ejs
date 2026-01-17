@@ -9,45 +9,59 @@
 </head>
 
 <body>
-    <a href='/' class='small back-link'
-        style='margin:8px 0 0 18px;display:inline-block;text-decoration:none;color:var(--muted); height:min-content'>←
-        Back to games</a>
-    <div id='profile'>
+    <div id="player">
+        <div class="avatar-large">
+                <div class="pfp-container" style="position:relative; display:inline-block"> 
+                    <img id="pfp" src="<%= typeof avatarUrl !== 'undefined' ? avatarUrl : '/img/basic_avatar.png' %>" style="display:block; border-radius:50%; max-width:250px;"> 
+                    <div id="pfp-overlay" style="position:absolute; inset:0; display:flex;align-items:center;justify-content:center; border-radius:50%; background:rgba(0,0,0,0.45); color:#fff; font-weight:700; opacity:0; transition:opacity .12s; pointer-events:none">Change profile picture</div>
+                </div>
+        </div>
 
-        <!-- Right column: main profile info -->
-        <div class='profile-info'>
-            <div class='panel'>
-                <h1 id='name'>unnamed</h1>
-                <!-- <p class='small'>Casual player, coffee-fueled tactics solver, and challenger of time controls.</p> -->
-
-                <!--! The div below should have functionality soon.-->
-
-                <!-- <div style='display:flex;gap:10px;margin-top:12px;'>
-                    <button class='btn'>Edit Profile</button>
-                    <button class='btn secondary'>Message</button>
-                </div> -->
+        <div id="name"></div>
+        <div id="btn-wrap">
+            <button id="friends-btn" class="btn secondary"> <img src="/img/emoji-1.png" class="friend-emoji">Add
+                Friend<img src="/img/emoji-1.png" class="friend-emoji"></button>
+            <button id="challenge-btn" class="btn secondary">⚔️ Challenge ⚔️</button>
+        </div>
+        <div id='chat-container'>
+            <div id='chat-sidebar'>
+                <h2>Users</h2>
             </div>
 
-            <div style='margin-top:12px; display:grid; grid-template-columns: repeat(3,1fr); gap:12px;'>
+            <div id='chat-main'>
+                <div id='messages'></div>
+
+                <div id='inputBar'>
+                    <input type='text' id='msg' placeholder='Type your message here...' />
+                    <button id='send'>Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id='profile'>
+        <!-- Right column: main profile info -->
+        <div class='profile-info'>
+            <div style='margin-top:12px; display:grid; grid-template-columns: repeat(2,1fr); gap:12px;'>
                 <div class='panel'>
                     <div class='small'>Win %</div>
-                    <div style='font-weight:700;font-size:18px;margin-top:6px;' id='winPercent'>0</div>
+                    <div id='winPercent'>0</div>
                 </div>
                 <div class='panel'>
                     <div class='small'>Tokens</div>
-                    <div style='font-weight:700;font-size:18px;margin-top:6px;' id='tokens'>0</div>
+                    <div id='tokens'>0</div>
                 </div>
                 <div class='panel'>
                     <div class='small'>Games started</div>
-                    <div style='font-weight:700;font-size:18px;margin-top:6px;' id='started'>0</div>
+                    <div id='started'>0</div>
                 </div>
                 <div class='panel'>
                     <div class='small'>Games finished</div>
-                    <div style='font-weight:700;font-size:18px;margin-top:6px;' id='finished'>0</div>
+                    <div id='finished'>0</div>
                 </div>
                 <div class='panel'>
                     <div class='small'>W/D/L</div>
-                    <div style='font-weight:700;font-size:18px;margin-top:6px;' id='wdl'>0/0/0</div>
+                    <div id='wdl'>0/0/0</div>
                 </div>
             </div>
         </div>
@@ -70,10 +84,27 @@
         </div>
     </div>
 
+    <a href='/' class='small back-link'
+        style='margin:8px 0 0 18px;display:inline-block;text-decoration:none;color:var(--muted); height:min-content'>←
+        Back to games</a>
 </body>
 
 <script src='/socket.io/socket.io.js'></script>
 <script src='js/socket.js'></script>
+<script>
+    // Expose whether this page is the signed-in user's own profile.
+    // If `?usr=` is present and differs from the session user id, it's someone else's profile.
+    (function(){
+        try {
+            const params = new URLSearchParams(window.location.search)
+            const q = params.get('usr')
+            const sessionUserId = <%= user && user.id ? user.id : 'null' %>
+            // true if no query param (own profile) or query matches session id
+            window.isOwnProfile = (!q) || String(q) === String(sessionUserId)
+        } catch (e) { window.isOwnProfile = true }
+    })()
+</script>
+<script src='/js/profilePfp.js'></script>
 
 <script>
     const pinBox = document.getElementById('pinInput')
@@ -149,12 +180,11 @@
     // Get the user data
     socket.on('foundUser', (user) => {
         updateInfo(user)
-        console.log(user)
     })
 
     socket.on('noUser', () => {
-        window.location.href='/profile'
-    }) 
+        window.location.href = '/profile'
+    })
 
     if (viewingUser) {
         socket.emit('getUser', viewingUser)
@@ -162,7 +192,6 @@
     } else {
         socket.on('youAre', (u) => {
             viewingUser = u.id
-            console.log(u)
             socket.emit('getUser', u.id)
             updateBuyTokensVisibility()
         })
@@ -178,6 +207,116 @@
         finished.innerText = user.finished
         wdl.innerText = `${user.wins}/${user.draws}/${user.losses}`
         nameBox.innerText = user.display_name
+    }
+</script>
+
+<script>
+    const message = document.getElementById('chatOff')
+
+    socket.on('chatOff', () => {
+        if (!message) return;
+
+        // Add visible class to trigger CSS transition
+        message.classList.add('show');
+        message.setAttribute('aria-hidden', 'false');
+
+        // clear any previous hide timer
+        if (message._chatOffTimeout) clearTimeout(message._chatOffTimeout);
+
+        // hide after a few seconds
+        message._chatOffTimeout = setTimeout(() => {
+            // remove class so CSS transitions the element out
+            message.classList.remove('show');
+            message.setAttribute('aria-hidden', 'true');
+            message._chatOffTimeout = null;
+        }, 3000);
+    });
+</script>
+
+<script>
+    // User list population
+    const users = document.getElementById('chat-sidebar')
+
+    function populateUsers() {
+        if (gameData && gameData.users) {
+            users.innerHTML = ''
+
+            // Helper to format milliseconds to MM:SS
+            function formatMsToMMSS(ms) {
+                if (!ms || ms < 0) return '00:00'
+                const totalSeconds = Math.floor(ms / 1000)
+                const minutes = Math.floor(totalSeconds / 60)
+                const seconds = totalSeconds % 60
+                return String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0')
+            }
+
+            let usersToShow = []
+            if (gameData.prevWhite) usersToShow.push(gameData.prevWhite)
+            if (gameData.prevBlack) usersToShow.push(gameData.prevBlack)
+
+            gameData.users.forEach(u => {
+                if (!usersToShow.some(user => user.id == u.id)) usersToShow.push(u)
+            })
+
+            usersToShow.forEach(u => {
+                const userDiv = document.createElement('div')
+                userDiv.classList.add('userdiv')
+                const name = document.createElement('h3')
+                const statusDot = document.createElement('div')
+                name.classList.add('username')
+
+                // Only create and append the inactive timestamp when the user is offline.
+                // This keeps the status-dot flush against the username while online.
+                let inactiveSpan = null
+                if (!u.active && u.lastActiveAt) {
+                    inactiveSpan = document.createElement('span')
+                    inactiveSpan.classList.add('inactive-duration')
+                    const elapsed = Date.now() - u.lastActiveAt
+                    inactiveSpan.textContent = formatMsToMMSS(elapsed) + ' '
+                }
+
+                statusDot.classList.add('status-dot')
+                // Determine online/offline by matching IDs (object identity may differ
+                // for serialized `prevWhite`/`prevBlack` vs the live `gameData.users` entries).
+                const liveUser = Array.isArray(gameData.users) ? gameData.users.find(x => x.id == u.id) : null
+                if (liveUser && liveUser.active) {
+                    statusDot.classList.add('online')
+                } else {
+                    statusDot.classList.add('offline')
+                }
+
+                // Add animation class when user is offline so CSS can sequence the slide + fade
+                if (!u.active) {
+                    userDiv.classList.add('went-offline')
+                } else {
+                    userDiv.classList.remove('went-offline')
+                }
+
+                // Make the name clickable to open the user's profile in a new tab
+                if (u.id == me.id) {
+                    name.innerText = `You (${u.side})`
+                    name.style.cursor = 'pointer'
+                    name.setAttribute('role', 'link')
+                    name.setAttribute('title', 'View your profile page')
+                    name.addEventListener('click', () => { window.open('/profile', '_blank') })
+                } else {
+                    name.innerText = `${u.displayName} (${u.side})`
+                    name.style.cursor = 'pointer'
+                    name.setAttribute('role', 'link')
+                    name.setAttribute('title', `View ${u.displayName}'s profile page`)
+                    name.addEventListener('click', () => { window.open(`/profile?usr=${u.id}`, '_blank') })
+                }
+
+                userDiv.appendChild(name)
+                // insert inactive duration before the colored status dot when present
+                if (inactiveSpan) userDiv.appendChild(inactiveSpan)
+                userDiv.appendChild(statusDot)
+
+                users.appendChild(userDiv)
+            })
+            // update waiting overlay after repopulating users
+            try { updateWaitingOverlay(); } catch (e) { }
+        }
     }
 </script>
 

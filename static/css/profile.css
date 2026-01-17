@@ -1,20 +1,48 @@
 /* profile.css — adapted to site theme (dark gradients, shared variables) */
 
 :root {
-    --bg-1: #020613; /* very dark navy */
-    --bg-2: #07121a; /* deep navy */
-    --card: #0c1a24; /* dark panel */
-    --muted: #7f8a95; /* subdued text */
-    --accent: #c78d2f; /* muted amber */
-    --accent-2: #362380; /* muted purple */
+    --bg-1: #020613;
+    /* very dark navy */
+    --bg-2: #07121a;
+    /* deep navy */
+    --card: #0c1a24;
+    /* dark panel */
+    --muted: #7f8a95;
+    /* subdued text */
+    --accent: #c78d2f;
+    /* muted amber */
+    --accent-2: #362380;
+    /* muted purple */
     --glass: rgba(255, 255, 255, 0.02);
     --radius: 12px;
     --max-width: 1100px;
 }
 
-* { box-sizing: border-box }
+#player {
+    display: flex;
+    flex-direction: column;
+    /* Align items at the top (start of the vertical/main axis) */
+    justify-content: flex-start;
+    /* Center items along the horizontal/cross axis */
+    align-items: center;
+    margin-top: 45px;
+}
 
-html, body { height: 100% }
+#pfp {
+    width: 250px;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+* {
+    box-sizing: border-box
+}
+
+html,
+body {
+    height: 100%
+}
 
 body {
     margin: 0;
@@ -24,20 +52,28 @@ body {
     -webkit-font-smoothing: antialiased;
     padding: 28px 18px;
     display: flex;
-    justify-content: center;
+    gap: 20px;
+    align-items: flex-start;
+    min-height: 100vh;
 }
 
-.page-wrap { width: 100%; max-width: var(--max-width) }
+.page-wrap {
+    width: 100%;
+    max-width: var(--max-width)
+}
 
-#profile{
+#profile {
     display: grid;
     /* allow the profile area to expand but keep it subtle */
     width: 100%;
-    max-width: 820px; /* narrower than site max so profile doesn't dominate */
+    /* let flex sizing control the width */
+    max-width: none;
     /* grid-template-columns: 160px 1fr; slightly narrower left column */
     gap: 20px;
     align-items: start;
-    margin: 18px 50px; /* center horizontally */
+    margin: 18px 0;
+    /* flex proportion: take up 2 parts out of 4 (50%) */
+    flex: 2 1 0;
     /* Make sure profile visually sits on top of other page panels when they overlap */
     position: relative;
     z-index: 40;
@@ -45,49 +81,114 @@ body {
 
 .panel {
     /* lower-contrast panel so profile feels lighter */
-    background: rgba(255,255,255,0.012);
+    min-height: 150px;
+    min-width: 300px;
+
+    background: rgba(255, 255, 255, 0.012);
     border-radius: calc(var(--radius) - 2px);
     padding: 12px;
     box-shadow: 0 6px 18px rgba(3, 8, 18, 0.5);
-    border: 1px solid rgba(255,255,255,0.02);
+    border: 1px solid rgba(255, 255, 255, 0.02);
 }
 
-.profile-avatar{
+#name {
+    font-size: 40px;
+    font-weight: 700;
+    margin-top: 2px;
+    margin-bottom: 16px;
+}
+
+#btn-wrap {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+#btn-wrap button {
+    flex: 1;
+    font-size: 16px;
+}
+
+.friend-emoji {
+    width: 1em;
+    height: auto;
+    margin-left: 7px;
+    margin-right: 7px;
+    margin-bottom: -3px;
+}
+
+#winPercent,
+#tokens,
+#started,
+#finished,
+#wdl {
+    font-weight: 700;
+    font-size: 40px;
+    margin-top: 6px;
+}
+
+.panel .small {
+    font-size: 25px;
+    /* Increase the font size */
+    font-weight: 700;
+}
+
+.profile-avatar {
     width: 110px;
     height: 110px;
     border-radius: 8px;
-    background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 36px;
     color: var(--muted);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.45);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
 }
 
-.profile-info h1{
+.profile-info h1 {
     margin: 0 0 6px 0;
     font-size: 18px;
     font-weight: 700;
 }
 
-.profile-info p{
+
+.profile-info p {
     margin: 0 0 12px 0;
     color: var(--muted);
 }
 
- #buyTokens{
+#buyTokens {
     max-width: 420px;
     margin: 0;
-    width:100%;
-    height:min-content
+    width: 100%;
+    height: min-content
 }
+
+/* Give the three top-level profile page columns proportional widths
+   - left `#player`    -> 1/4 (flex:1)
+   - center `#profile` -> 1/2 (flex:2)
+   - right `#buyTokens`-> 1/4 (flex:1)
+*/
+body > #player {
+    flex: 1 1 0;
+}
+
+body > #buyTokens {
+    flex: 1 1 0;
+    max-width: none;
+}
+
 /* keep buy panel under the profile when overlapping */
 #buyTokens.panel {
     position: relative;
     z-index: 10;
 }
-#buyTokens .panel { padding: 5px }
+
+#buyTokens .panel {
+    padding: 5px
+}
 
 /* Layout the purchase box with consistent spacing */
 #buyTokens.panel {
@@ -108,13 +209,13 @@ body {
 }
 
 #buyTokens input[type='number'],
-#buyTokens input[type='text']{
+#buyTokens input[type='text'] {
     width: calc(100% - 12px);
     padding: 10px 12px;
     margin: 6px 0 10px 0;
     border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.06);
-    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
     color: var(--muted);
 }
 
@@ -123,8 +224,8 @@ body {
     width: 100%;
     padding: 10px 12px;
     border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.06);
-    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
     color: var(--muted);
 }
 
@@ -150,27 +251,63 @@ body {
     filter: brightness(1.03);
 }
 
-@media (max-width: 920px){
-    #profile{ grid-template-columns: 1fr; }
-    .profile-avatar{ width: 120px; height: 120px; margin: 0 auto; }
+@media (max-width: 920px) {
+    #profile {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+    }
+    /* Stack the three columns on small screens */
+    body {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+
+    body > #player,
+    body > #profile,
+    body > #buyTokens {
+        flex: none;
+        width: 100%;
+        max-width: none;
+    }
 }
 
 /* accessibility focus styles consistent with site */
 button:focus,
-input:focus { outline: 3px solid rgba(94, 234, 212, 0.12); outline-offset: 2px }
+input:focus {
+    outline: 3px solid rgba(94, 234, 212, 0.12);
+    outline-offset: 2px
+}
 
-.small { font-size: 13px; color: var(--muted) }
+.small {
+    font-size: 13px;
+    color: var(--muted)
+}
 
 /* keep hidden utility */
-.hidden { display: none }
+.hidden {
+    display: none
+}
 
 /* subtle inline back link for profile header */
 .back-link {
+    position: fixed;
+    bottom: 12px;
+    left: 12px;
     padding: 4px 6px;
     border-radius: 8px;
     color: var(--muted);
 }
-.back-link:hover { color: #eaf4fb; background: rgba(255,255,255,0.01); }
+
+.back-link:hover {
+    color: #eaf4fb;
+    background: rgba(255, 255, 255, 0.01);
+}
 
 /* === Checkbox Group === */
 .checkbox-group {
@@ -242,4 +379,169 @@ input:focus { outline: 3px solid rgba(94, 234, 212, 0.12); outline-offset: 2px }
 /* Change label color when checkbox is checked */
 .checkbox-item input[type='checkbox']:checked+label {
     color: #fff;
+}
+
+
+/* chatbox and silt */
+
+#chat-container {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    width: 360px;
+    max-height: calc(100vh - 36px);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 8px;
+    z-index: 1200;
+    overflow: hidden
+}
+
+#chat-sidebar {
+    width: 100%;
+    background: var(--panel);
+    padding: 3px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    flex: 0 0 auto;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45)
+}
+
+#chat-sidebar h2 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    color: #dff2fb
+}
+
+#chat-main {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    background: var(--panel);
+    border-radius: 10px;
+    padding: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    overflow: hidden
+}
+
+#messages {
+    flex: 1 1 auto;
+    overflow: auto;
+}
+
+.message-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 2px 0;
+}
+
+.message-row.you {
+    align-items: flex-end;
+    /* align bubbles and sender to the right for your messages */
+}
+
+.message-row.other {
+    align-items: flex-start;
+    /* align to the left for others */
+}
+
+/* Sender label above each bubble */
+.sender {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+    line-height: 1;
+    margin: 10px 0 2px 0;
+    /* compact spacing under the sender */
+}
+
+#InfoBox {
+    width: auto;
+    height: auto;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* changed: use same system font as the rest of the page */
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 25px;
+    line-height: 1.1;
+    color: #e9f8fb;
+    /* border: 1px solid rgba(255, 255, 255, 0.03); */
+    text-align: center;
+    line-height: 1;
+    transition: transform 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+
+.message {
+    max-width: 70%;
+    padding: 5px 15px;
+    border-radius: 1em;
+    background: rgba(255, 255, 255, 0.03);
+    color: #eaf5fb
+}
+
+/* Ensure long words / unbroken text wrap inside chat bubbles */
+.message {
+    /* allow breaking long words and force wrap when necessary */
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
+}
+
+.message-row.you .message {
+    background: var(--accent-2);
+    color: white
+}
+
+#inputBar {
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 10px;
+    background: #071b2a;
+    margin-top: 8px
+}
+
+#back-link {
+    position: fixed;
+    bottom: 12px;
+    left: 12px;
+    z-index: 1000;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    border-radius: 4px;
+    text-decoration: none;
+    font-family: inherit;
+}
+
+#msg {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    background: transparent;
+    color: var(--muted);
+    outline: none
+}
+
+#send {
+    /* background: linear-gradient(90deg, var(--accent), var(--accent-2)); */
+    background: var(--accent);
+    border: 0;
+    color: #022;
+    font-weight: 700;
+    cursor: pointer;
+
+    padding: 5px 15px;
+    border-radius: 1em;
+}
+
+#send:hover {
+    transform: translateY(-2px) scale(1.1);
+    transition: transform 180ms cubic-bezier(.2,.9,.3,1);
 }
