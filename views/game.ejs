@@ -4,10 +4,12 @@
 <head>
     <title>Game - Chessbar</title>
     <link href='https://fonts.googleapis.com/css2?family=Lavishly+Yours&display=swap' rel='stylesheet'>
+    <link rel='stylesheet' href='/css/sidebar.css'>
     <link rel='stylesheet' href='/css/game.css'>
 </head>
 
-<body>
+<body class="with-sidebar">
+    <%- include('partials/sidebar') %>
     <!-- Join code badge (top-left) -->
     <div id='join-code-badge' role='button' tabindex='0' aria-live='polite' aria-label='Copy join code'
         title='Click to copy join code' style='display:none'></div>
@@ -30,6 +32,7 @@
             <!-- <div id='CapturedW' class='captureBox'></div>
             <div id='CapturedB' class='captureBox'></div> -->
         </div>
+            <script src='/js/sidebar.js'></script>
     </div>
 
     <!-- Waiting overlay shown when opponent hasn't joined -->

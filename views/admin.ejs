@@ -5,6 +5,7 @@
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Admin - Chessbar</title>
+    <link rel='stylesheet' href='/css/sidebar.css'>
     <link rel='stylesheet' href='/css/profile.css'>
     <style>
         :root { --guideline-color: #3f3f3f; }
@@ -151,7 +152,8 @@
     </style>
 </head>
 
-<body>
+<body class="with-sidebar">
+    <%- include('partials/sidebar') %>
     <div class="admin-container">
         <div class="admin-header">
             <h1>Admin dashboard</h1>
@@ -197,6 +199,7 @@
         <a href='/' class='small back-link' style='margin-top:18px;display:inline-block;text-decoration:none;color:var(--muted)'>← Back to games</a>
     </div>
 
+    <script src='/js/sidebar.js'></script>
     <script>
         let currentUsers = []
 

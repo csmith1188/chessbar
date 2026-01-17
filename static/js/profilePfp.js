@@ -93,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cropArea = modal.querySelector('#pfp-crop-area')
 
         const CANVAS_SIZE = 200 // fixed avatar size in px
+        const canvas = document.createElement('canvas')
 
         let img = new Image()
         let imgLoaded = false

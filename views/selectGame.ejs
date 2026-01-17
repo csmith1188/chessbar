@@ -5,6 +5,7 @@
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Chess</title>
+    <link rel='stylesheet' href='/css/sidebar.css'>
     <link rel='stylesheet' href='/css/selectGame.css'>
     <link rel='stylesheet' href='/css/newGame.css'>
     <style>
@@ -42,7 +43,8 @@
     </style>
 </head>
 
-<body>
+<body class="with-sidebar">
+    <%- include('partials/sidebar') %>
     <div id='newGameOverlay' class='overlay'>
         <div class='overlay-content'>
             <h1 id="newTitle">New Game</h1>
@@ -132,6 +134,7 @@
             </aside>
         </main>
     </div>
+    <script src='/js/sidebar.js'></script>
 </body>
 <script src='/socket.io/socket.io.js'></script>
 <script src='js/socket.js'></script>
