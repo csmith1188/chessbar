@@ -2,7 +2,8 @@ let takenUserIds = []
 class User {
     // sessionUser is the object from req.session.user (Formbar info) if present
     constructor(socket, sessionUser = null) {
-        this.socket = socket
+        // Always create the `socket` property (may be `null` when disconnected)
+        this.socket = socket || null
 
         // If the user signed in via Formbar, prefer their Formbar id
         if (sessionUser && sessionUser.id) {
@@ -50,7 +51,7 @@ class User {
 
     youAre() {
         // Emit current known info immediately; getInfo will re-emit if DB provides a different display_name.
-        this.socket.emit('youAre', this.serialize())
+        if (this.socket) this.socket.emit('youAre', this.serialize())
     }
 
     getInfo(db) {
@@ -74,11 +75,11 @@ class User {
                         db.run(`UPDATE users SET display_name = ? WHERE formbar_id = ?`, [fallback, this.id], (updateErr) => {
                             if (updateErr) return console.error('Failed to set fallback display_name in getInfo:', updateErr)
                             this.displayName = fallback
-                            this.socket.emit('youAre', this.serialize())
+                            if (this.socket) this.socket.emit('youAre', this.serialize())
                         })
                     } else {
                         this.displayName = fallback
-                        this.socket.emit('youAre', this.serialize())
+                        if (this.socket) this.socket.emit('youAre', this.serialize())
                     }
                 }
             }
@@ -205,10 +206,10 @@ function userSocket(io, db1) {
     db = db1
     io.on('connection', (socket) => {
         socket.on('getUser', (uid) => {
-            db.get('SELECT * FROM users WHERE formbar_id = ?', [uid], (err, user) => {
-                if (err || !user) return socket.emit('noUser');
+            db.get('SELECT * FROM users WHERE formbar_id = ?', [uid], (err, dbUser) => {
+                if (err || !dbUser) return socket.emit('noUser');
 
-                return socket.emit('foundUser', user);
+                return socket.emit('foundUser', dbUser);
             })
         })
     })
