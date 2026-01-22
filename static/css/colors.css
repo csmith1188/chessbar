@@ -1,0 +1,28 @@
+/* Centralized color and theme variables used across the site */
+:root {
+    /* global backgrounds */
+    --bg-1: #020613; /* very dark navy */
+    --bg-2: #07121a; /* deep navy */
+
+    /* panels / cards */
+    --panel: rgba(255, 255, 255, 0.02);
+    --glass: rgba(255, 255, 255, 0.02);
+    --card: #0c1a24; /* dark panel */
+
+    /* typographic / accents */
+    --muted: #7f8a95; /* subdued text */
+    --accent: #c78d2f; /* muted amber */
+    --accent-2: #362380; /* muted purple */
+
+    /* sidebar specific values (kept here for single source) */
+    --sidebar-width: 240px;
+    --sidebar-collapsed: 56px;
+    --sidebar-bg: #0c131a;
+    --sidebar-border: rgba(255, 255, 255, 0.07);
+    --sidebar-text: #e8f3ff;
+    --sidebar-muted: #9aa9b6;
+    --sidebar-highlight: #1d6fea;
+    --sidebar-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+
+    --max-width: 1100px;
+}
