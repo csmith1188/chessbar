@@ -195,7 +195,8 @@ class User {
             // derive `active` from the current socket connection state when possible
             active: (this.socket && this.socket.connected === true) ? true : !!this.active,
             lastActiveAt: this.lastActiveAt || null,
-            displayName: this.displayName
+            displayName: this.displayName,
+            game: this.game ? { id: this.game.id, joinCode: this.game.joinCode } : null
         }
     }
 }

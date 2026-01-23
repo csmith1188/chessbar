@@ -207,15 +207,6 @@
         if (gameData && gameData.users) {
             users.innerHTML = ''
 
-            // Helper to format milliseconds to MM:SS
-            function formatMsToMMSS(ms) {
-                if (!ms || ms < 0) return '00:00'
-                const totalSeconds = Math.floor(ms / 1000)
-                const minutes = Math.floor(totalSeconds / 60)
-                const seconds = totalSeconds % 60
-                return String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0')
-            }
-
             let usersToShow = []
             if (gameData.prevWhite) usersToShow.push(gameData.prevWhite)
             if (gameData.prevBlack) usersToShow.push(gameData.prevBlack)
@@ -237,6 +228,7 @@
                 if (!u.active && u.lastActiveAt) {
                     inactiveSpan = document.createElement('span')
                     inactiveSpan.classList.add('inactive-duration')
+                    inactiveSpan.dataset.lastActiveAt = u.lastActiveAt
                     const elapsed = Date.now() - u.lastActiveAt
                     inactiveSpan.textContent = formatMsToMMSS(elapsed) + ' '
                 }
@@ -284,6 +276,31 @@
             try { updateWaitingOverlay(); } catch (e) {}
         }
     }
+
+    // Helper to format milliseconds to MM:SS (also used by the update timer)
+    function formatMsToMMSS(ms) {
+        if (!ms || ms < 0) return '00:00'
+        const totalSeconds = Math.floor(ms / 1000)
+        const minutes = Math.floor(totalSeconds / 60)
+        const seconds = totalSeconds % 60
+        return String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0')
+    }
+
+    // Continuously update inactive duration clocks for offline players
+    setInterval(() => {
+        // Don't update the clock if the game is finished
+        if (gameData && gameData.finished) return
+
+        const inactiveDurationElements = document.querySelectorAll('.inactive-duration')
+        inactiveDurationElements.forEach(span => {
+            const lastActiveAt = parseInt(span.dataset.lastActiveAt)
+            if (lastActiveAt) {
+                const elapsed = Date.now() - lastActiveAt
+                span.textContent = formatMsToMMSS(elapsed) + ' '
+            }
+        })
+    }, 1000)
+
 </script>
 
 <script>

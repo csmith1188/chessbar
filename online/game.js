@@ -42,6 +42,17 @@ class Game {
         this.prevWhite = null
         this.prevBlack = null
 
+        /* 
+        List of moves so that players can scroll through them (should also come with serialized game).
+        Example move:
+        {
+            from: {x, y}, 
+            to: {x, y},
+            takes: {false || name, side} 
+        } 
+        */
+        this.moves = []
+
         this.winner = null
         this.loser = null
 
@@ -278,7 +289,7 @@ class Game {
                 // Game finished by mate: clear any outstanding leave timers
                 if (this.leaveTimers) {
                     for (let k in this.leaveTimers) {
-                        try { clearTimeout(this.leaveTimers[k]) } catch (e) {}
+                        try { clearTimeout(this.leaveTimers[k]) } catch (e) { }
                     }
                     this.leaveTimers = {}
                 }
@@ -305,7 +316,7 @@ class Game {
                 // Clear any outstanding leave timers when the game finishes by stalemate/draw
                 if (this.leaveTimers) {
                     for (let k in this.leaveTimers) {
-                        try { clearTimeout(this.leaveTimers[k]) } catch (e) {}
+                        try { clearTimeout(this.leaveTimers[k]) } catch (e) { }
                     }
                     this.leaveTimers = {}
                 }
@@ -357,7 +368,7 @@ class Game {
                 // Clear any outstanding leave timers when the game finishes by resign
                 if (this.leaveTimers) {
                     for (let k in this.leaveTimers) {
-                        try { clearTimeout(this.leaveTimers[k]) } catch (e) {}
+                        try { clearTimeout(this.leaveTimers[k]) } catch (e) { }
                     }
                     this.leaveTimers = {}
                 }
@@ -381,7 +392,7 @@ class Game {
 
         // perform resign
         this.resign(userObj)
-        
+
         // Emit a dedicated socket event to active users to display an alert (separate from chat)
         try {
             const name = userObj.displayName || `Player${userObj.id}`
@@ -393,7 +404,7 @@ class Game {
             }
 
             for (let u of this.activeUsers()) {
-                try { u.socket.emit('systemAlert', payload) } catch (e) {}
+                try { u.socket.emit('systemAlert', payload) } catch (e) { }
             }
         } catch (e) {
             // ignore failures
@@ -419,13 +430,13 @@ class Game {
 
     emptyUpdate(socket) {
         if (socket) {
-            try { socket.emit('updateBoard', serializeGame(this)) } catch (e) {}
+            try { socket.emit('updateBoard', serializeGame(this)) } catch (e) { }
             return
         }
 
         // Broadcast to all users so clients are kept in sync when no socket is provided
         for (let u of this.users) {
-            try { u.socket.emit('updateBoard', serializeGame(this)) } catch (e) {}
+            try { u.socket.emit('updateBoard', serializeGame(this)) } catch (e) { }
         }
     }
 }
@@ -449,7 +460,8 @@ function serializeGame(game) {
         promotionPending: game.promotionPending || false,
         promotionSide: game.promotionSide || null,
         promotionCoords: game.promotionCoords || null,
-        finished: game.finished
+        finished: game.finished,
+        moves: game.moves
     }
 }
 
