@@ -239,7 +239,7 @@ function attachSocket(io, games) {
                         const isKingOnly = board.onlyKingsLeft()
 
                         // Only emit update to users in this game, plus check/mate/stalemate/draw events
-                        game.update({ x1: x1, y1: y1, x2: x2, y2: y2, name: foo.name, side: foo.side }, inCheck, isMate, isStalemate, isKingOnly, opponent, foo.side, dest.name || null)
+                        game.update({ x1: x1, y1: y1, x2: x2, y2: y2, name: foo.name, side: foo.side, takes: dest || null }, inCheck, isMate, isStalemate, isKingOnly, opponent, foo.side, dest.name || null)
                     } else {
                         // console.log(`Still ${board.turn}'s turn, move failed (Invalid).`)
                         game.emptyUpdate(socket)

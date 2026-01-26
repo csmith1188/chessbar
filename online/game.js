@@ -234,7 +234,22 @@ class Game {
     }
 
     update(move = {}, check = false, mate = false, stalemate = false, draw = false, opponent = null, winner = null, takenPiece = null) {
-        if (move) this.prevMove = move
+
+        if (move && move.x1 && move.x2) {
+            this.prevMove = move
+
+            console.log(move.takes)
+
+            this.moves.push({
+                from: { x: move.x1, y: move.y1 },
+                to: { x: move.x2, y: move.y2 },
+                takes: move.takes ? {name: move.takes.name, side: move.takes.side} : false,
+                enPassant: false,
+                promotion: false
+            })
+
+            console.log(this.moves)
+        }
 
         let promotion = false
         for (let user of this.users) {
