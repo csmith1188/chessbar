@@ -19,7 +19,7 @@ const db = new sqlite3.Database('database/database.db', sqlite3.OPEN_READWRITE, 
     if (err) return console.error('Error connecting to database:', err.message)
 })
 
-const PLAY_PRICE = 25
+const PLAY_PRICE = 100
 
 //! For digipogs
 
@@ -51,6 +51,15 @@ app.use(express.json({ limit: '50mb' })) // allow base64 uploads up to ~50MB
 
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs')
+// Make PLAY_PRICE available to all EJS templates
+app.locals.PLAY_PRICE = PLAY_PRICE
+
+// Also ensure each response has the value on `res.locals` so templates
+// rendered with an explicit locals object still see `PLAY_PRICE`.
+app.use((req, res, next) => {
+    res.locals.PLAY_PRICE = app.locals.PLAY_PRICE
+    next()
+})
 
 // session for Formbar login
 const sessionMiddleware = session({
@@ -513,6 +522,8 @@ io.on('connection', (socket) => {
             const isStalemate = !inCheck && !user.game.board.hasLegalMoves(opponent)
             const isKingOnly = user.game.board.onlyKingsLeft()
             user.game.endPromotion()
+            user.game.moves.find(m => m.to.x === x && m.to.y === y).promotion = newPiece
+            console.log("Promotion:", user.game.moves)
             user.game.update({}, inCheck, isMate, isStalemate, isKingOnly, opponent, user.side, null)
         }
     })

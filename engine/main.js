@@ -215,18 +215,60 @@ function attachSocket(io, games) {
                             return
                         }
 
-                        for (let y of board.layout) {
-                            for (let x of y) {
-                                if (x.enPassant) x.enPassant = false
+                        // Validate move once and reuse result to avoid side-effects
+                        const vm = foo.validMove(board.layout, x1, y1, x2, y2)
+                        if (vm == 'castle') foo.castle(board.layout, x1, y1, x2, y2)
+
+                        // Execute move. For en-passant captures the destination square
+                        // is empty; we must remove the captured pawn from its original
+                        // square (the pawn on the same rank as the mover, at file x2).
+
+                        // Remove moving piece from origin
+                        board.layout[y1][x1] = 0
+
+                        // Prepare move metadata for update call
+                        let takenPieceName = null
+                        let moveEnPassantFlag = false
+
+                        // Handle en-passant capture: moving pawn captured diagonally into
+                        // an empty square; the captured pawn sits at (x2, y1)
+                        if (foo.name === 'Pawn' && !dest && Math.abs(x2 - x1) === 1 && vm === true) {
+                            const capY = y1
+                            const capX = x2
+                            const capturedPawn = board.layout[capY] && board.layout[capY][capX]
+                            if (capturedPawn && capturedPawn.constructor.name === 'Pawn' && capturedPawn.enPassant) {
+                                takenPieceName = capturedPawn.name
+                                moveEnPassantFlag = true
+                                board.captured.push({ name: capturedPawn.name, side: capturedPawn.side })
+                                board.layout[capY][capX] = 0
+                            }
+                        } else {
+                            if (dest) {
+                                takenPieceName = dest.name
+                                board.captured.push({ name: dest.name, side: dest.side })
                             }
                         }
 
-                        if (foo.validMove(board.layout, x1, y1, x2, y2) == 'castle') foo.castle(board.layout, x1, y1, x2, y2)
-                        if (foo.validMove(board.layout, x1, y1, x2, y2) == 'enPassant') foo.enPassant = true
-
-                        board.layout[y1][x1] = 0
-                        if (dest) board.captured.push({ name: dest.name, side: dest.side })
+                        // Place moving piece on destination
                         board.layout[y2][x2] = foo
+
+                        // Mark move as enPassant when the move was a two-square pawn advance
+                        if (vm == 'enPassant') moveEnPassantFlag = true
+
+                        // After move execution: clear all existing en-passant marks (they
+                        // are only valid for one opposing move), then set enPassant on
+                        // the pawn that just moved two squares.
+                        for (let row of board.layout) {
+                            for (let cell of row) {
+                                if (cell && cell.enPassant) cell.enPassant = false
+                            }
+                        }
+
+                        if (vm == 'enPassant') {
+                            // The pawn that just moved two squares now resides at y2,x2
+                            const movedPawn = board.layout[y2][x2]
+                            if (movedPawn && movedPawn.name === 'Pawn') movedPawn.enPassant = true
+                        }
                         foo.moves++
                         board.turn = board.turn == 'white' ? 'black' : 'white'
                         // console.log(`Move successful, it's now ${board.turn}'s turn.`)
@@ -239,7 +281,17 @@ function attachSocket(io, games) {
                         const isKingOnly = board.onlyKingsLeft()
 
                         // Only emit update to users in this game, plus check/mate/stalemate/draw events
-                        game.update({ x1: x1, y1: y1, x2: x2, y2: y2, name: foo.name, side: foo.side, takes: dest || null }, inCheck, isMate, isStalemate, isKingOnly, opponent, foo.side, dest.name || null)
+                        game.update(
+                            { x1: x1, y1: y1, x2: x2, y2: y2, name: foo.name, side: foo.side },
+                            inCheck,
+                            isMate,
+                            isStalemate,
+                            isKingOnly,
+                            opponent,
+                            foo.side,
+                            takenPieceName || null,
+                            moveEnPassantFlag || false
+                        )
                     } else {
                         // console.log(`Still ${board.turn}'s turn, move failed (Invalid).`)
                         game.emptyUpdate(socket)

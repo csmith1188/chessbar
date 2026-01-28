@@ -55,10 +55,12 @@ class Pawn extends Piece {
                     // En-passant
                 } else if (!board[y2][x2] && board[y1][x2] &&
                     board[y1][x2].constructor.name == 'Pawn' &&
-                    board[y2][x1].side !== this.side && board[y1][x2].enPassant &&
-                    ((y1 + 2 == 6 && board[y1][x2].side == 'white') || (y1 - 2 == 1))) {
+                    board[y1][x2].side !== this.side && board[y1][x2].enPassant) {
 
-                    board[y1][x2] = 0
+                    // En-passant capture is legal; do NOT mutate the board here.
+                    // Board mutation (removing the captured pawn) must be performed
+                    // by the caller when actually executing the move to avoid
+                    // side-effects during move validation.
                     return true
                 }
 
