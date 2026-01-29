@@ -238,12 +238,13 @@ class Game {
         if (move && Number.isFinite(move.x1) && Number.isFinite(move.x2)) {
             this.prevMove = move
 
-            console.log(move.takes)
+            const sendY1 = move.side === 'black' ? 7 - move.y1 : move.y1
+            const sendY2 = move.side === 'black' ? 7 - move.y2 : move.y2
 
             this.moves.push({
                 side: move.side,
-                from: { x: move.x1, y: move.y1 },
-                to: { x: move.x2, y: move.y2 },
+                from: { x: move.x1, y: sendY1 },
+                to: { x: move.x2, y: sendY2 },
                 takes: takenPiece || false,
                 enPassant: enPassant || false,
                 promotion: false
