@@ -595,6 +595,12 @@ io.on('connection', (socket) => {
         }
     })
 
+    //kayden's profile DM chat
+
+    //dm history, dm messages, populate friends list
+
+
+
     socket.on('deleteGame', (gameId) => {
         const game = games.find(g => g.id === gameId)
 

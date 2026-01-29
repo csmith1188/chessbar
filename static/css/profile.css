@@ -385,9 +385,7 @@ input:focus {
 /* chatbox and silt */
 
 #chat-container {
-    position: fixed;
-    right: 18px;
-    bottom: 18px;
+    margin-top: 40px;
     width: 360px;
     max-height: calc(100vh - 36px);
     display: flex;
@@ -398,7 +396,7 @@ input:focus {
     overflow: hidden
 }
 
-#chat-sidebar {
+#chat-friendbar {
     width: 100%;
     background: var(--panel);
     padding: 3px;
@@ -408,7 +406,7 @@ input:focus {
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45)
 }
 
-#chat-sidebar h2 {
+#chat-friendbar h2 {
     margin: 0 0 8px 0;
     font-size: 16px;
     color: #dff2fb
