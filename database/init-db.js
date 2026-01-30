@@ -10,6 +10,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
 });
 
 db.serialize(() => {
+    // Users table
     db.run(`CREATE TABLE IF NOT EXISTS users (
         chessbar_id INTEGER PRIMARY KEY NOT NULL DEFAULT 0,
         formbar_id INTEGER NOT NULL DEFAULT 0,
@@ -35,4 +36,13 @@ db.serialize(() => {
             });
         }
     );
+
+    // Friends table    
+    db.run(`CREATE TABLE IF NOT EXISTS "friends" (
+        friendship    INTEGER NOT NULL UNIQUE, 
+        id_1	INTEGER NOT NULL,
+        id_2	INTEGER NOT NULL,
+        status	TEXT NOT NULL
+    );`)
+
 });
