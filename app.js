@@ -366,8 +366,8 @@ io.on('connection', (socket) => {
         user.sessionUser = sessionUser
         user.active = true
         // clear inactivity timestamp when the user reconnects
-        try { user.lastActiveAt = null } catch (e) {}
-        try { user.youAre() } catch (e) {}
+        try { user.lastActiveAt = null } catch (e) { }
+        try { user.youAre() } catch (e) { }
         // console.log(`User ${user.displayName || user.id} reconnected`)
         // Ensure the DB row exists and update display_name if missing on reload
         try { user.addToDb(db) } catch (e) { console.error('addToDb error on reconnect:', e) }
@@ -484,9 +484,9 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         user.active = false
         // record when the user went inactive so clients can show duration
-        try { user.lastActiveAt = Date.now() } catch (e) {}
+        try { user.lastActiveAt = Date.now() } catch (e) { }
         // clear the socket reference so serialize() can accurately reflect connection state
-        try { user.socket = null } catch (e) {}
+        try { user.socket = null } catch (e) { }
         if (user.game) user.game.leave(user)
 
         if (user.id <= 0) {
@@ -602,61 +602,61 @@ io.on('connection', (socket) => {
 
 
     socket.on('deleteGame', (gameId) => {
-        const game = games.find(g => g.id === gameId)
+            const game = games.find(g => g.id === gameId)
 
-        if (game && game.owner && game.owner.id === user.id) {
-            // mutate the shared array instead of reassigning the variable
-            const idx = games.findIndex(g => g.id === gameId)
-            if (idx !== -1) games.splice(idx, 1)
-            // console.log(`Game ${gameId} deleted by owner ${user.id}.`)
-            io.emit('refreshGames')
-        }
-        logUsers()
-    })
+            if (game && game.owner && game.owner.id === user.id) {
+                // mutate the shared array instead of reassigning the variable
+                const idx = games.findIndex(g => g.id === gameId)
+                if (idx !== -1) games.splice(idx, 1)
+                // console.log(`Game ${gameId} deleted by owner ${user.id}.`)
+                io.emit('refreshGames')
+            }
+            logUsers()
+        })
 
     socket.on('requestValidMoves', (piece) => {
-        // Ensure we have a game and valid numeric coordinates (0 is valid)
-        if (
-            piece && piece.name && piece.side &&
-            user && user.game && !user.game.finished &&
-            Number.isInteger(piece.x) && Number.isInteger(piece.y)
-        ) {
-            let validMoves = []
-            if (user.side == 'white') {
-                // instantiate with side/moves so `this.side` is set in piece methods
-                const pieceObj = new classes[piece.name](piece.side, piece.moves)
-                if (pieceObj) {
-                    for (let y = 0; y < 8; y++) {
-                        for (let x = 0; x < 8; x++) {
-                            // pass the actual 2D array layout, not the Board object
-                            if (pieceObj.validMove(user.game.board.layout, piece.x, piece.y, x, y) &&
-                                user.game.board.layout[y][x].side != user.side &&
-                                !user.game.board.wouldBeInCheckAfterMove(piece.x, piece.y, x, y)) {
-                                validMoves.push({ x, y })
+            // Ensure we have a game and valid numeric coordinates (0 is valid)
+            if (
+                piece && piece.name && piece.side &&
+                user && user.game && !user.game.finished &&
+                Number.isInteger(piece.x) && Number.isInteger(piece.y)
+            ) {
+                let validMoves = []
+                if (user.side == 'white') {
+                    // instantiate with side/moves so `this.side` is set in piece methods
+                    const pieceObj = new classes[piece.name](piece.side, piece.moves)
+                    if (pieceObj) {
+                        for (let y = 0; y < 8; y++) {
+                            for (let x = 0; x < 8; x++) {
+                                // pass the actual 2D array layout, not the Board object
+                                if (pieceObj.validMove(user.game.board.layout, piece.x, piece.y, x, y) &&
+                                    user.game.board.layout[y][x].side != user.side &&
+                                    !user.game.board.wouldBeInCheckAfterMove(piece.x, piece.y, x, y)) {
+                                    validMoves.push({ x, y })
+                                }
+                            }
+                        }
+                    }
+                } else if (user.side == 'black') {
+                    piece.y = 7 - piece.y
+                    // instantiate with side/moves so `this.side` is set in piece methods
+                    const pieceObj = new classes[piece.name](piece.side, piece.moves)
+                    if (pieceObj) {
+                        for (let y = 0; y < 8; y++) {
+                            for (let x = 0; x < 8; x++) {
+                                // pass the actual 2D array layout, not the Board object
+                                if (pieceObj.validMove(user.game.board.layout, piece.x, piece.y, x, y) &&
+                                    user.game.board.layout[y][x].side != user.side &&
+                                    !user.game.board.wouldBeInCheckAfterMove(piece.x, piece.y, x, y)) {
+                                    validMoves.push({ x: x, y: 7 - y })
+                                }
                             }
                         }
                     }
                 }
-            } else if (user.side == 'black') {
-                piece.y = 7 - piece.y
-                // instantiate with side/moves so `this.side` is set in piece methods
-                const pieceObj = new classes[piece.name](piece.side, piece.moves)
-                if (pieceObj) {
-                    for (let y = 0; y < 8; y++) {
-                        for (let x = 0; x < 8; x++) {
-                            // pass the actual 2D array layout, not the Board object
-                            if (pieceObj.validMove(user.game.board.layout, piece.x, piece.y, x, y) &&
-                                user.game.board.layout[y][x].side != user.side &&
-                                !user.game.board.wouldBeInCheckAfterMove(piece.x, piece.y, x, y)) {
-                                validMoves.push({ x: x, y: 7 - y })
-                            }
-                        }
-                    }
-                }
+                socket.emit('validMoves', validMoves)
             }
-            socket.emit('validMoves', validMoves)
-        }
-    })
+        })
 })
 
 
