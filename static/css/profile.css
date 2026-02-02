@@ -7,13 +7,10 @@
 #player {
     display: flex;
     flex-direction: column;
-    /* Align items at the top (start of the vertical/main axis) */
     justify-content: flex-start;
-    /* Center items along the horizontal/cross axis */
     align-items: center;
     margin-top: 45px;
-    margin-left: 5px;
-    margin-right: 5px;
+    
 }
 
 #pfp {
@@ -75,7 +72,7 @@ body {
     background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
     color: #eaf4fb;
     -webkit-font-smoothing: antialiased;
-    padding: 28px 18px;
+    padding: 30px 18px 0px 0px;
     display: flex;
     gap: 20px;
     align-items: flex-start;
@@ -96,7 +93,6 @@ body {
     /* grid-template-columns: 160px 1fr; slightly narrower left column */
     gap: 20px;
     align-items: start;
-    margin: 18px 0;
     /* flex proportion: take up 2 parts out of 4 (50%) */
     flex: 2 1 0;
     /* Make sure profile visually sits on top of other page panels when they overlap */
@@ -128,6 +124,7 @@ body {
     display: flex;
     gap: 10px;
     justify-content: center;
+   
 }
 
 #btn-wrap button {
@@ -185,8 +182,8 @@ body {
 }
 
 #buyTokens {
+    margin-top: 12px;
     max-width: 420px;
-    margin: 0;
     width: 100%;
     height: min-content
 }

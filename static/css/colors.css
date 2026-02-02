@@ -16,7 +16,7 @@
 
     /* sidebar specific values (kept here for single source) */
     --sidebar-width: 240px;
-    --sidebar-collapsed: 56px;
+    --sidebar-collapsed: 18px;
     --sidebar-bg: #0c131a;
     --sidebar-border: rgba(255, 255, 255, 0.07);
     --sidebar-text: #e8f3ff;
