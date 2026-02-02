@@ -5,75 +5,98 @@
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Profile - Chessbar</title>
+    <link rel='stylesheet' href='/css/sidebar.css'>
     <link rel='stylesheet' href='/css/profile.css'>
 </head>
 
-<body>
-    <a href='/' class='small back-link'
-        style='margin:8px 0 0 18px;display:inline-block;text-decoration:none;color:var(--muted); height:min-content'>←
-        Back to games</a>
-    <div id='profile'>
-
-        <!-- Right column: main profile info -->
-        <div class='profile-info'>
-            <div class='panel'>
-                <h1 id='name'>unnamed</h1>
-                <!-- <p class='small'>Casual player, coffee-fueled tactics solver, and challenger of time controls.</p> -->
-
-                <!--! The div below should have functionality soon.-->
-
-                <!-- <div style='display:flex;gap:10px;margin-top:12px;'>
-                    <button class='btn'>Edit Profile</button>
-                    <button class='btn secondary'>Message</button>
-                </div> -->
-            </div>
-
-            <div style='margin-top:12px; display:grid; grid-template-columns: repeat(3,1fr); gap:12px;'>
-                <div class='panel'>
-                    <div class='small'>Win %</div>
-                    <div style='font-weight:700;font-size:18px;margin-top:6px;' id='winPercent'>0</div>
-                </div>
-                <div class='panel'>
-                    <div class='small'>Tokens</div>
-                    <div style='font-weight:700;font-size:18px;margin-top:6px;' id='tokens'>0</div>
-                </div>
-                <div class='panel'>
-                    <div class='small'>Games started</div>
-                    <div style='font-weight:700;font-size:18px;margin-top:6px;' id='started'>0</div>
-                </div>
-                <div class='panel'>
-                    <div class='small'>Games finished</div>
-                    <div style='font-weight:700;font-size:18px;margin-top:6px;' id='finished'>0</div>
-                </div>
-                <div class='panel'>
-                    <div class='small'>W/D/L</div>
-                    <div style='font-weight:700;font-size:18px;margin-top:6px;' id='wdl'>0/0/0</div>
+<body class="with-sidebar">
+    <%- include('partials/sidebar') %>
+        <div id="player">
+            <div class="avatar-large">
+                <div class="pfp-container" style="position:relative; display:inline-block">
+                    <div id="pfp"
+                        style="background-image: url(<%= typeof avatarUrl !== 'undefined' ? avatarUrl : '/img/basic_avatar.png' %>)"
+                        style="display:block; border-radius:50%; max-width:250px;"></div>
+                    <div id="pfp-overlay">
+                        Change profile picture</div>
                 </div>
             </div>
+
+            <div id="name"></div>
+            <div id="btn-wrap">
+                <button id="friends-btn" class="btn secondary"> <img src="/img/emoji-1.png" class="friend-emoji">Add
+                    Friend<img src="/img/emoji-1.png" class="friend-emoji"></button>
+                <button id="challenge-btn" class="btn secondary">⚔️ Challenge ⚔️</button>
+            </div>
         </div>
-    </div>
 
-    <div id='buyTokens' class='panel'>
-        <h3>Purchase tokens</h3>
-        <input type='password' inputmode='numeric' pattern='[0-9]*' placeholder='Your PIN...' id='pinInput'
-            class='input'>
-        <input type='number' placeholder='Amount?' id='amount' class='input' min='1' value='1'>
-
-        <div class='checkbox-item'>
-            <input type='checkbox' id='saveToCookies' name='box'>
-            <label for='saveToCookies'>Save PIN for quick pay?</label>
+        <div id='profile'>
+            <!-- Right column: main profile info -->
+            <div class='profile-info'>
+                <div style='margin-top:12px; display:grid; grid-template-columns: repeat(2,1fr); gap:12px;'>
+                    <div class='panel'>
+                        <div class='small'>Win %</div>
+                        <div id='winPercent'>0</div>
+                    </div>
+                    <div class='panel'>
+                        <div class='small'>Tokens</div>
+                        <div id='tokens'>0</div>
+                    </div>
+                    <div class='panel'>
+                        <div class='small'>Games started</div>
+                        <div id='started'>0</div>
+                    </div>
+                    <div class='panel'>
+                        <div class='small'>Games finished</div>
+                        <div id='finished'>0</div>
+                    </div>
+                    <div class='panel'>
+                        <div class='small'>W/D/L</div>
+                        <div id='wdl'>0/0/0</div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <p>Saving your pin will automatically purchase a token when you try to join a game without tokens.</p>
 
-        <div class='actions'>
-            <button id='submit' class='btn'>Buy (25)</button>
+        <div id='buyTokens' class='panel'>
+            <h3>Purchase tokens</h3>
+            <input type='password' inputmode='numeric' pattern='[0-9]*' placeholder='Your PIN...' id='pinInput'
+                class='input'>
+            <input type='number' placeholder='Amount?' id='amount' class='input' min='1' value='1'>
+
+            <div class='checkbox-item'>
+                <input type='checkbox' id='saveToCookies' name='box'>
+                <label for='saveToCookies'>Save PIN for quick pay?</label>
+            </div>
+            <p>Saving your pin will automatically purchase a token when you try to join a game without tokens.</p>
+
+            <div class='actions'>
+                <button id='submit' class='btn'>Buy (<%= PLAY_PRICE %>)</button>
+            </div>
         </div>
-    </div>
 
+        <a href='/' class='small back-link'
+            style='margin:8px 0 0 18px;display:inline-block;text-decoration:none;color:var(--muted); height:min-content'>←
+            Back to games</a>
 </body>
 
+<script src='/js/sidebar.js'></script>
 <script src='/socket.io/socket.io.js'></script>
 <script src='js/socket.js'></script>
+<script>
+    // Expose whether this page is the signed-in user's own profile.
+    // If `?usr=` is present and differs from the session user id, it's someone else's profile.
+    (function () {
+        try {
+            const params = new URLSearchParams(window.location.search)
+            const q = params.get('usr')
+            const sessionUserId = <%= user && user.id ? user.id : 'null' %>
+                // true if no query param (own profile) or query matches session id
+                window.isOwnProfile = (!q) || String(q) === String(sessionUserId)
+        } catch (e) { window.isOwnProfile = true }
+    })()
+</script>
+<script src='/js/profilePfp.js'></script>
 
 <script>
     const pinBox = document.getElementById('pinInput')
@@ -149,12 +172,11 @@
     // Get the user data
     socket.on('foundUser', (user) => {
         updateInfo(user)
-        console.log(user)
     })
 
     socket.on('noUser', () => {
-        window.location.href='/profile'
-    }) 
+        window.location.href = '/profile'
+    })
 
     if (viewingUser) {
         socket.emit('getUser', viewingUser)
@@ -162,7 +184,6 @@
     } else {
         socket.on('youAre', (u) => {
             viewingUser = u.id
-            console.log(u)
             socket.emit('getUser', u.id)
             updateBuyTokensVisibility()
         })

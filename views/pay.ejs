@@ -5,6 +5,7 @@
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Pay - Chessbar</title>
+    <link rel='stylesheet' href='/css/sidebar.css'>
     <link rel='stylesheet' href='/css/pay.css'>
 </head>
 
@@ -62,7 +63,8 @@
 
 </script>
 
-<body>
+<body class="with-sidebar">
+    <%- include('partials/sidebar') %>
     <div id='buyTokens' class='panel'>
         <h3>Purchase tokens</h3>
         <p>You do not have any tokens. Play cost is 1 token.</p>
@@ -76,13 +78,14 @@
         </div>
 
         <div class='actions'>
-            <button id='submit' class='btn'>Buy (25)</button>
+            <button id='submit' class='btn'>Buy (<%= PLAY_PRICE %>)</button>
         </div>
     </div>
 
     <a href='/' id='back-link'
         style='position:fixed;bottom:12px;left:12px;z-index:1000;padding:8px 12px;background:rgba(0,0,0,0.7);color:#fff;border-radius:4px;text-decoration:none;font-family:inherit;'>Back
         to game selection</a>
+    <script src='/js/sidebar.js'></script>
 </body>
 
 <script>

@@ -4,10 +4,12 @@
 <head>
     <title>Game - Chessbar</title>
     <link href='https://fonts.googleapis.com/css2?family=Lavishly+Yours&display=swap' rel='stylesheet'>
+    <link rel='stylesheet' href='/css/sidebar.css'>
     <link rel='stylesheet' href='/css/game.css'>
 </head>
 
-<body>
+<body class="with-sidebar">
+    <%- include('partials/sidebar') %>
     <!-- Join code badge (top-left) -->
     <div id='join-code-badge' role='button' tabindex='0' aria-live='polite' aria-label='Copy join code'
         title='Click to copy join code' style='display:none'></div>
@@ -30,6 +32,7 @@
             <!-- <div id='CapturedW' class='captureBox'></div>
             <div id='CapturedB' class='captureBox'></div> -->
         </div>
+            <script src='/js/sidebar.js'></script>
     </div>
 
     <!-- Waiting overlay shown when opponent hasn't joined -->
@@ -59,6 +62,7 @@
             <div id='inputBar'>
                 <input type='text' id='msg' placeholder='Type your message here...' />
                 <button id='send'>Send</button>
+                <button id='export-pgn' title='Generate PGN from game moves'>Export PGN</button>
             </div>
         </div>
     </div>
@@ -204,15 +208,6 @@
         if (gameData && gameData.users) {
             users.innerHTML = ''
 
-            // Helper to format milliseconds to MM:SS
-            function formatMsToMMSS(ms) {
-                if (!ms || ms < 0) return '00:00'
-                const totalSeconds = Math.floor(ms / 1000)
-                const minutes = Math.floor(totalSeconds / 60)
-                const seconds = totalSeconds % 60
-                return String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0')
-            }
-
             let usersToShow = []
             if (gameData.prevWhite) usersToShow.push(gameData.prevWhite)
             if (gameData.prevBlack) usersToShow.push(gameData.prevBlack)
@@ -234,6 +229,7 @@
                 if (!u.active && u.lastActiveAt) {
                     inactiveSpan = document.createElement('span')
                     inactiveSpan.classList.add('inactive-duration')
+                    inactiveSpan.dataset.lastActiveAt = u.lastActiveAt
                     const elapsed = Date.now() - u.lastActiveAt
                     inactiveSpan.textContent = formatMsToMMSS(elapsed) + ' '
                 }
@@ -281,6 +277,31 @@
             try { updateWaitingOverlay(); } catch (e) {}
         }
     }
+
+    // Helper to format milliseconds to MM:SS (also used by the update timer)
+    function formatMsToMMSS(ms) {
+        if (!ms || ms < 0) return '00:00'
+        const totalSeconds = Math.floor(ms / 1000)
+        const minutes = Math.floor(totalSeconds / 60)
+        const seconds = totalSeconds % 60
+        return String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0')
+    }
+
+    // Continuously update inactive duration clocks for offline players
+    setInterval(() => {
+        // Don't update the clock if the game is finished
+        if (gameData && gameData.finished) return
+
+        const inactiveDurationElements = document.querySelectorAll('.inactive-duration')
+        inactiveDurationElements.forEach(span => {
+            const lastActiveAt = parseInt(span.dataset.lastActiveAt)
+            if (lastActiveAt) {
+                const elapsed = Date.now() - lastActiveAt
+                span.textContent = formatMsToMMSS(elapsed) + ' '
+            }
+        })
+    }, 1000)
+
 </script>
 
 <script>

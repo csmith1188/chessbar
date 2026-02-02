@@ -5,11 +5,13 @@
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Document</title>
+    <link rel='stylesheet' href='/css/sidebar.css'>
     <style></style>
 </head>
 
 
-<body>
+<body class="with-sidebar">
+    <%- include('partials/sidebar') %>
     <canvas id='screen' width='800' height='400'></canvas>
 
     <script>
@@ -48,6 +50,7 @@
         drawArrowhead(ctx, endX, endY, angle, 25);
     </script>
 
+    <script src='/js/sidebar.js'></script>
 </body>
 
 </html>

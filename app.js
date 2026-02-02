@@ -4,6 +4,9 @@ const express = require('express')
 const http = require('http')
 const { Server } = require('socket.io')
 const path = require('path')
+const fs = require('fs')
+const https = require('https')
+const httpReq = require('http')
 const { Board, attachSocket, classes } = require('./engine/main')
 const { User, takenUserIds, userSocket } = require('./online/user')
 let { Game, games, takenGameIds, serializeGame } = require('./online/game')
@@ -16,7 +19,7 @@ const db = new sqlite3.Database('database/database.db', sqlite3.OPEN_READWRITE, 
     if (err) return console.error('Error connecting to database:', err.message)
 })
 
-const PLAY_PRICE = 25
+const PLAY_PRICE = 100
 
 //! For digipogs
 
@@ -44,10 +47,19 @@ const AUTH_URL = FORMBAR_URL
 
 const app = express()
 app.use(express.static('static')) // serve client files from /public
-app.use(express.json())
+app.use(express.json({ limit: '50mb' })) // allow base64 uploads up to ~50MB
 
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs')
+// Make PLAY_PRICE available to all EJS templates
+app.locals.PLAY_PRICE = PLAY_PRICE
+
+// Also ensure each response has the value on `res.locals` so templates
+// rendered with an explicit locals object still see `PLAY_PRICE`.
+app.use((req, res, next) => {
+    res.locals.PLAY_PRICE = app.locals.PLAY_PRICE
+    next()
+})
 
 // session for Formbar login
 const sessionMiddleware = session({
@@ -62,6 +74,14 @@ app.use(sessionMiddleware)
 app.use((req, res, next) => {
     res.locals.user = req.session ? req.session.user : null
     next()
+})
+
+// Friendly error for payloads that exceed the JSON body parser limit
+app.use((err, req, res, next) => {
+    if (err && (err.type === 'entity.too.large' || err instanceof Error && err.status === 413)) {
+        return res.status(413).json({ error: 'Payload too large' })
+    }
+    next(err)
 })
 
 // simple JSON endpoint to get the current signed-in user from session
@@ -126,8 +146,109 @@ app.get('/profile', (req, res) => {
     if (!req.session || !req.session.user) {
         return res.redirect('/login')
     }
+    // If a specific user id is provided via query, show that user's profile.
+    const viewingUser = req.query && req.query.usr ? Number(req.query.usr) : null
+    const formbarId = viewingUser || Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
 
-    res.render('profile')
+    if (!formbarId) return res.render('profile', { avatarUrl: '/img/basic_avatar.png' })
+
+    db.get('SELECT avatar FROM users WHERE formbar_id = ?', [formbarId], (err, row) => {
+        if (err) {
+            console.error('DB error fetching avatar:', err)
+            return res.render('profile', { avatarUrl: '/img/basic_avatar.png' })
+        }
+        if (row && row.avatar) {
+            return res.render('profile', { avatarUrl: `/img/avatars/${row.avatar}` })
+        }
+        return res.render('profile', { avatarUrl: '/img/basic_avatar.png' })
+    })
+})
+
+// Accept avatar changes via either a data URL (from file upload) or a remote URL.
+app.post('/profile/avatar', (req, res) => {
+    if (!req.session || !req.session.user) return res.status(401).json({ error: 'Not authenticated' })
+    const formbarId = Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
+    if (!formbarId) return res.status(400).json({ error: 'No user id available' })
+
+    const avatarsDir = path.join(__dirname, 'static', 'img', 'avatars')
+    try { if (!fs.existsSync(avatarsDir)) fs.mkdirSync(avatarsDir, { recursive: true }) } catch (e) { /* ignore */ }
+
+    // Ensure `avatar` column exists on users table. If missing, add it.
+    db.all("PRAGMA table_info(users);", [], (err, cols) => {
+        if (err) return res.status(500).json({ error: 'DB error' })
+        const hasAvatar = cols.some(c => c && c.name === 'avatar')
+        const continueSave = () => {
+            // Two supported flows: { data: dataUrl, filename } or { url }
+            if (req.body && req.body.data) {
+                // data URL (base64)
+                const dataUrl = String(req.body.data)
+                const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.*)$/)
+                if (!match) return res.status(400).json({ error: 'Invalid data URL' })
+                const mime = match[1]
+                const b64 = match[2]
+                if (!mime.startsWith('image/')) return res.status(400).json({ error: 'Unsupported image MIME' })
+                let ext = mime.split('/')[1]
+                if (ext === 'jpeg') ext = 'jpg'
+                const filename = `${formbarId}_${Date.now()}.${ext}`
+                const filePath = path.join(avatarsDir, filename)
+                const buf = Buffer.from(b64, 'base64')
+                fs.writeFile(filePath, buf, (werr) => {
+                    if (werr) return res.status(500).json({ error: 'Failed to save file' })
+                    db.run('UPDATE users SET avatar = ? WHERE formbar_id = ?', [filename, formbarId], function (uerr) {
+                        if (uerr) return res.status(500).json({ error: 'DB update failed' })
+                        return res.json({ success: true, url: `/img/avatars/${filename}` })
+                    })
+                })
+            } else if (req.body && req.body.url) {
+                let theUrl = String(req.body.url)
+                let parsed
+                try { parsed = new URL(theUrl) } catch (e) { return res.status(400).json({ error: 'Invalid URL' }) }
+                const client = parsed.protocol === 'https:' ? https : httpReq
+                client.get(theUrl, (resp) => {
+                    const status = resp.statusCode || 0
+                    if (status >= 300 && status < 400 && resp.headers && resp.headers.location) {
+                        // follow simple redirects
+                        return client.get(resp.headers.location, (r2) => resp = r2)
+                    }
+                    const ctype = (resp.headers && resp.headers['content-type']) ? String(resp.headers['content-type']) : ''
+                    if (!ctype.startsWith('image/')) {
+                        resp.resume()
+                        return res.status(400).json({ error: 'Remote URL did not return an image' })
+                    }
+                    let ext = ctype.split('/')[1] || 'png'
+                    if (ext === 'jpeg') ext = 'jpg'
+                    const filename = `${formbarId}_${Date.now()}.${ext}`
+                    const filePath = path.join(avatarsDir, filename)
+                    const fileStream = fs.createWriteStream(filePath)
+                    resp.pipe(fileStream)
+                    fileStream.on('finish', () => {
+                        fileStream.close(() => {
+                            db.run('UPDATE users SET avatar = ? WHERE formbar_id = ?', [filename, formbarId], function (uerr) {
+                                if (uerr) return res.status(500).json({ error: 'DB update failed' })
+                                return res.json({ success: true, url: `/img/avatars/${filename}` })
+                            })
+                        })
+                    })
+                    fileStream.on('error', (e) => {
+                        return res.status(500).json({ error: 'Failed to save remote image' })
+                    })
+                }).on('error', (e) => {
+                    return res.status(400).json({ error: 'Failed to fetch URL' })
+                })
+            } else {
+                return res.status(400).json({ error: 'No data or URL provided' })
+            }
+        }
+
+        if (!hasAvatar) {
+            db.run('ALTER TABLE users ADD COLUMN avatar TEXT DEFAULT ""', [], (aerr) => {
+                // ignore errors (column may be added concurrently); continue either way
+                continueSave()
+            })
+        } else {
+            continueSave()
+        }
+    })
 })
 
 // Admin page - restricted to users with an `admin` flag on their session user object
@@ -398,8 +519,12 @@ io.on('connection', (socket) => {
             const opponent = user.side == 'white' ? 'black' : 'white'
             const inCheck = user.game.board.inCheck(opponent)
             const isMate = inCheck && !user.game.board.hasLegalMoves(opponent)
+            const isStalemate = !inCheck && !user.game.board.hasLegalMoves(opponent)
+            const isKingOnly = user.game.board.onlyKingsLeft()
             user.game.endPromotion()
-            user.game.update({}, inCheck, isMate, opponent, user.side, null)
+            user.game.moves.find(m => m.to.x === x && m.to.y === y).promotion = newPiece
+            console.log("Promotion:", user.game.moves)
+            user.game.update({}, inCheck, isMate, isStalemate, isKingOnly, opponent, user.side, null)
         }
     })
 
