@@ -12,6 +12,8 @@
     /* Center items along the horizontal/cross axis */
     align-items: center;
     margin-top: 45px;
+    margin-left: 5px;
+    margin-right: 5px;
 }
 
 #pfp {
