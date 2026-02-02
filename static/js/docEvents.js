@@ -25,6 +25,19 @@ document.addEventListener('mousemove', (e) => {
 })
 document.addEventListener('keydown', (e) => {
     keys[e.key] = true
+    try {
+        // Don't navigate when typing in inputs or when overlay blocks interaction
+        const active = document.activeElement && document.activeElement.tagName
+        if (isWaitingOverlayVisible() || active === 'INPUT' || active === 'TEXTAREA' || active === 'SELECT' || document.activeElement && document.activeElement.isContentEditable) return
+
+        if (e.key === 'ArrowLeft') {
+            e.preventDefault()
+            if (typeof navigateMoves === 'function') navigateMoves(-1)
+        } else if (e.key === 'ArrowRight') {
+            e.preventDefault()
+            if (typeof navigateMoves === 'function') navigateMoves(1)
+        }
+    } catch (err) { }
 })
 document.addEventListener('keyup', (e) => {
     keys[e.key] = false

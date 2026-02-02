@@ -26,6 +26,9 @@ let keys = {}
 
 let board
 let gameData
+// null = live view; otherwise number of half-moves applied from gameData.moves (0..n)
+// NOTE: store the actual count (0..total). This avoids off-by-one confusion.
+let movesViewCount = null
 
 // Format seconds to MM:SS or show infinity symbol for null/undefined
 function formatTime(seconds) {
@@ -75,7 +78,7 @@ function showSystemPopup(title, message, duration = 6000, player = null) {
             container._timeout = null
         }, duration)
     } catch (e) {
-        try { alert(message) } catch (e) {}
+        try { alert(message) } catch (e) { }
     }
 }
 
@@ -83,6 +86,18 @@ let freshBoard = false
 
 socket.on('mate', (d) => {
     showSystemPopup('Checkmate', `Checkmate. ${d.winner} wins!`, 8000)
+})
+
+socket.on('stalemate', (d) => {
+    showSystemPopup('Stalemate', `Stalemate. Draw.`, 8000)
+})
+
+socket.on('draw', (d) => {
+    if (d && d.reason === 'lack-of-material') {
+        showSystemPopup('Draw: Lack of material', `Draw: Lack of material`, 8000)
+    } else {
+        showSystemPopup('Draw', `Draw.`, 8000)
+    }
 })
 
 // Time-up event (different from checkmate)
@@ -177,6 +192,8 @@ socket.on('promotion', (x, y) => {
 function updateBoard(data) {
     gameData = data
     selected = null
+    // When a fresh board arrives (a new move), return to the live/current view
+    movesViewCount = null
     //kayden added this
 
     freshBoard = true
@@ -337,6 +354,204 @@ function updateBoard(data) {
 }
 
 // check socket go here
+// Build a board state (layout array like server `board.layout`) by applying
+// the first `count` half-moves from `moves` (count may be 0..moves.length).
+function buildBoardFromMoves(moves, count) {
+    const B = (n) => ({ name: n, side: 'black', moves: 0 })
+    const W = (n) => ({ name: n, side: 'white', moves: 0 })
+    const boardState = [
+        [B('Rook'), B('Knight'), B('Bishop'), B('Queen'), B('King'), B('Bishop'), B('Knight'), B('Rook')],
+        [B('Pawn'), B('Pawn'), B('Pawn'), B('Pawn'), B('Pawn'), B('Pawn'), B('Pawn'), B('Pawn')],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [W('Pawn'), W('Pawn'), W('Pawn'), W('Pawn'), W('Pawn'), W('Pawn'), W('Pawn'), W('Pawn')],
+        [W('Rook'), W('Knight'), W('Bishop'), W('Queen'), W('King'), W('Bishop'), W('Knight'), W('Rook')]
+    ]
+
+    function adjustMoveCoords(m) {
+        if (!m) return m
+        const fromY = (m.side === 'black') ? 7 - m.from.y : m.from.y
+        const toY = (m.side === 'black') ? 7 - m.to.y : m.to.y
+        return Object.assign({}, m, { from: { x: m.from.x, y: fromY }, to: { x: m.to.x, y: toY } })
+    }
+
+    function applyMoveToBoard(bd, m) {
+        const fx = m.from.x, fy = m.from.y
+        const tx = m.to.x, ty = m.to.y
+        const mover = bd[fy] && bd[fy][fx]
+        if (!mover) {
+            bd[ty] = bd[ty] || []
+            bd[ty][tx] = { name: 'Pawn', side: m.side, moves: 0 }
+            if (bd[fy]) bd[fy][fx] = null
+            return
+        }
+
+        if (m.enPassant) {
+            if (bd[fy] && bd[fy][tx]) {
+                bd[fy][tx] = null
+            }
+        }
+
+        if (mover.name === 'King' && Math.abs(tx - fx) === 2) {
+            if (tx === 6) {
+                const ry = fy
+                bd[ry][5] = bd[ry][7]
+                bd[ry][7] = null
+            } else if (tx === 2) {
+                const ry = fy
+                bd[ry][3] = bd[ry][0]
+                bd[ry][0] = null
+            }
+        }
+
+        bd[ty] = bd[ty] || []
+        bd[ty][tx] = mover
+        if (bd[fy]) bd[fy][fx] = null
+
+        if (m.promotion) {
+            mover.name = m.promotion
+        }
+    }
+
+    const upto = Math.max(0, Math.min(count || 0, Array.isArray(moves) ? moves.length : 0))
+    for (let i = 0; i < upto; i++) {
+        const m = adjustMoveCoords(moves[i])
+        if (m) applyMoveToBoard(boardState, m)
+    }
+
+    return boardState
+}
+
+// Adjust a stored move's Y coordinates (server stores coords normalized to mover's perspective)
+function adjustStoredMove(m) {
+    if (!m) return null
+    const fromY = (m.side === 'black') ? 7 - m.from.y : m.from.y
+    const toY = (m.side === 'black') ? 7 - m.to.y : m.to.y
+    return Object.assign({}, m, { from: { x: m.from.x, y: fromY }, to: { x: m.to.x, y: toY } })
+}
+
+// Render a snapshot of the game by applying `count` half-moves. `count` is number of half-moves applied (1..n), 0 => starting position
+function renderMovesView(count) {
+    if (!gameData || !Array.isArray(gameData.moves)) return
+    if (count === null) return
+
+    const layout = buildBoardFromMoves(gameData.moves, count)
+    pieces = []
+    let y2 = 0
+    if (me && me.side == 'white') {
+        for (let y of layout) {
+            let x = 0
+            for (let obj of y) {
+                if (obj) new Piece(x * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, y2 * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, `img/${Settings.pieceStyle}/${obj.side}_${obj.name.toLowerCase()}.png`, obj.name, obj.side, obj.moves)
+                x++
+            }
+            y2++
+        }
+    } else {
+        for (let y of [...layout].reverse()) {
+            let x = 0
+            for (let obj of y) {
+                if (obj) new Piece(x * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, y2 * Settings.boardSquareSize + Settings.defaultPieceMargin / 2, `img/${Settings.pieceStyle}/${obj.side}_${obj.name.toLowerCase()}.png`, obj.name, obj.side, obj.moves)
+                x++
+            }
+            y2++
+        }
+    }
+
+    board = { layout: layout, captured: [] }
+    const last = gameData.moves[count - 1]
+    if (last) {
+        if (last.side == 'white') {
+            prevMove = { x1: last.from.x, y1: last.from.y, x2: last.to.x, y2: last.to.y, side: last.side }
+        } else {
+            prevMove = { x1: last.from.x, y1: 7 - last.from.y, x2: last.to.x, y2: 7 - last.to.y, side: last.side }
+        }
+    } else prevMove = {}
+}
+
+// Navigate through half-move history: dir = -1 (left), +1 (right)
+window.navigateMoves = function (dir) {
+    if (!gameData || !Array.isArray(gameData.moves)) return
+    const total = gameData.moves.length
+
+    // currentCount is the number of half-moves currently shown (total when live)
+    const currentCount = (movesViewCount === null) ? total : movesViewCount
+
+    // newCount: what we want to show after this navigation
+    let newCount = currentCount
+    if (dir === -1) {
+        newCount = Math.max(0, currentCount - 1)
+    } else if (dir === 1) {
+        newCount = Math.min(total, currentCount + 1)
+    }
+
+    // Update movesViewCount to reflect newCount (null == live / full)
+    if (newCount === total) movesViewCount = null
+    else movesViewCount = Math.max(0, newCount)
+
+    // Attempt to animate the move that corresponds to newCount (the last applied half-move)
+    const rawMoveIndex = (dir === -1) ? newCount : (newCount - 1)
+    if (newCount >= 0 && Array.isArray(gameData.moves) && gameData.moves[rawMoveIndex]) {
+        try {
+            const rawMove = gameData.moves[rawMoveIndex]
+            const adj = adjustStoredMove(rawMove)
+            if (adj) {
+                // If navigating backwards (undo), animate the piece moving from its post-move
+                // square back to its pre-move square. Otherwise animate the forward move.
+                if (dir === -1) {
+                    // Board after the move was applied (so the mover is at the 'to' square)
+                    // `newCount` is the count after navigation (one less than before),
+                    // so the board with the move applied is `newCount + 1`.
+                    const afterLayout = buildBoardFromMoves(gameData.moves, newCount + 1)
+                    const mover = (afterLayout && afterLayout[adj.to.y] && afterLayout[adj.to.y][adj.to.x]) || { name: 'Pawn', side: rawMove.side }
+                    const pieceImg = `img/${Settings.pieceStyle}/${mover.side}_${mover.name.toLowerCase()}.png`
+
+                    let x1 = adj.to.x
+                    let y1 = adj.to.y
+                    let x2 = adj.from.x
+                    let y2 = adj.from.y
+
+                    // Mirror for black viewer to match rendering elsewhere
+                    if (me && me.side && me.side !== 'white') {
+                        y1 = 7 - y1
+                        y2 = 7 - y2
+                    }
+
+                    moveAnimation = new MovePiece(x1, y1, x2, y2, pieceImg, mover.name, mover.side)
+                } else {
+                    // Board just before this move (for forward animation)
+                    const beforeLayout = buildBoardFromMoves(gameData.moves, newCount - 1)
+                    const mover = (beforeLayout && beforeLayout[adj.from.y] && beforeLayout[adj.from.y][adj.from.x]) || { name: 'Pawn', side: rawMove.side }
+                    const pieceImg = `img/${Settings.pieceStyle}/${mover.side}_${mover.name.toLowerCase()}.png`
+
+                    let x1 = adj.from.x
+                    let y1 = adj.from.y
+                    let x2 = adj.to.x
+                    let y2 = adj.to.y
+
+                    // Mirror for black viewer to match rendering elsewhere
+                    if (me && me.side && me.side !== 'white') {
+                        y1 = 7 - y1
+                        y2 = 7 - y2
+                    }
+
+                    moveAnimation = new MovePiece(x1, y1, x2, y2, pieceImg, mover.name, mover.side)
+                }
+            }
+        } catch (e) {
+            moveAnimation = null
+        }
+    }
+
+    if (movesViewCount === null) {
+        if (gameData && gameData.board) updateBoard(gameData)
+    } else {
+        renderMovesView(movesViewCount)
+    }
+}
+
 socket.on('check', (data) => {
     if (data.side == me.side) {
         me.incheck = true
