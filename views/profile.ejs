@@ -96,6 +96,7 @@
         } catch (e) { window.isOwnProfile = true }
     })()
 </script>
+
 <script src='/js/profilePfp.js'></script>
 
 <script>
@@ -200,6 +201,12 @@
         wdl.innerText = `${user.wins}/${user.draws}/${user.losses}`
         nameBox.innerText = user.display_name
     }
+
+    // Add a friend
+    const addFriendButton = document.getElementById('friends-btn')
+    addFriendButton.addEventListener('click', (e) => {
+        socket.emit('friendRequest', me.id, viewingUser.id)
+    })
 </script>
 
 </html>

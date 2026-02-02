@@ -21,6 +21,61 @@ const desiredColumns = {
     display_name: "TEXT NOT NULL DEFAULT ''"
 };
 
+// Desired schema for `friends` table (kept in sync with `database/init-db.js`).
+const desiredFriendsColumns = {
+    friendship: 'INTEGER NOT NULL UNIQUE',
+    id_1: 'INTEGER NOT NULL',
+    id_2: 'INTEGER NOT NULL',
+    status: "TEXT NOT NULL"
+};
+
+function ensureFriendsTable(cb) {
+    db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='friends'", (err, row) => {
+        if (err) return cb(err);
+        if (!row) {
+            const cols = Object.entries(desiredFriendsColumns).map(([name, def]) => `${name} ${def}`).join(',\n        ');
+            const createSql = `CREATE TABLE IF NOT EXISTS "friends" (\n        ${cols}\n    );`;
+            db.run(createSql, (err) => cb(err));
+        } else {
+            cb(null);
+        }
+    });
+}
+
+function getExistingFriendColumns(cb) {
+    db.all("PRAGMA table_info(friends);", (err, rows) => {
+        if (err) return cb(err);
+        const cols = rows.map(r => r.name);
+        cb(null, cols);
+    });
+}
+
+function addMissingFriendColumns(existing, cb) {
+    const toAdd = Object.keys(desiredFriendsColumns).filter(c => !existing.includes(c));
+
+    // Skip adding `friendship` if missing because adding a UNIQUE constraint
+    // or changing uniqueness on an existing table isn't supported here.
+    const safeToAdd = toAdd.filter(c => c !== 'friendship');
+
+    if (toAdd.includes('friendship')) {
+        console.warn('Migration: column `friendship` is missing. This script will not attempt to add UNIQUE constraints automatically.');
+    }
+
+    if (safeToAdd.length === 0) return cb(null);
+
+    db.serialize(() => {
+        safeToAdd.forEach((col) => {
+            const def = desiredFriendsColumns[col];
+            const sql = `ALTER TABLE friends ADD COLUMN ${col} ${def}`;
+            db.run(sql, (err) => {
+                if (err) console.error(`Failed to add column ${col} to friends:`, err);
+                else console.log(`Added column ${col} to friends`);
+            });
+        });
+        db.wait ? db.wait(cb) : setTimeout(cb, 50);
+    });
+}
+
 function ensureUsersTable(cb) {
     db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='users'", (err, row) => {
         if (err) return cb(err);
@@ -129,10 +184,21 @@ db.serialize(() => {
             console.log('Existing columns:', existing.join(', '));
             addMissingColumns(existing, (err) => {
                 if (err) return console.error('Failed to add missing columns:', err);
-                ensureDefaultRow((err) => {
-                    if (err) return console.error('Failed to ensure default row:', err);
-                    console.log('Migration complete.');
-                    db.close();
+                // Ensure friends table exists and has required columns.
+                ensureFriendsTable((err) => {
+                    if (err) return console.error('Failed to ensure friends table:', err);
+                    getExistingFriendColumns((err, fExisting) => {
+                        if (err) return console.error('Failed to read existing friends columns:', err);
+                        console.log('Existing friends columns:', fExisting.join(', '));
+                        addMissingFriendColumns(fExisting, (err) => {
+                            if (err) return console.error('Failed to add missing friends columns:', err);
+                            ensureDefaultRow((err) => {
+                                if (err) return console.error('Failed to ensure default row:', err);
+                                console.log('Migration complete.');
+                                db.close();
+                            });
+                        });
+                    });
                 });
             });
         });

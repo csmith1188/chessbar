@@ -268,7 +268,7 @@ app.post('/profile/avatar', (req, res) => {
             })
 
             fileStream.on('error', (e) => {
-                try { fs.unlinkSync(filePath) } catch (e) {}
+                try { fs.unlinkSync(filePath) } catch (e) { }
                 return res.status(500).json({ error: 'Failed to save remote image' })
             })
         })
@@ -738,6 +738,123 @@ function chatEvents(socket, user) {
 }
 
 /*
+:::::::::: :::::::::  ::::::::::: :::::::::: ::::    ::: :::::::::   ::::::::
+:+:        :+:    :+:     :+:     :+:        :+:+:   :+: :+:    :+: :+:    :+:
++:+        +:+    +:+     +:+     +:+        :+:+:+  +:+ +:+    +:+ +:+
+:#::+::#   +#++:++#:      +#+     +#++:++#   +#+ +:+ +#+ +#+    +:+ +#++:++#++
++#+        +#+    +#+     +#+     +#+        +#+  +#+#+# +#+    +#+        +#+
+#+#        #+#    #+#     #+#     #+#        #+#   #+#+# #+#    #+# #+#    #+#
+###        ###    ### ########### ########## ###    #### #########   ########
+*/
+function friendEvents(socket, user) {
+    const dbGet = (sql, params = []) => new Promise((resolve, reject) => {
+        db.get(sql, params, (err, row) => {
+            if (err) return reject(err)
+            resolve(row)
+        })
+    })
+
+    const dbRun = (sql, params = []) => new Promise((resolve, reject) => {
+        db.run(sql, params, function (err) {
+            if (err) return reject(err)
+            resolve(this) // allow access to lastID / changes if needed
+        })
+    })
+
+    const areFriends = async (user1, user2) => {
+        const row = await dbGet(
+            'SELECT status FROM friends WHERE (id_1 = ? AND id_2 = ?) OR (id_1 = ? AND id_2 = ?)',
+            [user1, user2, user2, user1]
+        )
+        return !!(row && row.status === 'friends')
+    }
+
+    const addFriendRecord = (user1, user2, status) =>
+        dbRun('INSERT INTO friends (id_1, id_2, status) VALUES (?, ?, ?)', [user1, user2, status])
+
+    const updateFriendRecord = (user1, user2, newStatus) =>
+        dbRun(
+            'UPDATE friends SET status = ? WHERE (id_1 = ? AND id_2 = ?) OR (id_1 = ? AND id_2 = ?)',
+            [newStatus, user1, user2, user2, user1]
+        )
+
+    socket.on('friendRequest', async (fromIdRaw, toIdRaw) => {
+        try {
+            console.log('friendRequest event', { fromIdRaw, toIdRaw, socketId: socket.id, userId: user ? user.id : null })
+
+            const fromId = Number(fromIdRaw) || 0
+            const toId = Number(toIdRaw) || 0
+            console.log('friendRequest parsed ids', { fromId, toId })
+            if (!fromId || !toId) return
+
+            const already = await areFriends(fromId, toId)
+            console.log('friendRequest areFriends result', { fromId, toId, already })
+            if (already) return
+
+            // Check for existing record to avoid duplicate inserts (select full row for clarity)
+            const existing = await dbGet(
+                'SELECT status, id_1, id_2 FROM friends WHERE (id_1 = ? AND id_2 = ?) OR (id_1 = ? AND id_2 = ?)',
+                [fromId, toId, toId, fromId]
+            )
+            console.log('friendRequest existing row:', existing)
+            if (existing) {
+                // If there is already a pending request in the other direction, accept it automatically
+                if (existing.status === 'pending' && existing.id_1 === toId && existing.id_2 === fromId) {
+                    console.log('friendRequest auto-accepting pending from other direction', { fromId, toId, existing })
+                    await updateFriendRecord(fromId, toId, 'friends')
+                    console.log('friendRequest updated record to friends for', { fromId, toId })
+                    socket.emit('friendRequestAccepted', toId)
+                    const other = users.find(u => u.id === toId)
+                    if (other && other.socket) other.socket.emit('friendRequestAccepted', fromId)
+                    return
+                }
+                // otherwise, do nothing (already exists)
+                console.log('friendRequest: record already exists and is not auto-accepted; skipping insert')
+                return
+            }
+
+            const res = await addFriendRecord(fromId, toId, 'pending')
+            console.log('friendRequest inserted pending record', { lastID: res && res.lastID })
+            socket.emit('friendRequestSent')
+        } catch (err) {
+            console.error('friendRequest handler error:', err)
+            socket.emit('friendRequestError', 'Server error')
+        }
+    })
+
+    socket.on('acceptFriendRequest', async (userIdRaw) => {
+        try {
+            console.log('acceptFriendRequest event', { userIdRaw, socketId: socket.id, userId: user ? user.id : null })
+            const userId = Number(userIdRaw) || 0
+            console.log('acceptFriendRequest parsed id', { userId })
+            if (!user || !Number.isInteger(userId) || userId <= 0) return
+
+            const row = await dbGet(
+                'SELECT status, id_1, id_2 FROM friends WHERE (id_1 = ? AND id_2 = ?) OR (id_1 = ? AND id_2 = ?)',
+                [user.id, userId, userId, user.id]
+            )
+            console.log('acceptFriendRequest row:', row)
+            if (!row) {
+                socket.emit('friendAcceptError', 'No friend record found')
+                return
+            }
+            if (row.status !== 'pending') {
+                socket.emit('friendAcceptError', 'Friendship is not pending')
+                return
+            }
+
+            await updateFriendRecord(user.id, userId, 'friends')
+            socket.emit('friendRequestAccepted', userId)
+            const other = users.find(u => u.id === userId)
+            if (other && other.socket) other.socket.emit('friendRequestAccepted', user.id)
+        } catch (err) {
+            console.error('acceptFriendRequest handler error:', err)
+            socket.emit('friendAcceptError', 'DB error')
+        }
+    })
+}
+
+/*
  ::::::::   ::::::::  ::::    ::: ::::    ::: :::::::::: :::::::: :::::::::::
 :+:    :+: :+:    :+: :+:+:   :+: :+:+:   :+: :+:       :+:    :+:    :+:
 +:+        +:+    +:+ :+:+:+  +:+ :+:+:+  +:+ +:+       +:+           +:+
@@ -758,6 +875,7 @@ io.on('connection', (socket) => {
     pregameEvents(socket, user)
     inGameEvents(socket, user)
     chatEvents(socket, user)
+    friendEvents(socket, user)
 
     //! Disconnection
     socket.on('disconnect', () => {
