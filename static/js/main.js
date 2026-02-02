@@ -26,7 +26,8 @@ let keys = {}
 
 let board
 let gameData
-// null = live view; otherwise number of half-moves applied from gameData.moves (0..n-1)
+// null = live view; otherwise number of half-moves applied from gameData.moves (0..n)
+// NOTE: store the actual count (0..total). This avoids off-by-one confusion.
 let movesViewCount = null
 
 // Format seconds to MM:SS or show infinity symbol for null/undefined
@@ -476,7 +477,7 @@ window.navigateMoves = function (dir) {
     const total = gameData.moves.length
 
     // currentCount is the number of half-moves currently shown (total when live)
-    const currentCount = (movesViewCount === null) ? total : (movesViewCount + 1)
+    const currentCount = (movesViewCount === null) ? total : movesViewCount
 
     // newCount: what we want to show after this navigation
     let newCount = currentCount
@@ -488,31 +489,56 @@ window.navigateMoves = function (dir) {
 
     // Update movesViewCount to reflect newCount (null == live / full)
     if (newCount === total) movesViewCount = null
-    else movesViewCount = Math.max(0, newCount - 1)
+    else movesViewCount = Math.max(0, newCount)
 
     // Attempt to animate the move that corresponds to newCount (the last applied half-move)
-    if (newCount > 0 && Array.isArray(gameData.moves) && gameData.moves[newCount - 1]) {
+    const rawMoveIndex = (dir === -1) ? newCount : (newCount - 1)
+    if (newCount >= 0 && Array.isArray(gameData.moves) && gameData.moves[rawMoveIndex]) {
         try {
-            const rawMove = gameData.moves[newCount - 1]
+            const rawMove = gameData.moves[rawMoveIndex]
             const adj = adjustStoredMove(rawMove)
             if (adj) {
-                // Board just before this move
-                const beforeLayout = buildBoardFromMoves(gameData.moves, newCount - 1)
-                const mover = (beforeLayout && beforeLayout[adj.from.y] && beforeLayout[adj.from.y][adj.from.x]) || { name: 'Pawn', side: rawMove.side }
-                const pieceImg = `img/${Settings.pieceStyle}/${mover.side}_${mover.name.toLowerCase()}.png`
+                // If navigating backwards (undo), animate the piece moving from its post-move
+                // square back to its pre-move square. Otherwise animate the forward move.
+                if (dir === -1) {
+                    // Board after the move was applied (so the mover is at the 'to' square)
+                    // `newCount` is the count after navigation (one less than before),
+                    // so the board with the move applied is `newCount + 1`.
+                    const afterLayout = buildBoardFromMoves(gameData.moves, newCount + 1)
+                    const mover = (afterLayout && afterLayout[adj.to.y] && afterLayout[adj.to.y][adj.to.x]) || { name: 'Pawn', side: rawMove.side }
+                    const pieceImg = `img/${Settings.pieceStyle}/${mover.side}_${mover.name.toLowerCase()}.png`
 
-                let x1 = adj.from.x
-                let y1 = adj.from.y
-                let x2 = adj.to.x
-                let y2 = adj.to.y
+                    let x1 = adj.to.x
+                    let y1 = adj.to.y
+                    let x2 = adj.from.x
+                    let y2 = adj.from.y
 
-                // Mirror for black viewer to match rendering elsewhere
-                if (me && me.side && me.side !== 'white') {
-                    y1 = 7 - y1
-                    y2 = 7 - y2
+                    // Mirror for black viewer to match rendering elsewhere
+                    if (me && me.side && me.side !== 'white') {
+                        y1 = 7 - y1
+                        y2 = 7 - y2
+                    }
+
+                    moveAnimation = new MovePiece(x1, y1, x2, y2, pieceImg, mover.name, mover.side)
+                } else {
+                    // Board just before this move (for forward animation)
+                    const beforeLayout = buildBoardFromMoves(gameData.moves, newCount - 1)
+                    const mover = (beforeLayout && beforeLayout[adj.from.y] && beforeLayout[adj.from.y][adj.from.x]) || { name: 'Pawn', side: rawMove.side }
+                    const pieceImg = `img/${Settings.pieceStyle}/${mover.side}_${mover.name.toLowerCase()}.png`
+
+                    let x1 = adj.from.x
+                    let y1 = adj.from.y
+                    let x2 = adj.to.x
+                    let y2 = adj.to.y
+
+                    // Mirror for black viewer to match rendering elsewhere
+                    if (me && me.side && me.side !== 'white') {
+                        y1 = 7 - y1
+                        y2 = 7 - y2
+                    }
+
+                    moveAnimation = new MovePiece(x1, y1, x2, y2, pieceImg, mover.name, mover.side)
                 }
-
-                moveAnimation = new MovePiece(x1, y1, x2, y2, pieceImg, mover.name, mover.side)
             }
         } catch (e) {
             moveAnimation = null
@@ -522,7 +548,7 @@ window.navigateMoves = function (dir) {
     if (movesViewCount === null) {
         if (gameData && gameData.board) updateBoard(gameData)
     } else {
-        renderMovesView(movesViewCount + 1)
+        renderMovesView(movesViewCount)
     }
 }
 
