@@ -61,6 +61,10 @@
                     <input type='checkbox' id='startWhite' name='white' checked>
                     <label for='startWhite'>Start as white</label>
                 </div>
+                <div class='checkbox-item'>
+                    <input type="checkbox" id='musicOn' name='lockInMusic' checked>
+                    <label for='musicOn'>Lock in music</label>
+                </div>
             </div>
 
             <input type='text' class='input' id='time' placeholder='How many minutes?'>
@@ -148,6 +152,8 @@
     const chatOn = document.getElementById('chatOn')
     const startWhite = document.getElementById('startWhite')
     const timeAmount = document.getElementById('time')
+    const musicOn = document.getElementById('musicOn')
+
 
     function newGame(visibility) {
         socket.emit('newGame', visibility, gameName.value.trim(), chatOn.checked, startWhite.checked, timeAmount.value * 60)
