@@ -598,7 +598,9 @@ io.on('connection', (socket) => {
     //kayden's profile DM chat
 
     //dm history, dm messages, populate friends list
-
+    socket.on('dm', (from, to, message) => {
+        if (from ) {}
+        })
 
 
     socket.on('deleteGame', (gameId) => {
