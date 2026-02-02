@@ -1,6 +1,8 @@
 // Simple non-blocking clock manager for chess games
 // Ticks every `tickMs` milliseconds and updates in-memory game clocks.
 
+const warnSeconds = [30, 20, 10, 5, 3, 2, 1]
+
 function startClockManager(io, games, tickMs = 1000) {
     // prevent double-starting when module is required multiple times
     if (global.__clockManagerStarted) return
@@ -24,8 +26,6 @@ function startClockManager(io, games, tickMs = 1000) {
                 if (!game._clockStarted) {
                     if (whitePlayer && blackPlayer) {
                         game._clockStarted = true
-                    } else {
-                        continue
                     }
                 }
 
@@ -43,6 +43,10 @@ function startClockManager(io, games, tickMs = 1000) {
                 const payload = { whiteTime: game.whiteClock, blackTime: game.blackClock }
                 for (const u of game.users) {
                     if (u && u.socket) u.socket.emit('updateClock', payload)
+
+                    // Clock warning sounds
+                    if (u.side == 'white' && warnSeconds.includes(game.whiteClock)) u.socket.emit('sound', 'warning')
+                    if (u.side == 'black' && warnSeconds.includes(game.blackClock)) u.socket.emit('sound', 'warning')
                 }
 
                 // If any clock has hit zero or below, finish the game by time
