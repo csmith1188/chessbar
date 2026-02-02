@@ -13,13 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function showOverlay() {
         overlay.style.opacity = '1'
         overlay.style.pointerEvents = 'auto'
-        pfp.style.boxShadow = '0 0 0 4px rgba(233, 233, 233, 0.87)'
+        pfp.classList.add('hovered')
     }
 
     function hideOverlay() {
         overlay.style.opacity = '0'
         overlay.style.pointerEvents = 'none'
-        pfp.style.boxShadow = ''
+        pfp.classList.remove('hovered')
     }
 
     container.addEventListener('mouseenter', () => {
@@ -93,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cropArea = modal.querySelector('#pfp-crop-area')
 
         const CANVAS_SIZE = 200 // fixed avatar size in px
+        const canvas = document.createElement('canvas')
 
         let img = new Image()
         let imgLoaded = false
@@ -321,6 +322,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     pfp.src = body.url + '?t=' + Date.now()
                     modal.remove()
                     hideOverlay()
+                    // Reload the page so server-side state and other UI update correctly
+                    try { window.location.reload() } catch (e) { /* ignore */ }
                 } else {
                     showMessage((body && body.error) ? body.error : 'Upload failed')
                 }

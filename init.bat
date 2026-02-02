@@ -7,5 +7,6 @@ echo Initializing database
 cd database
 del *.db
 node init-db
+node migrate
 cd ../
 echo Initialization complete

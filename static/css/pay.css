@@ -1,15 +1,4 @@
-/* pay.css — styles for the pay / purchase tokens page
-   Inspired by profile.css and site theme variables. */
-
-:root {
-    --bg-1: #020613;
-    --bg-2: #07121a;
-    --panel: rgba(255,255,255,0.012);
-    --muted: #7f8a95;
-    --accent: #c78d2f;
-    --accent-2: #362380;
-    --radius: 12px;
-}
+@import url('colors.css');
 
 * { box-sizing: border-box }
 
@@ -35,7 +24,7 @@ body {
 
 .panel {
     background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border-radius: var(--radius);
+    border-radius: 12px;
     padding: 16px;
     box-shadow: 0 8px 32px rgba(3, 8, 18, 0.7);
     border: 1px solid rgba(255,255,255,0.03);

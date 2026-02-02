@@ -1,18 +1,7 @@
 /* Clean styles for game.ejs */
-:root {
-    --bg-1: #020613;
-    /* very dark navy */
-    --bg-2: #07121a;
-    /* deep navy */
-    --panel: rgba(255, 255, 255, 0.02);
-    --muted: #7f8a95;
-    /* subdued text */
-    --accent: #c78d2f;
-    /* muted amber */
-    --accent-2: #362380;
-    /* muted purple */
-    --radius: 12px;
-}
+@import url('colors.css');
+
+/* shared theme variables are imported from colors.css */
 
 * {
     box-sizing: border-box
