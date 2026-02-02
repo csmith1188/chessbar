@@ -1,0 +1,34 @@
+<div class="global-sidebar" data-sidebar>
+  <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-expanded="true" aria-label="Collapse sidebar">
+    <span class="chevron" aria-hidden="true"><</span>
+  </button>
+
+  <div class="sidebar-inner">
+    <div class="sidebar-brand">
+      <div class="sidebar-mark">Chessbar</div>
+      <div class="sidebar-subtitle">
+        <% if (typeof user !== 'undefined' && user) { %>
+          Signed in as <strong><%= user.displayName || user.display_name || user.email || 'Player' %></strong>
+        <% } else { %>
+          You are browsing as a guest
+        <% } %>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Primary">
+      <a href="/" class="sidebar-link">Select a game</a>
+      <a href="/profile" class="sidebar-link">Profile</a>
+      <% if (typeof user === 'undefined' || !user) { %>
+        <a href="/login" class="sidebar-link">Sign in</a>
+      <% } %>
+      <% const uid = user && (user.id || user.formbar_id || user.user_id); %>
+      <% if (uid && [37, 40].includes(Number(uid))) { %>
+        <a href="/admin" class="sidebar-link">Admin</a>
+      <% } %>
+    </nav>
+
+    <div class="sidebar-footer">
+      <p class="sidebar-note">Use the arrow to collapse or expand this menu. It will stay where you left it.</p>
+    </div>
+  </div>
+</div>
