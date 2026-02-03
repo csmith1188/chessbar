@@ -41,6 +41,7 @@ fbSocket.on('connect', () => {
 
 const jwt = require('jsonwebtoken')
 const session = require('express-session')
+const { error } = require('console')
 
 const AUTH_URL = FORMBAR_URL
 // callback URL that Formbar should redirect back to with ?token=JWT
@@ -528,7 +529,7 @@ io.on('connection', (socket) => {
         }
     })
 
-    socket.on('newGame', (visibility = 'public', name = '', chatOn = true, startWhite = true, time = null) => {
+    socket.on('newGame', (visibility = 'public', name = '', chatOn = true, startWhite = true, musicOn = true, time = null) => {
         if (user.id > 0) {
             if (user.game) {
                 user.game.leave(user)
@@ -537,11 +538,11 @@ io.on('connection', (socket) => {
             // Normalize time: treat non-finite and non-positive values (including 0) as null => infinite clock
             const parsed = Number(time)
             const t = Number.isFinite(parsed) && parsed > 0 ? parsed : null
-            let game = new Game(visibility, name, chatOn, startWhite, t)
+            let game = new Game(visibility, name, chatOn, startWhite, musicOn, t)
             game.owner = user
             // console.log(game.id, game.joinCode, game.owner)
             game.update()
-            // send the updated visible-games list (including any private games the creator is in) to the creator only
+            // send the updated visible-games list (including any private games the creator is in) to the creator only 
             socket.emit('gamesList', getVisibleGames())
             io.emit('refreshGames')
             socket.emit('redirect', `/game?code=${game.joinCode}`)
