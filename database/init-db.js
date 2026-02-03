@@ -39,7 +39,7 @@ db.serialize(() => {
 
     // Friends table    
     db.run(`CREATE TABLE IF NOT EXISTS "friends" (
-        friendship    INTEGER NOT NULL UNIQUE, 
+        friendship    INTEGER PRIMARY KEY AUTOINCREMENT,
         id_1	INTEGER NOT NULL,
         id_2	INTEGER NOT NULL,
         status	TEXT NOT NULL

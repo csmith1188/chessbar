@@ -23,7 +23,9 @@ const desiredColumns = {
 
 // Desired schema for `friends` table (kept in sync with `database/init-db.js`).
 const desiredFriendsColumns = {
-    friendship: 'INTEGER NOT NULL UNIQUE',
+    // Use an INTEGER PRIMARY KEY so SQLite will auto-increment the value
+    // when the column is omitted from INSERT statements.
+    friendship: 'INTEGER PRIMARY KEY AUTOINCREMENT',
     id_1: 'INTEGER NOT NULL',
     id_2: 'INTEGER NOT NULL',
     status: "TEXT NOT NULL"
@@ -50,15 +52,92 @@ function getExistingFriendColumns(cb) {
     });
 }
 
+// Return full PRAGMA info for friends columns (used to inspect primary key)
+function getFriendColumnsInfo(cb) {
+    db.all("PRAGMA table_info(friends);", (err, rows) => {
+        if (err) return cb(err);
+        cb(null, rows);
+    });
+}
+
+// If the `friendship` column exists but is NOT an INTEGER PRIMARY KEY,
+// recreate the table with the correct schema and copy rows over. This
+// will assign new autoincremented `friendship` ids to existing rows.
+function ensureFriendshipIsPrimaryKey(cb) {
+    getFriendColumnsInfo((err, rows) => {
+        if (err) return cb(err);
+        const friendshipCol = rows.find(r => r.name === 'friendship');
+        if (!friendshipCol) return cb(null); // missing column handled elsewhere
+
+        const isInteger = /^INTEGER/i.test(friendshipCol.type || '');
+        const isPK = friendshipCol.pk === 1;
+
+        if (isInteger && isPK) return cb(null); // already correct
+
+        console.warn('Migration: `friendship` column exists but is not an INTEGER PRIMARY KEY. Recreating table to fix schema.');
+
+        db.serialize(() => {
+            db.run('BEGIN TRANSACTION');
+            const createSql = `CREATE TABLE IF NOT EXISTS friends_new (
+        friendship INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_1 INTEGER NOT NULL,
+        id_2 INTEGER NOT NULL,
+        status TEXT NOT NULL
+    );`;
+            db.run(createSql, (err) => {
+                if (err) {
+                    console.error('Failed to create temporary friends_new table:', err);
+                    db.run('ROLLBACK', () => cb(err));
+                    return;
+                }
+
+                // Copy only id_1,id_2,status so new friendship ids are generated.
+                db.run('INSERT INTO friends_new (id_1, id_2, status) SELECT id_1, id_2, status FROM friends', (err) => {
+                    if (err) {
+                        console.error('Failed to copy rows into friends_new:', err);
+                        db.run('ROLLBACK', () => cb(err));
+                        return;
+                    }
+
+                    db.run('DROP TABLE friends', (err) => {
+                        if (err) {
+                            console.error('Failed to drop old friends table:', err);
+                            db.run('ROLLBACK', () => cb(err));
+                            return;
+                        }
+
+                        db.run('ALTER TABLE friends_new RENAME TO friends', (err) => {
+                            if (err) {
+                                console.error('Failed to rename friends_new to friends:', err);
+                                db.run('ROLLBACK', () => cb(err));
+                                return;
+                            }
+
+                            db.run('COMMIT', (err) => {
+                                if (err) {
+                                    console.error('Failed to commit friends table migration:', err);
+                                    return cb(err);
+                                }
+                                console.log('Recreated `friends` table with `friendship INTEGER PRIMARY KEY AUTOINCREMENT`.');
+                                cb(null);
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+}
+
 function addMissingFriendColumns(existing, cb) {
     const toAdd = Object.keys(desiredFriendsColumns).filter(c => !existing.includes(c));
 
-    // Skip adding `friendship` if missing because adding a UNIQUE constraint
-    // or changing uniqueness on an existing table isn't supported here.
+    // Skip adding `friendship` if missing because adding a PRIMARY KEY or
+    // changing the table's primary key isn't supported via simple ALTER TABLE.
     const safeToAdd = toAdd.filter(c => c !== 'friendship');
 
     if (toAdd.includes('friendship')) {
-        console.warn('Migration: column `friendship` is missing. This script will not attempt to add UNIQUE constraints automatically.');
+        console.warn('Migration: column `friendship` is missing. This script will not attempt to add a PRIMARY KEY/ AUTOINCREMENT column automatically. Manual migration may be required.');
     }
 
     if (safeToAdd.length === 0) return cb(null);
@@ -192,10 +271,14 @@ db.serialize(() => {
                         console.log('Existing friends columns:', fExisting.join(', '));
                         addMissingFriendColumns(fExisting, (err) => {
                             if (err) return console.error('Failed to add missing friends columns:', err);
-                            ensureDefaultRow((err) => {
-                                if (err) return console.error('Failed to ensure default row:', err);
-                                console.log('Migration complete.');
-                                db.close();
+                            // Ensure friendship is a proper INTEGER PRIMARY KEY AUTOINCREMENT
+                            ensureFriendshipIsPrimaryKey((err) => {
+                                if (err) return console.error('Failed to ensure friendship primary key:', err);
+                                ensureDefaultRow((err) => {
+                                    if (err) return console.error('Failed to ensure default row:', err);
+                                    console.log('Migration complete.');
+                                    db.close();
+                                });
                             });
                         });
                     });
