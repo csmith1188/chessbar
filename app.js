@@ -147,6 +147,7 @@ app.get('/profile', (req, res) => {
     if (!req.session || !req.session.user) {
         return res.redirect('/login')
     }
+
     // If a specific user id is provided via query, show that user's profile.
     const viewingUser = req.query && req.query.usr ? Number(req.query.usr) : null
     const formbarId = viewingUser || Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
@@ -168,88 +169,139 @@ app.get('/profile', (req, res) => {
 // Accept avatar changes via either a data URL (from file upload) or a remote URL.
 app.post('/profile/avatar', (req, res) => {
     if (!req.session || !req.session.user) return res.status(401).json({ error: 'Not authenticated' })
-    const formbarId = Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
+
+    const formbarId = getFormbarId(req)
     if (!formbarId) return res.status(400).json({ error: 'No user id available' })
 
     const avatarsDir = path.join(__dirname, 'static', 'img', 'avatars')
-    try { if (!fs.existsSync(avatarsDir)) fs.mkdirSync(avatarsDir, { recursive: true }) } catch (e) { /* ignore */ }
+    ensureAvatarsDir(avatarsDir)
 
-    // Ensure `avatar` column exists on users table. If missing, add it.
-    db.all("PRAGMA table_info(users);", [], (err, cols) => {
+    ensureAvatarColumn((err) => {
         if (err) return res.status(500).json({ error: 'DB error' })
-        const hasAvatar = cols.some(c => c && c.name === 'avatar')
-        const continueSave = () => {
-            // Two supported flows: { data: dataUrl, filename } or { url }
-            if (req.body && req.body.data) {
-                // data URL (base64)
-                const dataUrl = String(req.body.data)
-                const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.*)$/)
-                if (!match) return res.status(400).json({ error: 'Invalid data URL' })
-                const mime = match[1]
-                const b64 = match[2]
-                if (!mime.startsWith('image/')) return res.status(400).json({ error: 'Unsupported image MIME' })
-                let ext = mime.split('/')[1]
-                if (ext === 'jpeg') ext = 'jpg'
-                const filename = `${formbarId}_${Date.now()}.${ext}`
-                const filePath = path.join(avatarsDir, filename)
-                const buf = Buffer.from(b64, 'base64')
-                fs.writeFile(filePath, buf, (werr) => {
-                    if (werr) return res.status(500).json({ error: 'Failed to save file' })
-                    db.run('UPDATE users SET avatar = ? WHERE formbar_id = ?', [filename, formbarId], function (uerr) {
-                        if (uerr) return res.status(500).json({ error: 'DB update failed' })
-                        return res.json({ success: true, url: `/img/avatars/${filename}` })
-                    })
-                })
-            } else if (req.body && req.body.url) {
-                let theUrl = String(req.body.url)
-                let parsed
-                try { parsed = new URL(theUrl) } catch (e) { return res.status(400).json({ error: 'Invalid URL' }) }
-                const client = parsed.protocol === 'https:' ? https : httpReq
-                client.get(theUrl, (resp) => {
-                    const status = resp.statusCode || 0
-                    if (status >= 300 && status < 400 && resp.headers && resp.headers.location) {
-                        // follow simple redirects
-                        return client.get(resp.headers.location, (r2) => resp = r2)
-                    }
-                    const ctype = (resp.headers && resp.headers['content-type']) ? String(resp.headers['content-type']) : ''
-                    if (!ctype.startsWith('image/')) {
-                        resp.resume()
-                        return res.status(400).json({ error: 'Remote URL did not return an image' })
-                    }
-                    let ext = ctype.split('/')[1] || 'png'
-                    if (ext === 'jpeg') ext = 'jpg'
-                    const filename = `${formbarId}_${Date.now()}.${ext}`
-                    const filePath = path.join(avatarsDir, filename)
-                    const fileStream = fs.createWriteStream(filePath)
-                    resp.pipe(fileStream)
-                    fileStream.on('finish', () => {
-                        fileStream.close(() => {
-                            db.run('UPDATE users SET avatar = ? WHERE formbar_id = ?', [filename, formbarId], function (uerr) {
-                                if (uerr) return res.status(500).json({ error: 'DB update failed' })
-                                return res.json({ success: true, url: `/img/avatars/${filename}` })
-                            })
-                        })
-                    })
-                    fileStream.on('error', (e) => {
-                        return res.status(500).json({ error: 'Failed to save remote image' })
-                    })
-                }).on('error', (e) => {
-                    return res.status(400).json({ error: 'Failed to fetch URL' })
-                })
-            } else {
-                return res.status(400).json({ error: 'No data or URL provided' })
-            }
-        }
-
-        if (!hasAvatar) {
-            db.run('ALTER TABLE users ADD COLUMN avatar TEXT DEFAULT ""', [], (aerr) => {
-                // ignore errors (column may be added concurrently); continue either way
-                continueSave()
-            })
-        } else {
-            continueSave()
-        }
+        if (req.body && req.body.data) return handleDataUrl(req, res, avatarsDir, formbarId)
+        if (req.body && req.body.url) return handleRemoteUrl(req, res, avatarsDir, formbarId)
+        return res.status(400).json({ error: 'No data or URL provided' })
     })
+
+    // Helpers
+    function getFormbarId(req) {
+        return Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
+    }
+
+    function ensureAvatarsDir(dir) {
+        try {
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+        } catch (e) { /* ignore */ }
+    }
+
+    function ensureAvatarColumn(cb) {
+        db.all("PRAGMA table_info(users);", [], (err, cols) => {
+            if (err) return cb(err)
+            const hasAvatar = Array.isArray(cols) && cols.some(c => c && c.name === 'avatar')
+            if (hasAvatar) return cb(null)
+            db.run('ALTER TABLE users ADD COLUMN avatar TEXT DEFAULT ""', [], (aerr) => {
+                // ignore alter errors (could already exist concurrently) and continue
+                cb(null)
+            })
+        })
+    }
+
+    function saveAvatarFilenameToDb(filename, cb) {
+        db.run('UPDATE users SET avatar = ? WHERE formbar_id = ?', [filename, formbarId], function (uerr) {
+            if (uerr) return cb(uerr)
+            return cb(null, `/img/avatars/${filename}`)
+        })
+    }
+
+    function handleDataUrl(req, res, avatarsDir, formbarId) {
+        const dataUrl = String(req.body.data)
+        const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.*)$/)
+        if (!match) return res.status(400).json({ error: 'Invalid data URL' })
+
+        const mime = match[1]
+        const b64 = match[2]
+        if (!mime.startsWith('image/')) return res.status(400).json({ error: 'Unsupported image MIME' })
+
+        let ext = mime.split('/')[1] || 'png'
+        if (ext === 'jpeg') ext = 'jpg'
+        const filename = `${formbarId}_${Date.now()}.${ext}`
+        const filePath = path.join(avatarsDir, filename)
+        const buf = Buffer.from(b64, 'base64')
+
+        fs.writeFile(filePath, buf, (werr) => {
+            if (werr) return res.status(500).json({ error: 'Failed to save file' })
+            saveAvatarFilenameToDb(filename, (uerr, url) => {
+                if (uerr) return res.status(500).json({ error: 'DB update failed' })
+                return res.json({ success: true, url })
+            })
+        })
+    }
+
+    function handleRemoteUrl(req, res, avatarsDir, formbarId) {
+        let theUrl = String(req.body.url)
+        let parsed
+        try { parsed = new URL(theUrl) } catch (e) { return res.status(400).json({ error: 'Invalid URL' }) }
+
+        fetchImageStream(theUrl, (err, resp) => {
+            if (err) return res.status(400).json({ error: err.message || 'Failed to fetch URL' })
+
+            const ctype = (resp.headers && resp.headers['content-type']) ? String(resp.headers['content-type']) : ''
+            if (!ctype.startsWith('image/')) {
+                resp.resume()
+                return res.status(400).json({ error: 'Remote URL did not return an image' })
+            }
+
+            let ext = ctype.split('/')[1] || 'png'
+            if (ext === 'jpeg') ext = 'jpg'
+            const filename = `${formbarId}_${Date.now()}.${ext}`
+            const filePath = path.join(avatarsDir, filename)
+            const fileStream = fs.createWriteStream(filePath)
+
+            resp.pipe(fileStream)
+
+            fileStream.on('finish', () => {
+                fileStream.close(() => {
+                    saveAvatarFilenameToDb(filename, (uerr, url) => {
+                        if (uerr) return res.status(500).json({ error: 'DB update failed' })
+                        return res.json({ success: true, url })
+                    })
+                })
+            })
+
+            fileStream.on('error', (e) => {
+                try { fs.unlinkSync(filePath) } catch (e) {}
+                return res.status(500).json({ error: 'Failed to save remote image' })
+            })
+        })
+    }
+
+    // Fetch an image response and follow a single redirect if necessary.
+    function fetchImageStream(urlStr, cb) {
+        const parsed = new URL(urlStr)
+        const client = parsed.protocol === 'https:' ? https : httpReq
+
+        const req = client.get(urlStr, (resp) => {
+            const status = resp.statusCode || 0
+            if (status >= 300 && status < 400 && resp.headers && resp.headers.location) {
+                // follow one redirect
+                try {
+                    const loc = new URL(resp.headers.location, urlStr).toString()
+                    const client2 = loc.startsWith('https:') ? https : httpReq
+                    client2.get(loc, (r2) => cb(null, r2)).on('error', (e2) => cb(new Error('Failed to fetch redirected URL')))
+                } catch (e) {
+                    cb(new Error('Invalid redirect location'))
+                }
+                return
+            }
+            if (status < 200 || status >= 300) {
+                resp.resume()
+                return cb(new Error('Remote server returned non-OK status'))
+            }
+            return cb(null, resp)
+        })
+
+        req.on('error', (e) => cb(new Error('Failed to fetch URL')))
+    }
 })
 
 // Admin page - restricted to users with an `admin` flag on their session user object
@@ -288,14 +340,20 @@ app.get('/admin/users', requireAdmin, (req, res) => {
 app.post('/admin/users/:id/add', requireAdmin, (req, res) => {
     const id = Number(req.params.id)
     const amount = Number(req.body.amount) || 1
+
     if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Invalid id' })
 
     db.get('SELECT * FROM users WHERE formbar_id = ?', [id], (err, user) => {
+
         if (err) return res.status(500).json({ error: 'DB error' })
         if (!user) return res.status(404).json({ error: 'User not found' })
+
         const newTokens = (typeof user.tokens === 'number' ? user.tokens : 0) + amount
+
         db.run('UPDATE users SET tokens = ? WHERE formbar_id = ?', [newTokens, id], function (updateErr) {
+
             if (updateErr) return res.status(500).json({ error: 'DB update error' })
+
             db.get('SELECT * FROM users WHERE formbar_id = ?', [id], (err2, updated) => {
                 if (err2) return res.status(500).json({ error: 'DB error' })
                 return res.json({ user: updated })
@@ -308,17 +366,23 @@ app.post('/admin/users/:id/add', requireAdmin, (req, res) => {
 app.post('/admin/users/:id/set', requireAdmin, (req, res) => {
     const id = Number(req.params.id)
     const tokens = Number(req.body.tokens)
+
     if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Invalid id' })
     if (!Number.isInteger(tokens) || tokens < 0) return res.status(400).json({ error: 'Invalid tokens' })
 
     db.get('SELECT * FROM users WHERE formbar_id = ?', [id], (err, user) => {
+
         if (err) return res.status(500).json({ error: 'DB error' })
         if (!user) return res.status(404).json({ error: 'User not found' })
+
         db.run('UPDATE users SET tokens = ? WHERE formbar_id = ?', [tokens, id], function (updateErr) {
+
             if (updateErr) return res.status(500).json({ error: 'DB update error' })
             db.get('SELECT * FROM users WHERE formbar_id = ?', [id], (err2, updated) => {
+
                 if (err2) return res.status(500).json({ error: 'DB error' })
                 return res.json({ user: updated })
+
             })
         })
     })
@@ -363,13 +427,12 @@ function logUsers() {
 
 let users = []
 
-io.on('connection', (socket) => {
-    // if the HTTP session had a Formbar user stored on it, pass that along so the User object
-    // can use the Formbar id instead of a generated numeric id.
+function initUser(socket) {
     const sessionUser = socket.request && socket.request.session ? socket.request.session.user : null
     let user = new User(socket, sessionUser)
     user.addToDb(db)
     user.getInfo(db)
+
     if (users.some(u => u.id == user.id)) {
         user = users.find(u => u.id == user.id)
         user.socket = socket
@@ -386,109 +449,316 @@ io.on('connection', (socket) => {
         users.push(user)
         console.log(`Created new user: ${user.displayName || user.id}`)
     }
+    return user
+}
+/*
+:::::::::  :::::::::  :::::::::: ::::::::      :::     ::::    ::::  ::::::::::
+:+:    :+: :+:    :+: :+:       :+:    :+:   :+: :+:   +:+:+: :+:+:+ :+:
++:+    +:+ +:+    +:+ +:+       +:+         +:+   +:+  +:+ +:+:+ +:+ +:+
++#++:++#+  +#++:++#:  +#++:++#  :#:        +#++:++#++: +#+  +:+  +#+ +#++:++#
++#+        +#+    +#+ +#+       +#+   +#+# +#+     +#+ +#+       +#+ +#+
+#+#        #+#    #+# #+#       #+#    #+# #+#     #+# #+#       #+# #+#
+###        ###    ### ########## ########  ###     ### ###       ### ##########
+*/
 
-    logUsers()
-
-    function getVisibleGames() {
-        // console.log(games)
-        return games.filter(g => {
+function getVisibleGames() {
+    // Return games visible to the current "user" (relies on the surrounding scope's `user`)
+    return games
+        .filter(g => {
             if (g.visibility === 'public') return true
             if (g.owner && (g.owner == user || g.owner.id == user.id)) return true
             return false
-        }).map(serializeGame)
-    }
+        })
+        .map(serializeGame)
+}
 
-    socket.emit('gamesList', getVisibleGames())
-
+function pregameEvents(socket, user) {
+    // ---- Purchase tokens ----
     socket.on('purchaseToken', (pin, amount) => {
-        // console.log('purchaseToken', pin, amount)
-
-        const amt = parseInt(amount) || 0
-        if (amt <= 0) {
+        const amt = parseInt(amount, 10) || 0
+        if (amt <= 0 || !user || !user.id) {
             socket.emit('tokenTransactionComplete')
             return
         }
 
         let completed = 0
+        const handleComplete = () => {
+            completed += 1
+            if (completed === amt) socket.emit('tokenTransactionComplete')
+        }
 
-        // For each requested token: attach a one-time response handler BEFORE emitting
-        // the transfer, to avoid missing fast responses. Count completions and only
-        // notify the client when all transfers have returned.
-        for (let i = 0; i < amt; i++) {
-            if (user.id) {
-                const data = {
-                    from: user.id,
-                    to: POOL_ID,
-                    amount: PLAY_PRICE,
-                    reason: 'Chess Payment',
-                    pin: pin,
-                    pool: true
+        const buyOne = () => {
+            const data = {
+                from: user.id,
+                to: POOL_ID,
+                amount: PLAY_PRICE,
+                reason: 'Chess Payment',
+                pin: pin,
+                pool: true
+            }
+
+            fbSocket.once('transferResponse', (res) => {
+                socket.emit('transferResponse', res)
+
+                const success = res && res.success === true
+                if (!success) {
+                    console.log('Payment failed:', res)
+                    handleComplete()
+                    return
                 }
 
-                fbSocket.once('transferResponse', res => {
-                    socket.emit('transferResponse', res)
-
-                    if (res && res.success === true) {
-                        // Use parameterized query to avoid accidental SQL issues
-                        db.run('UPDATE users SET tokens = ? WHERE formbar_id = ?', [user.tokens + 1, user.id], function (err) {
-                            if (err) console.error('DB update error:', err)
-                            else {
-                                user.tokens++
-                                console.log('Player bought token', user.tokens)
-                            }
-                        })
+                const newTokenCount = (typeof user.tokens === 'number' ? user.tokens : 0) + 1
+                db.run('UPDATE users SET tokens = ? WHERE formbar_id = ?', [newTokenCount, user.id], (err) => {
+                    if (err) {
+                        console.error('DB update error:', err)
                     } else {
-                        console.log('Payment failed:', res)
+                        user.tokens = newTokenCount
+                        console.log('Player bought token', user.tokens)
                     }
-
-                    completed++
-                    if (completed === amt) {
-                        socket.emit('tokenTransactionComplete')
-                    }
+                    handleComplete()
                 })
+            })
 
-                // Emit after the listener is attached so we don't miss fast responses
-                fbSocket.emit('transferDigipogs', data)
-            } else {
-                // No user id available; still count this iteration toward completion
-                completed++
-                if (completed === amt) socket.emit('tokenTransactionComplete')
-            }
+            fbSocket.emit('transferDigipogs', data)
         }
+
+        for (let i = 0; i < amt; i++) buyOne()
     })
 
-    socket.on('gamesList', () => {
-        socket.emit('gamesList', getVisibleGames())
-    })
-
-    // When a user resigns
-    socket.on(('resign'), () => {
-        if (user.game) {
-            user.game.resign(user)
-        }
-    })
-
+    // ---- Join game ----
     socket.on('join', (gameId) => {
-        for (let game of games) {
-            if (game.joinCode == gameId) {
-                game.join(user)
-                break
-            } else if (game.id == gameId && game.visibility === 'public') {
-                game.join(user)
-                break
-            }
+        const found = games.find(game => (game.joinCode == gameId) || (game.id == gameId && game.visibility === 'public'))
+        if (found) {
+            found.join(user)
         }
 
         if (user.game) {
-            if (user.game.messages) {
-                socket.emit('messageHistory', user.game.messages)
-            }
+            if (user.game.messages) socket.emit('messageHistory', user.game.messages)
             return
         }
 
         socket.emit('noGame')
         logUsers()
     })
+
+    // ---- Request games list ----
+    socket.on('gamesList', () => {
+        socket.emit('gamesList', getVisibleGames())
+    })
+
+    // ---- New game ----
+    socket.on('newGame', (visibility = 'public', name = '', chatOn = true, startWhite = true, time = null) => {
+        if (!(user && user.id > 0)) {
+            socket.emit('redirect', '/login')
+            return
+        }
+
+        if (user.game) user.game.leave(user)
+
+        const parsed = Number(time)
+        const t = Number.isFinite(parsed) && parsed > 0 ? parsed : null
+
+        const game = new Game(visibility, name, chatOn, startWhite, t)
+        game.owner = user
+        game.update()
+
+        // creator only sees private games they're in, so emit to creator only
+        socket.emit('gamesList', getVisibleGames())
+        io.emit('refreshGames')
+        socket.emit('redirect', `/game?code=${game.joinCode}`)
+
+        logUsers()
+    })
+
+    // ---- Delete game ----
+    socket.on('deleteGame', (gameId) => {
+        const game = games.find(g => g.id === gameId)
+        if (!game || !game.owner || game.owner.id !== user.id) {
+            logUsers()
+            return
+        }
+
+        const idx = games.findIndex(g => g.id === gameId)
+        if (idx !== -1) games.splice(idx, 1)
+        io.emit('refreshGames')
+        logUsers()
+    })
+}
+
+/*
+::::::::::: ::::    :::  ::::::::      :::     ::::    ::::  ::::::::::
+    :+:     :+:+:   :+: :+:    :+:   :+: :+:   +:+:+: :+:+:+ :+:
+    +:+     :+:+:+  +:+ +:+         +:+   +:+  +:+ +:+:+ +:+ +:+
+    +#+     +#+ +:+ +#+ :#:        +#++:++#++: +#+  +:+  +#+ +#++:++#
+    +#+     +#+  +#+#+# +#+   +#+# +#+     +#+ +#+       +#+ +#+
+    #+#     #+#   #+#+# #+#    #+# #+#     #+# #+#       #+# #+#
+########### ###    ####  ########  ###     ### ###       ### ##########
+*/
+
+function inGameEvents(socket, user) {
+    // ---- Promotion ----
+    socket.on('promotion', (x, y, newPiece) => {
+        if (!user.game || !user.game.promotionPending) return
+        const cell = user.game.board.layout[y][x]
+        if (!cell || cell.constructor.name !== 'Pawn') return
+
+        user.game.board.layout[y][x] = new classes[newPiece](user.side, 0)
+
+        const opponent = user.side === 'white' ? 'black' : 'white'
+        const inCheck = user.game.board.inCheck(opponent)
+        const isMate = inCheck && !user.game.board.hasLegalMoves(opponent)
+        const isStalemate = !inCheck && !user.game.board.hasLegalMoves(opponent)
+        const isKingOnly = user.game.board.onlyKingsLeft()
+
+        user.game.endPromotion()
+
+        const move = user.game.moves.find(m => m.to.x === x && m.to.y === y)
+        if (move) move.promotion = newPiece
+        console.log('Promotion:', user.game.moves)
+
+        user.game.update({}, inCheck, isMate, isStalemate, isKingOnly, opponent, user.side, null)
+    })
+
+    // ---- Board updates ----
+    socket.on('updateBoard', (data) => {
+        if (!user.game) return
+        if (data) user.game.update(data)
+        else user.game.emptyUpdate()
+        logUsers()
+    })
+
+    // ---- Resign ----
+    socket.on('resign', () => {
+        if (!user.game) return
+        user.game.resign(user)
+    })
+
+    // ---- Clock placeholder (no-op) ----
+    socket.on('updateClock', () => {
+        // kept for compatibility; no action required here
+    })
+
+    // ---- Valid moves request ----
+    socket.on('requestValidMoves', (piece) => {
+        if (
+            !piece || !piece.name || !piece.side ||
+            !user || !user.game || user.game.finished ||
+            !Number.isInteger(piece.x) || !Number.isInteger(piece.y)
+        ) {
+            socket.emit('validMoves', [])
+            return
+        }
+
+        const validMoves = []
+        const boardLayout = user.game.board.layout
+        const ownSide = user.side
+
+        const addIfValid = (fromX, fromY, toX, toY, pushX, pushY) => {
+            const pieceObj = new classes[piece.name](piece.side, piece.moves)
+            if (!pieceObj) return
+            if (!pieceObj.validMove(boardLayout, fromX, fromY, toX, toY)) return
+            if (boardLayout[toY][toX].side === ownSide) return
+            if (user.game.board.wouldBeInCheckAfterMove(fromX, fromY, toX, toY)) return
+            validMoves.push({ x: pushX, y: pushY })
+        }
+
+        if (ownSide === 'white') {
+            for (let y = 0; y < 8; y++) {
+                for (let x = 0; x < 8; x++) {
+                    addIfValid(piece.x, piece.y, x, y, x, y)
+                }
+            }
+        } else { // black: flip coordinates
+            const fromX = piece.x
+            const fromY = 7 - piece.y
+            for (let y = 0; y < 8; y++) {
+                for (let x = 0; x < 8; x++) {
+                    addIfValid(fromX, fromY, x, y, x, 7 - y)
+                }
+            }
+        }
+
+        socket.emit('validMoves', validMoves)
+    })
+}
+
+/*
+ ::::::::  :::    :::     ::: :::::::::::
+:+:    :+: :+:    :+:   :+: :+:   :+:
++:+        +:+    +:+  +:+   +:+  +:+
++#+        +#++:++#++ +#++:++#++: +#+
++#+        +#+    +#+ +#+     +#+ +#+
+#+#    #+# #+#    #+# #+#     #+# #+#
+ ########  ###    ### ###     ### ###
+*/
+
+function chatEvents(socket, user) {
+    const CHAT_LIMIT = 5        // max messages
+    const CHAT_WINDOW = 10_000  // cool-down window in ms
+
+    const chatState = {
+        count: 0,
+        lastReset: Date.now()
+    }
+
+    const isRateLimited = () => {
+        const now = Date.now()
+        if (now - chatState.lastReset > CHAT_WINDOW) {
+            chatState.count = 0
+            chatState.lastReset = now
+        }
+        if (chatState.count >= CHAT_LIMIT) return true
+        chatState.count++
+        return chatState.count > CHAT_LIMIT
+    }
+
+    socket.on('chatMessage', (msg) => {
+        if (!user.game || !user.game.chatOn) {
+            if (user.socket) user.socket.emit('chatOff')
+            return
+        }
+
+        if (socket.mutedUntil && Date.now() < socket.mutedUntil) {
+            socket.emit('chatMessage', 'System', 'You are currently muted.')
+            return
+        }
+
+        if (isRateLimited()) {
+            socket.emit('chatMessage', 'System', 'You are sending messages too fast. Please wait a few seconds.')
+            socket.mutedUntil = Date.now() + 10_000
+            socket.emit('chatMessage', 'System', 'Muted for 10 seconds for spamming.')
+            return
+        }
+
+        user.game.chatMsg(user.displayName, msg)
+    })
+
+    socket.on('messageHistory', () => {
+        if (user.game && user.game.messages) socket.emit('messageHistory', user.game.messages)
+    })
+}
+
+/*
+ ::::::::   ::::::::  ::::    ::: ::::    ::: :::::::::: :::::::: :::::::::::
+:+:    :+: :+:    :+: :+:+:   :+: :+:+:   :+: :+:       :+:    :+:    :+:
++:+        +:+    +:+ :+:+:+  +:+ :+:+:+  +:+ +:+       +:+           +:+
++#+        +#+    +:+ +#+ +:+ +#+ +#+ +:+ +#+ +#++:++#  +#+           +#+
++#+        +#+    +#+ +#+  +#+#+# +#+  +#+#+# +#+       +#+           +#+
+#+#    #+# #+#    #+# #+#   #+#+# #+#   #+#+# #+#       #+#    #+#    #+#
+ ########   ########  ###    #### ###    #### ########## ########     ###
+*/
+
+io.on('connection', (socket) => {
+    // Set up the user and register with database if needed
+    let user = initUser(socket)
+
+    logUsers()
+
+    socket.emit('gamesList', getVisibleGames())
+
+    pregameEvents(socket, user)
+    inGameEvents(socket, user)
+    chatEvents(socket, user)
 
     //! Disconnection
     socket.on('disconnect', () => {
@@ -507,170 +777,6 @@ io.on('connection', (socket) => {
 
         logUsers()
     })
-
-    socket.on('messageHistory', () => {
-        // console.log(user)
-        if (user.game && user.game.messages) socket.emit('messageHistory', user.game.messages)
-    })
-
-    socket.on('promotion', (x, y, newPiece) => {
-        if (!user.game.promotionPending) return
-        if (user.game.board.layout[y][x].constructor.name == 'Pawn') {
-            user.game.board.layout[y][x] = new classes[newPiece](user.side, 0)
-            const opponent = user.side == 'white' ? 'black' : 'white'
-            const inCheck = user.game.board.inCheck(opponent)
-            const isMate = inCheck && !user.game.board.hasLegalMoves(opponent)
-            const isStalemate = !inCheck && !user.game.board.hasLegalMoves(opponent)
-            const isKingOnly = user.game.board.onlyKingsLeft()
-            user.game.endPromotion()
-            user.game.moves.find(m => m.to.x === x && m.to.y === y).promotion = newPiece
-            console.log("Promotion:", user.game.moves)
-            user.game.update({}, inCheck, isMate, isStalemate, isKingOnly, opponent, user.side, null)
-        }
-    })
-
-    socket.on('newGame', (visibility = 'public', name = '', chatOn = true, startWhite = true, musicOn = true, time = null) => {
-        if (user.id > 0) {
-            if (user.game) {
-                user.game.leave(user)
-            }
-            // console.log('newGame event received')
-            // Normalize time: treat non-finite and non-positive values (including 0) as null => infinite clock
-            const parsed = Number(time)
-            const t = Number.isFinite(parsed) && parsed > 0 ? parsed : null
-            let game = new Game(visibility, name, chatOn, startWhite, musicOn, t)
-            game.owner = user
-            // console.log(game.id, game.joinCode, game.owner)
-            game.update()
-            // send the updated visible-games list (including any private games the creator is in) to the creator only 
-            socket.emit('gamesList', getVisibleGames())
-            io.emit('refreshGames')
-            socket.emit('redirect', `/game?code=${game.joinCode}`)
-        } else {
-            socket.emit('redirect', '/login')
-        }
-        logUsers()
-    })
-
-    socket.on('updateBoard', (data) => {
-        // console.log('updateBoard event received')
-        if (data) {
-            user.game.update(data)
-        } else {
-            user.game.emptyUpdate()
-        }
-        logUsers()
-    })
-
-    // kayden's chat limiter
-    const chatLimit = {
-        count: 0,
-        lastReset: Date.now()
-    }
-    const CHAT_LIMIT = 5        // max messages
-    const CHAT_WINDOW = 10_000  // cool-down window in ms
-
-    // When a message comes in
-    socket.on('chatMessage', (msg) => {
-        if (user.game.chatOn) {
-            const now = Date.now()
-
-            if (now - chatLimit.lastReset > CHAT_WINDOW) {
-                chatLimit.count = 0
-                chatLimit.lastReset = now
-            }
-
-            if (chatLimit.count >= CHAT_LIMIT) {
-                // Emit a chat message instead of an error message
-                socket.emit('chatMessage', 'System', 'You are sending messages too fast. Please wait a few seconds.');
-                return;
-            }
-            chatLimit.count++;
-
-            if (chatLimit.count >= CHAT_LIMIT) {
-                // Emit a chat message for muting
-                socket.emit('chatMessage', 'System', 'Muted for 10 seconds for spamming.')
-                socket.mutedUntil = Date.now() + 10_000;
-                return;
-            }
-
-            // Broadcast the actual chat message
-            user.game.chatMsg(user.displayName, msg)
-        } else {
-            user.socket.emit('chatOff')
-        }
-
-    })
-
-    //kayden's clock
-    socket.on('updateClock', () => {
-        if (user.game) {
-            user.side
-        }
-    })
-
-    //kayden's profile DM chat
-
-    //dm history, dm messages, populate friends list
-
-
-
-    socket.on('deleteGame', (gameId) => {
-            const game = games.find(g => g.id === gameId)
-
-            if (game && game.owner && game.owner.id === user.id) {
-                // mutate the shared array instead of reassigning the variable
-                const idx = games.findIndex(g => g.id === gameId)
-                if (idx !== -1) games.splice(idx, 1)
-                // console.log(`Game ${gameId} deleted by owner ${user.id}.`)
-                io.emit('refreshGames')
-            }
-            logUsers()
-        })
-
-    socket.on('requestValidMoves', (piece) => {
-            // Ensure we have a game and valid numeric coordinates (0 is valid)
-            if (
-                piece && piece.name && piece.side &&
-                user && user.game && !user.game.finished &&
-                Number.isInteger(piece.x) && Number.isInteger(piece.y)
-            ) {
-                let validMoves = []
-                if (user.side == 'white') {
-                    // instantiate with side/moves so `this.side` is set in piece methods
-                    const pieceObj = new classes[piece.name](piece.side, piece.moves)
-                    if (pieceObj) {
-                        for (let y = 0; y < 8; y++) {
-                            for (let x = 0; x < 8; x++) {
-                                // pass the actual 2D array layout, not the Board object
-                                if (pieceObj.validMove(user.game.board.layout, piece.x, piece.y, x, y) &&
-                                    user.game.board.layout[y][x].side != user.side &&
-                                    !user.game.board.wouldBeInCheckAfterMove(piece.x, piece.y, x, y)) {
-                                    validMoves.push({ x, y })
-                                }
-                            }
-                        }
-                    }
-                } else if (user.side == 'black') {
-                    piece.y = 7 - piece.y
-                    // instantiate with side/moves so `this.side` is set in piece methods
-                    const pieceObj = new classes[piece.name](piece.side, piece.moves)
-                    if (pieceObj) {
-                        for (let y = 0; y < 8; y++) {
-                            for (let x = 0; x < 8; x++) {
-                                // pass the actual 2D array layout, not the Board object
-                                if (pieceObj.validMove(user.game.board.layout, piece.x, piece.y, x, y) &&
-                                    user.game.board.layout[y][x].side != user.side &&
-                                    !user.game.board.wouldBeInCheckAfterMove(piece.x, piece.y, x, y)) {
-                                    validMoves.push({ x: x, y: 7 - y })
-                                }
-                            }
-                        }
-                    }
-                }
-                socket.emit('validMoves', validMoves)
-            }
-        })
 })
 
 
