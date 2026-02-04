@@ -10,29 +10,35 @@ const db = new sqlite3.Database(dbPath, (err) => {
 });
 
 db.serialize(() => {
-    db.run(`CREATE TABLE IF NOT EXISTS users (
-        chessbar_id INTEGER PRIMARY KEY NOT NULL DEFAULT 0,
-        formbar_id INTEGER NOT NULL DEFAULT 0,
+    // Users table
+    db.run(`
+        CREATE TABLE IF NOT EXISTS users (
+        chessbar_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        formbar_id INTEGER NOT NULL,
         tokens INTEGER NOT NULL DEFAULT 0,
         wins INTEGER NOT NULL DEFAULT 0,
         losses INTEGER NOT NULL DEFAULT 0,
         started INTEGER NOT NULL DEFAULT 0,
         finished INTEGER NOT NULL DEFAULT 0,
-        draws INTEGER NOT NULL DEFAULT 0
+        draws INTEGER NOT NULL DEFAULT 0,
+        display_name TEXT DEFAULT ''
     );`);
 
-    db.run(`INSERT INTO users (formbar_id, tokens, wins, losses, started, finished, draws) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [-1, 0, 0, 0, 0, 0, 0],
-        (err) => {
-            if (err) return console.error('Error updating default values:', err);
-            console.log('Row inserted');
+    db.run(`
+        CREATE TABLE IF NOT EXISTS friends (
+        friendship INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_1 INTEGER NOT NULL,
+        id_2 INTEGER NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending',
+        UNIQUE(id_1, id_2)
+    );`);
 
-            // Verification: fetch and print the row we just inserted so you can
-            // confirm values aren't null and we opened the correct DB file.
-            db.get(`SELECT * FROM users WHERE formbar_id = ?`, [-1], (err, row) => {
-                if (err) return console.error('Error querying inserted row:', err);
-                console.log('Inserted row:', row);
-            });
-        }
-    );
+    db.run(`
+        CREATE TABLE IF NOT EXISTS notifications (
+            notification INTEGER PRIMARY KEY AUTOINCREMENT,
+            user INTEGER NOT NULL,
+            type TEXT,
+            message TEXT NOT NULL
+    );`)
+
 });

@@ -22,6 +22,7 @@ const break3 = new Audio('sfx/break3.mp3')
 const break4 = new Audio('sfx/break4.mp3')
 const break5 = new Audio('sfx/break5.mp3')
 const break6 = new Audio('sfx/break6.mp3')
+const alarm = new Audio('sfx/clock/alarm.mp3')
 
 let soundMap = {
     move: move,
@@ -35,6 +36,7 @@ let soundMap = {
     break4: break4,
     break5: break5,
     break6: break6,
+    alarm: alarm,
 }
 
 socket.on('sound', (sound) => {

@@ -1,140 +1,151 @@
 const path = require('path');
+const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 
 const dbPath = path.join(__dirname, 'database.db');
-const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) return console.error('Failed to open DB:', err);
-});
+const db = new sqlite3.Database(dbPath);
 
-// Define the desired schema for the `users` table. We avoid attempting to
-// alter primary-key constraints on existing tables; instead we only add
-// missing columns that can be added safely with ALTER TABLE.
-const desiredColumns = {
-    chessbar_id: 'INTEGER PRIMARY KEY NOT NULL DEFAULT 0',
-    formbar_id: 'INTEGER NOT NULL DEFAULT 0',
-    tokens: 'INTEGER NOT NULL DEFAULT 0',
-    wins: 'INTEGER NOT NULL DEFAULT 0',
-    losses: 'INTEGER NOT NULL DEFAULT 0',
-    started: 'INTEGER NOT NULL DEFAULT 0',
-    finished: 'INTEGER NOT NULL DEFAULT 0',
-    draws: 'INTEGER NOT NULL DEFAULT 0',
-    display_name: "TEXT NOT NULL DEFAULT ''"
-};
+// Small helpers to run queries with Promises
+function runAsync(sql, params = []) {
+    return new Promise((resolve, reject) => db.run(sql, params, function (err) {
+        if (err) return reject(err);
+        resolve(this);
+    }));
+}
 
-function ensureUsersTable(cb) {
-    db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='users'", (err, row) => {
-        if (err) return cb(err);
-        if (!row) {
-            // Table doesn't exist; create it with full desired schema.
-            const cols = Object.entries(desiredColumns).map(([name, def]) => `${name} ${def}`).join(',\n        ');
-            const createSql = `CREATE TABLE IF NOT EXISTS users (\n        ${cols}\n    );`;
-            db.run(createSql, (err) => cb(err));
-        } else {
-            cb(null);
+function allAsync(sql, params = []) {
+    return new Promise((resolve, reject) => db.all(sql, params, (err, rows) => err ? reject(err) : resolve(rows)));
+}
+
+(async function migrate() {
+    try {
+        // Read `init-db.js` and extract all CREATE TABLE statements so we create
+        // any tables present in the initializer but missing from the DB.
+        const initPath = path.join(__dirname, 'init-db.js');
+        const initContent = fs.readFileSync(initPath, 'utf8');
+
+        // Capture SQL blocks that start with CREATE TABLE and end at the first closing
+        // ");" following that (non-greedy).
+        const createRe = /CREATE\s+TABLE[\s\S]*?\);/gi;
+        const stmts = [];
+        let m;
+        while ((m = createRe.exec(initContent)) !== null) {
+            // Normalize whitespace: trim leading/trailing and ensure it starts with CREATE
+            const stmt = m[0].trim();
+            stmts.push(stmt);
         }
-    });
-}
 
-function getExistingColumns(cb) {
-    db.all("PRAGMA table_info(users);", (err, rows) => {
-        if (err) return cb(err);
-        const cols = rows.map(r => r.name);
-        cb(null, cols);
-    });
-}
+        // Run each CREATE TABLE statement using IF NOT EXISTS semantics (should already
+        // be present in the statements from init-db.js). This will create any missing tables.
+        for (const s of stmts) {
+            // If the statement already contains IF NOT EXISTS, use it as-is; otherwise add it.
+            let withIf = s;
+            if (!/CREATE\s+TABLE\s+IF\s+NOT\s+EXISTS/i.test(s)) {
+                withIf = s.replace(/CREATE\s+TABLE\s+/i, 'CREATE TABLE IF NOT EXISTS ');
+            }
+            try {
+                await runAsync(withIf);
+                console.log('Ensured table from init script:', (withIf.split('\n')[0] || withIf).trim());
+            } catch (err) {
+                // Log and continue with other statements
+                console.warn('Failed to run statement (continuing):', err.message || err);
+            }
+            // After ensuring the table exists, make sure all columns declared in the
+            // init script are present in the actual table. For each missing column,
+            // attempt to `ALTER TABLE ADD COLUMN` using a safe subset of the
+            // original column definition (type + DEFAULT if present).
+            try {
+                const tableMatch = s.match(/CREATE\s+TABLE(?:\s+IF\s+NOT\s+EXISTS)?\s+["'`]?([A-Za-z0-9_]+)["'`]*/i);
+                if (tableMatch) {
+                    const tableName = tableMatch[1];
+                    const colBlockMatch = s.match(/\(([\s\S]*)\)\s*;?$/);
+                    if (colBlockMatch) {
+                        const colBlock = colBlockMatch[1];
+                        // Split on commas that are not inside parentheses (to avoid splitting
+                        // constraints that might contain commas).
+                        const parts = colBlock.split(/,(?![^()]*\))/g).map(p => p.trim()).filter(Boolean);
 
-function addMissingColumns(existing, cb) {
-    const toAdd = Object.keys(desiredColumns).filter(c => !existing.includes(c));
+                        const existingColsRows = await allAsync(`PRAGMA table_info(${tableName});`);
+                        const existingCols = existingColsRows.map(r => r.name);
 
-    // Skip adding `chessbar_id` if missing because adding a PRIMARY KEY to an
-    // existing table is not supported by simple ALTER TABLE. We log if it's
-    // missing so the operator can take manual action if desired.
-    const safeToAdd = toAdd.filter(c => c !== 'chessbar_id');
+                        for (const part of parts) {
+                            // Skip table-level constraints
+                            if (/^(UNIQUE|CONSTRAINT|PRIMARY\s+KEY|FOREIGN\s+KEY)/i.test(part)) continue;
 
-    if (toAdd.includes('chessbar_id')) {
-        console.warn('Migration: column `chessbar_id` is missing. This script will not attempt to add a PRIMARY KEY column automatically.');
-    }
+                            const colMatch = part.match(/^["'`]?([A-Za-z0-9_]+)["'`]?[\s\t]+([\s\S]*)$/);
+                            if (!colMatch) continue;
+                            const colName = colMatch[1];
+                            const rest = colMatch[2];
 
-    if (safeToAdd.length === 0) return cb(null);
+                            if (existingCols.includes(colName)) continue;
 
-    db.serialize(() => {
-        safeToAdd.forEach((col) => {
-            const def = desiredColumns[col];
-            const sql = `ALTER TABLE users ADD COLUMN ${col} ${def}`;
-            db.run(sql, (err) => {
-                if (err) console.error(`Failed to add column ${col}:`, err);
-                else console.log(`Added column ${col}`);
-            });
-        });
-        // Give async statements a tick to run then callback
-        db.wait ? db.wait(cb) : setTimeout(cb, 50);
-    });
-}
+                            // Extract type (first token(s) until a constraint keyword) and DEFAULT if present
+                            const typeMatch = rest.match(/^([A-Za-z0-9_()\s]+?)(?=\s+(NOT\s+NULL|DEFAULT|PRIMARY|UNIQUE|CHECK|REFERENCES)|$)/i);
+                            const defaultMatch = rest.match(/DEFAULT\s+((?:'[^']*')|(?:"[^"]*")|[^\s)]+)/i);
 
-function ensureDefaultRow(cb) {
-    db.get('SELECT COUNT(1) AS cnt FROM sqlite_master WHERE type = "table" AND name = "users"', (err, row) => {
-        if (err) return cb(err);
-        // Verify table exists, then ensure default row with formbar_id = -1
-        db.get('SELECT COUNT(1) AS cnt FROM users WHERE formbar_id = ?', [-1], (err, r) => {
-            if (err) return cb(err);
-            if (r.cnt > 0) {
-                console.log('Default user row exists.');
-                return cb(null);
+                            const colType = typeMatch ? typeMatch[1].trim() : '';
+                            const colDefault = defaultMatch ? defaultMatch[1] : null;
+
+                            // Build a safe ADD COLUMN clause: include type and DEFAULT if present.
+                            let addClause = '"' + colName + '"';
+                            if (colType) addClause += ' ' + colType;
+                            if (colDefault !== null) addClause += ' DEFAULT ' + colDefault;
+
+                            try {
+                                await runAsync(`ALTER TABLE "${tableName}" ADD COLUMN ${addClause}`);
+                                console.log(`Added missing column ${colName} to ${tableName}`);
+                            } catch (err) {
+                                console.warn(`Failed to add column ${colName} to ${tableName} (continuing):`, err.message || err);
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn('Column sync check failed (continuing):', err.message || err);
+            }
+        }
+
+        // Read existing columns from users and ensure a default formbar_id = -1 row exists
+        const info = await allAsync("PRAGMA table_info(users);");
+        const existing = info.map(r => r.name);
+
+        const rows = await allAsync('SELECT COUNT(1) AS cnt FROM users WHERE formbar_id = ?', [-1]);
+        if (rows.length === 0 || rows[0].cnt === 0) {
+            const valuesFor = {
+                chessbar_id: 0,
+                formbar_id: -1,
+                tokens: 0,
+                wins: 0,
+                losses: 0,
+                started: 0,
+                finished: 0,
+                draws: 0,
+                display_name: ''
+            };
+
+            const insertCols = [];
+            const placeholders = [];
+            const insertVals = [];
+
+            for (const [k, v] of Object.entries(valuesFor)) {
+                if (existing.includes(k)) {
+                    insertCols.push(k);
+                    placeholders.push('?');
+                    insertVals.push(v);
+                }
             }
 
-            // Build an insert that only includes columns that exist in the table.
-            getExistingColumns((err, cols) => {
-                if (err) return cb(err);
-                const insertCols = [];
-                const insertVals = [];
-                const placeholders = [];
-
-                const valuesFor = {
-                    chessbar_id: 0,
-                    formbar_id: -1,
-                    tokens: 0,
-                    wins: 0,
-                    losses: 0,
-                    started: 0,
-                    finished: 0,
-                    draws: 0,
-                    display_name: ''
-                };
-
-                cols.forEach(col => {
-                    if (valuesFor.hasOwnProperty(col)) {
-                        insertCols.push(col);
-                        insertVals.push(valuesFor[col]);
-                        placeholders.push('?');
-                    }
-                });
-
+            if (insertCols.length) {
                 const sql = `INSERT INTO users (${insertCols.join(', ')}) VALUES (${placeholders.join(', ')})`;
-                db.run(sql, insertVals, function (err) {
-                    if (err) return cb(err);
-                    console.log('Inserted default user row with formbar_id = -1');
-                    cb(null);
-                });
-            });
-        });
-    });
-}
+                await runAsync(sql, insertVals);
+                console.log('Inserted default user row with formbar_id = -1');
+            }
+        }
 
-// Run migration steps sequentially
-db.serialize(() => {
-    ensureUsersTable((err) => {
-        if (err) return console.error('Failed to ensure users table:', err);
-        getExistingColumns((err, existing) => {
-            if (err) return console.error('Failed to read existing columns:', err);
-            console.log('Existing columns:', existing.join(', '));
-            addMissingColumns(existing, (err) => {
-                if (err) return console.error('Failed to add missing columns:', err);
-                ensureDefaultRow((err) => {
-                    if (err) return console.error('Failed to ensure default row:', err);
-                    console.log('Migration complete.');
-                    db.close();
-                });
-            });
-        });
-    });
-});
+        console.log('Migration complete.');
+    } catch (err) {
+        console.error('Migration failed:', err);
+    } finally {
+        db.close();
+    }
+})();
