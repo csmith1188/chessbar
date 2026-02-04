@@ -9,24 +9,24 @@
     <link rel='stylesheet' href='/css/profile.css'>
 </head>
 
-<body class="with-sidebar">
+<body class='with-sidebar'>
     <%- include('partials/sidebar') %>
-        <div id="player">
-            <div class="avatar-large">
-                <div class="pfp-container" style="position:relative; display:inline-block">
-                    <div id="pfp"
-                        style="background-image: url(<%= typeof avatarUrl !== 'undefined' ? avatarUrl : '/img/basic_avatar.png' %>)"
-                        style="display:block; border-radius:50%; max-width:250px;"></div>
-                    <div id="pfp-overlay">
+        <div id='player'>
+            <div class='avatar-large'>
+                <div class='pfp-container' style='position:relative; display:inline-block'>
+                    <div id='pfp'
+                        style='background-image: url(<%= typeof avatarUrl !== "undefined" ? avatarUrl : "/img/basic_avatar.png" %>)'
+                        style='display:block; border-radius:50%; max-width:250px;'></div>
+                    <div id='pfp-overlay'>
                         Change profile picture</div>
                 </div>
             </div>
 
-            <div id="name"></div>
-            <div id="btn-wrap">
-                <button id="friends-btn" class="btn secondary"> <img src="/img/emoji-1.png" class="friend-emoji">Add
-                    Friend<img src="/img/emoji-1.png" class="friend-emoji"></button>
-                <button id="challenge-btn" class="btn secondary">⚔️ Challenge ⚔️</button>
+            <div id='name'></div>
+            <div id='btn-wrap'>
+                <button id='friends-btn' class='btn secondary'> <img src='/img/emoji-1.png' class='friend-emoji'>Add
+                    Friend<img src='/img/emoji-1.png' class='friend-emoji'></button>
+                <button id='challenge-btn' class='btn secondary'>⚔️ Challenge ⚔️</button>
             </div>
         </div>
 
@@ -106,7 +106,7 @@
     const submit = document.getElementById('submit')
 
     function getCookie(name) {
-        const nameEQ = name + "=";
+        const nameEQ = name + '=';
         const ca = document.cookie.split(';');
         for (let i = 0; i < ca.length; i++) {
             let c = ca[i];
