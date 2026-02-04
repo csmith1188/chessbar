@@ -460,7 +460,7 @@ function initUser(socket) {
 ###        ###    ### ########## ########  ###     ### ###       ### ##########
 */
 
-function getVisibleGames() {
+function getVisibleGames(user) {
     // Return games visible to the current "user" (relies on the surrounding scope's `user`)
     return games
         .filter(g => {
@@ -526,15 +526,13 @@ function pregameEvents(socket, user) {
 
     // ---- Join game ----
     socket.on('join', (gameId) => {
-        if (user.game) {
-            user.game.leave(user) //! Kick the user from their current game
-            user.socket.emit('redirect', '/')
-        }
 
         const found = games.find(game => (game.joinCode == gameId) || (game.id == gameId && game.visibility === 'public'))
         if (found) {
             found.join(user)
-        }
+        } else[
+            user.socket.emit('redirect', '/')
+        ]
 
         if (user.game) {
             if (user.game.messages) socket.emit('messageHistory', user.game.messages)
@@ -547,7 +545,7 @@ function pregameEvents(socket, user) {
 
     // ---- Request games list ----
     socket.on('gamesList', () => {
-        socket.emit('gamesList', getVisibleGames())
+        socket.emit('gamesList', getVisibleGames(user))
     })
 
     // ---- New game ----
@@ -567,7 +565,7 @@ function pregameEvents(socket, user) {
         game.update()
 
         // creator only sees private games they're in, so emit to creator only
-        socket.emit('gamesList', getVisibleGames())
+        socket.emit('gamesList', getVisibleGames(user))
         io.emit('refreshGames')
         socket.emit('redirect', `/game?code=${game.joinCode}`)
 
@@ -824,7 +822,7 @@ io.on('connection', (socket) => {
 
     logUsers()
 
-    socket.emit('gamesList', getVisibleGames())
+    socket.emit('gamesList', getVisibleGames(user))
 
     pregameEvents(socket, user)
     inGameEvents(socket, user)
