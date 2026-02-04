@@ -93,6 +93,13 @@
             const sessionUserId = <%= user && user.id ? user.id : 'null' %>
                 // true if no query param (own profile) or query matches session id
                 window.isOwnProfile = (!q) || String(q) === String(sessionUserId)
+            // hide buttons immediately when this is the signed-in user's own profile
+            try {
+                if (window.isOwnProfile) {
+                    const btnWrap = document.getElementById('btn-wrap')
+                    if (btnWrap) btnWrap.style.display = 'none'
+                }
+            } catch (e) { /* ignore */ }
         } catch (e) { window.isOwnProfile = true }
     })()
 </script>
@@ -204,9 +211,11 @@
 
     // Add a friend
     const addFriendButton = document.getElementById('friends-btn')
-    addFriendButton.addEventListener('click', (e) => {
-        socket.emit('friendRequest', me.id, viewingUser)
-    })
+    if (addFriendButton) {
+        addFriendButton.addEventListener('click', (e) => {
+            socket.emit('friendRequest', me.id, viewingUser)
+        })
+    }
 </script>
 
 </html>
