@@ -4,3 +4,4 @@ database/database.db
 database/freeTokens.js
 .env
 /static/img/avatars/*
+apikey

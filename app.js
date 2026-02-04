@@ -526,6 +526,8 @@ function pregameEvents(socket, user) {
 
     // ---- Join game ----
     socket.on('join', (gameId) => {
+        if (user.game) user.game.leave(user) //! Kick the user from their current game
+
         const found = games.find(game => (game.joinCode == gameId) || (game.id == gameId && game.visibility === 'public'))
         if (found) {
             found.join(user)
