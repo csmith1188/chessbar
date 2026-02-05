@@ -10,152 +10,153 @@
 
 <body class="with-sidebar">
     <%- include('partials/sidebar') %>
-    <!-- Join code badge (top-left) -->
-    <div id='join-code-badge' role='button' tabindex='0' aria-live='polite' aria-label='Copy join code'
-        title='Click to copy join code' style='display:none'></div>
+        <!-- Join code badge (top-left) -->
+        <div id='join-code-badge' role='button' tabindex='0' aria-live='polite' aria-label='Copy join code'
+            title='Click to copy join code' style='display:none'></div>
 
-    <div id='container'>
-        <!-- Game canvas -->
-        <div id="board-column">
-            <canvas id='canvas'></canvas>
-            <div id="underBoard">
-                <div id="blackCaptured"></div>
-                <div id="whiteClock"></div>
-                <div id='InfoBox'></div>
-                <button id="resign-btn" type="button" title="Resign" aria-label="Resign"></button>
-                <div id="blackClock"></div>
-                <div id="whiteCaptured"></div>
+        <div id='container'>
+            <!-- Game canvas -->
+            <div id="board-column">
+                <canvas id='canvas'></canvas>
+                <div id="underBoard">
+                    <div id="blackCaptured"></div>
+                    <div id="whiteClock"></div>
+                    <div id='InfoBox'></div>
+                    <button id="resign-btn" type="button" title="Resign" aria-label="Resign"></button>
+                    <div id="blackClock"></div>
+                    <div id="whiteCaptured"></div>
+                </div>
             </div>
-        </div>
 
-        <div id='sidebar'>
-            <!-- <div id='CapturedW' class='captureBox'></div>
+            <div id='sidebar'>
+                <!-- <div id='CapturedW' class='captureBox'></div>
             <div id='CapturedB' class='captureBox'></div> -->
-        </div>
+            </div>
             <script src='/js/sidebar.js'></script>
-    </div>
-
-    <!-- Waiting overlay shown when opponent hasn't joined -->
-    <div id="waitingOverlay" aria-live="polite" aria-hidden="true">
-        <div class="waiting-inner" role="status">
-            <div class="waiting-text">Waiting for opponent...</div>
-        </div>
-    </div>
-
-    <!-- Pawn promotion menu (hidden, fixed top-center) -->
-    <div id="promotion" aria-hidden="true">
-        <img src="" id="queen">
-        <img src="" id="rook">
-        <img src="" id="bishop">
-        <img src="" id="knight">
-    </div>
-
-    <!-- === Chat Section === -->
-    <div id='chat-container'>
-        <div id='chat-sidebar'>
-            <h2>Users</h2>
         </div>
 
-        <div id='chat-main'>
-            <div id='messages'></div>
-
-            <div id='inputBar'>
-                <input type='text' id='msg' placeholder='Type your message here...' />
-                <button id='send'>Send</button>
-                <button id='export-pgn' title='Generate PGN from game moves'>Export PGN</button>
+        <!-- Waiting overlay shown when opponent hasn't joined -->
+        <div id="waitingOverlay" aria-live="polite" aria-hidden="true">
+            <div class="waiting-inner" role="status">
+                <div class="waiting-text">Waiting for opponent...</div>
             </div>
         </div>
-    </div>
 
-    <a href='/' id='back-link'>Back to game selection</a>
-
-    <!-- Settings button -->
-    <button id='settings-btn' type='button' title='Settings' aria-label='Open settings'></button>
-
-    <!-- Chat disabled message -->
-    <div id="chatOff" aria-live="polite" aria-hidden="true">
-        <div class="chat-off-message" role="status">
-            This game does not allow chat. Sorry!
+        <!-- Pawn promotion menu (hidden, fixed top-center) -->
+        <div id="promotion" aria-hidden="true">
+            <img src="" id="queen">
+            <img src="" id="rook">
+            <img src="" id="bishop">
+            <img src="" id="knight">
         </div>
-    </div>
 
-    <!-- Settings modal (hidden by default) -->
-    <div id='settings-modal' class='hidden' role='dialog' aria-modal='true' aria-labelledby='settings-title'
-        aria-hidden='true' style='display:none'>
-        <div id='settings-panel'>
-            <h3 id='settings-title'>Settings</h3>
-
-            <div class='setting-row'>
-                <label for='boardSquareSize'>Board square size</label>
-                <input id='boardSquareSize' type='number' min='30' max='200' />
+        <!-- === Chat Section === -->
+        <div id='chat-container'>
+            <div id='chat-sidebar'>
+                <h2>Users</h2>
             </div>
 
-            <div class='setting-row'>
-                <label for='lightSquareColor'>Light square color</label>
-                <input id='lightSquareColor' type='color' />
-            </div>
+            <div id='chat-main'>
+                <div id='messages'></div>
 
-            <div class='setting-row'>
-                <label for='moveColor'>Move Highlight Color:</label>
-                <input type='color' id='moveColor'>
-                <label for='moveAlpha'>Transparency (0-1):</label>
-                <input type='number' id='moveAlpha' min='0' max='1' step='0.01' value='0.31'>
-
-            </div>
-
-            <div class='setting-row'>
-                <label for='arrowColor'>Move Arrow Color:</label>
-                <input type='color' id='arrowColor'>
-                <label for='arrowAlpha'>Transparency (0-1):</label>
-                <input type='number' id='arrowAlpha' min='0' max='1' step='0.01' value='0.6'>
-
-            </div>
-
-            <div class='setting-row'>
-                <label for='arrowHeadBaseWidth'>Arrow head base width (px)</label>
-                <input id='arrowHeadBaseWidth' type='number' min='4' max='200' />
-            </div>
-
-            <div class='setting-row'>
-                <label for='darkSquareColor'>Dark square color</label>
-                <input id='darkSquareColor' type='color' />
-            </div>
-
-            <div class='setting-row'>
-                <label for='defaultPieceMargin'>Piece margin</label>
-                <input id='defaultPieceMargin' type='number' min='0' max='100' />
-            </div>
-
-            <div class='setting-row'>
-                <label for='hoverSizeIncrease'>Hover size increase</label>
-                <input id='hoverSizeIncrease' type='number' min='0' max='50' />
-            </div>
-
-            <div class='setting-row'>
-                <label for='pieceStyle'>Piece style</label>
-                <select id='pieceStyle'>
-                    <option value='basic'>Basic</option>
-                    <option value='goofy'>Goofy</option>
-                    <option value='pixel'>Pixel</option>
-                    	<option value='neo'>Neo</option>
-                </select>
-            </div>
-
-            <fieldset class='setting-group'>
-                <legend>Debug</legend>
-                <label><input id='logMouseEvents' type='checkbox' /> Log mouse events</label>
-                <label><input id='showHoverSquare' type='checkbox' /> Show hover square</label>
-                <label><input id='showClickSquare' type='checkbox' /> Show click square</label>
-                <label><input id='logMoveEvents' type='checkbox' /> Log move events</label>
-            </fieldset>
-
-            <div class='settings-actions'>
-                <button id='save-settings' type='button'>Save & reload</button>
-                <button id='reset-settings' type='button'>Reset</button>
-                <button id='close-settings' type='button' tabindex='0'>Close</button>
+                <div id='inputBar'>
+                    <input type='text' id='msg' placeholder='Type your message here...' />
+                    <button id='send'>Send</button>
+                    <button id='export-pgn' title='Generate PGN from game moves'>Export PGN</button>
+                </div>
             </div>
         </div>
-    </div>
+
+        <a href='/' id='back-link'>Back to game selection</a>
+
+        <!-- Settings button -->
+        <button id='settings-btn' type='button' title='Settings' aria-label='Open settings'></button>
+
+        <!-- Chat disabled message -->
+        <div id="chatOff" aria-live="polite" aria-hidden="true">
+            <div class="chat-off-message" role="status">
+                This game does not allow chat. Sorry!
+            </div>
+        </div>
+
+        <!-- Settings modal (hidden by default) -->
+        <div id='settings-modal' class='hidden' role='dialog' aria-modal='true' aria-labelledby='settings-title'
+            aria-hidden='true' style='display:none'>
+            <div id='settings-panel'>
+                <h3 id='settings-title'>Settings</h3>
+
+                <div class='setting-row'>
+                    <label for='boardSquareSize'>Board square size</label>
+                    <input id='boardSquareSize' type='number' min='30' max='200' />
+                </div>
+
+                <div class='setting-row'>
+                    <label for='lightSquareColor'>Light square color</label>
+                    <input id='lightSquareColor' type='color' />
+                </div>
+
+                <div class='setting-row'>
+                    <label for='moveColor'>Move Highlight Color:</label>
+                    <input type='color' id='moveColor'>
+                    <label for='moveAlpha'>Transparency (0-1):</label>
+                    <input type='number' id='moveAlpha' min='0' max='1' step='0.01' value='0.31'>
+
+                </div>
+
+                <div class='setting-row'>
+                    <label for='arrowColor'>Move Arrow Color:</label>
+                    <input type='color' id='arrowColor'>
+                    <label for='arrowAlpha'>Transparency (0-1):</label>
+                    <input type='number' id='arrowAlpha' min='0' max='1' step='0.01' value='0.6'>
+
+                </div>
+
+                <div class='setting-row'>
+                    <label for='arrowHeadBaseWidth'>Arrow head base width (px)</label>
+                    <input id='arrowHeadBaseWidth' type='number' min='4' max='200' />
+                </div>
+
+                <div class='setting-row'>
+                    <label for='darkSquareColor'>Dark square color</label>
+                    <input id='darkSquareColor' type='color' />
+                </div>
+
+                <div class='setting-row'>
+                    <label for='defaultPieceMargin'>Piece margin</label>
+                    <input id='defaultPieceMargin' type='number' min='0' max='100' />
+                </div>
+
+                <div class='setting-row'>
+                    <label for='hoverSizeIncrease'>Hover size increase</label>
+                    <input id='hoverSizeIncrease' type='number' min='0' max='50' />
+                </div>
+
+                <div class='setting-row'>
+                    <label for='pieceStyle'>Piece style</label>
+                    <select id='pieceStyle'>
+                        <option value='basic'>Basic</option>
+                        <option value='goofy'>Goofy</option>
+                        <option value='pixel'>Pixel</option>
+                        <option value='neo'>Neo</option>
+                    </select>
+                </div>
+
+                <fieldset class='setting-group'>
+                    <legend>Debug</legend>
+                    <label><input id='logMouseEvents' type='checkbox' /> Log mouse events</label>
+                    <label><input id='showHoverSquare' type='checkbox' /> Show hover square</label>
+                    <label><input id='showClickSquare' type='checkbox' /> Show click square</label>
+                    <label><input id='logMoveEvents' type='checkbox' /> Log move events</label>
+                </fieldset>
+
+                <div class='settings-actions'>
+                    <button id='save-settings' type='button'>Save & reload</button>
+                    <button id='reset-settings' type='button'>Reset</button>
+                    <button id='close-settings' type='button' tabindex='0'>Close</button>
+                </div>
+            </div>
+        </div>
+        <%- include('partials/notificationPopup') %>
 </body>
 <!-- Socket.IO client -->
 <script src='/socket.io/socket.io.js'></script>
@@ -274,7 +275,7 @@
                 users.appendChild(userDiv)
             })
             // update waiting overlay after repopulating users
-            try { updateWaitingOverlay(); } catch (e) {}
+            try { updateWaitingOverlay(); } catch (e) { }
         }
     }
 
@@ -340,12 +341,12 @@
     socket.on('updateBoard', (data) => {
         // existing handler in this file already calls updateBoard and populateUsers;
         // call updateWaitingOverlay again in case users changed
-        try { updateWaitingOverlay(); } catch (e) {}
+        try { updateWaitingOverlay(); } catch (e) { }
     })
 
     socket.on('youAre', () => {
         // identity may have changed; refresh overlay
-        try { updateWaitingOverlay(); } catch (e) {}
+        try { updateWaitingOverlay(); } catch (e) { }
     })
 </script>
 

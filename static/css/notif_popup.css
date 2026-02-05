@@ -1,0 +1,11 @@
+#notif_popup{
+    width: 100%;
+    position: abosolute;
+    bottom: 0;
+    display: block;
+    background-color: blue;
+}
+
+#notif_popup.hidden {
+    display: none;
+}
