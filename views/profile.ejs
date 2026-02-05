@@ -85,7 +85,6 @@
 <script src='js/socket.js'></script>
 <script>
     // Expose whether this page is the signed-in user's own profile.
-    // If `?usr=` is present and differs from the session user id, it's someone else's profile.
     (function () {
         try {
             const params = new URLSearchParams(window.location.search)

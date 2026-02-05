@@ -48,7 +48,7 @@
                     <img src='/img/basic/white_rook.png' alt='logo'>
                     <h1>Chessbar — Select a Game</h1>
                 </div>
-                
+
             </header>
 
             <main class='main'>
@@ -92,8 +92,6 @@
 
     function newGame(visibility) {
         socket.emit('newGame', visibility, gameName.value.trim(), chatOn.checked, startWhite.checked, musicOn.checked, timeAmount.value * 60)
-        // if (payPin.value) {
-        // }
     }
 
     function joinGame() {
