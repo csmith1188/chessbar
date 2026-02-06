@@ -7,6 +7,7 @@
     <title>Profile - Chessbar</title>
     <link rel='stylesheet' href='/css/sidebar.css'>
     <link rel='stylesheet' href='/css/profile.css'>
+    <link rel='stylesheet' href='/css/game.css'>
 </head>
 
 <body class="with-sidebar">
@@ -28,6 +29,22 @@
                     Friend<img src="/img/emoji-1.png" class="friend-emoji"></button>
                 <button id="challenge-btn" class="btn secondary">⚔️ Challenge ⚔️</button>
             </div>
+
+            <div style="position: relative; right: 0px; bottom: 0px;" id='chat-container'>
+                <div id='chat-sidebar'>
+                    <h2>Users</h2>
+                </div>
+
+                <div id='chat-main'>
+                    <div id='messages'></div>
+
+                    <div id='inputBar'>
+                        <input type='text' id='msg' placeholder='Type your message here...' />
+                        <button id='send'>Send</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div id='profile'>
@@ -199,6 +216,10 @@
         wdl.innerText = `${user.wins}/${user.draws}/${user.losses}`
         nameBox.innerText = user.display_name
     }
+</script>
+
+<script>
+
 </script>
 
 </html>
