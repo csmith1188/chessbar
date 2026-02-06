@@ -51,3 +51,19 @@ socket.on('sound', (sound) => {
         console.log('Sound failed')
     }
 })
+
+// Notification
+const notifBox = document.getElementById('notif_popup')
+const notifType = document.getElementById('notif_type')
+const notifMsg = document.getElementById('notif_message')
+
+socket.on('notification', (type, message) => {
+    if (!notifBox.classList.contains('hidden')) return
+    
+    notifType.innerText = type
+    notifMsg.innerText = message
+
+    notifBox.classList.toggle('hidden')
+
+    setInterval(() => {notifBox.classList.toggle('hidden')}, 5000)
+})

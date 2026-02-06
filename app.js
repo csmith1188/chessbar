@@ -749,6 +749,14 @@ function chatEvents(socket, user) {
 #+#        #+#    #+#     #+#     #+#        #+#   #+#+# #+#    #+# #+#    #+#
 ###        ###    ### ########### ########## ###    #### #########   ########
 */
+
+function notification(usr, type, message) {
+    db.run('ISERT INTO notifications (user, type, message) VALUES (?, ?, ?)', [usr, type, message])
+
+    let foo = users.find(u => u.id == usr)
+    if (foo) foo.socket.emit('notification', type, message)
+}
+
 function friendEvents(socket, user) {
 
     function getStatus(user1, user2) {
@@ -796,11 +804,17 @@ function friendEvents(socket, user) {
         if (!Number.isFinite(from) || !Number.isFinite(to)) return
         if (from == to) return
 
+        
         getStatus(from, to).then((status) => {
             if (status == 'pending') {
                 updateFriendRecord(from, to, 'friends')
+
+                notification(to, 'Friendship', `You are now friends with ${from}`)
+                notification(from, 'Friendship', `You are now friends with ${to}`)
             } else {
                 newFriendRecord(from, to)
+
+                notification(to, 'Friendship', `You have a friend request from ${from}.`)
             }
         })
     })
