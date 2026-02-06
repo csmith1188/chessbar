@@ -206,7 +206,7 @@
         function createRowElement(u) {
             const tr = document.createElement('tr')
             tr.innerHTML = `
-                <td><a href="/profile?usr=${u.formbar_id}" class="user-link" title="View profile" target="_blank" rel="noopener noreferrer">${u.display_name || u.displayName || ''}</a></td>
+                <td><a href="/profile?usr=${u.formbar_id}" class="user-link" title="View profile" rel="noopener noreferrer">${u.display_name || u.displayName || ''}</a></td>
                 <td style="text-align:right">${u.wins || 0}</td>
                 <td style="text-align:right">${u.losses || 0}</td>
                 <td style="text-align:right">${u.draws || u.draws === 0 ? u.draws : 0}</td>
@@ -351,6 +351,7 @@
 
         loadUsers()
     </script>
+    <%- include('partials/notificationPopup') %>
 </body>
 
 </html>

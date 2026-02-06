@@ -2,8 +2,7 @@ let takenUserIds = []
 class User {
     // sessionUser is the object from req.session.user (Formbar info) if present
     constructor(socket, sessionUser = null) {
-        // Always create the `socket` property (may be `null` when disconnected)
-        this.socket = socket || null
+        this.socket = socket
 
         // If the user signed in via Formbar, prefer their Formbar id
         if (sessionUser && sessionUser.id) {
@@ -23,7 +22,7 @@ class User {
 
         this.side = 'spectating'
 
-        this.sessionUser = sessionUser || null
+        this.sessionUser = sessionUser
 
         this.started = 0
         this.finished = 0

@@ -1,11 +1,31 @@
-#notif_popup{
-    width: 100%;
-    position: abosolute;
+#notif_popup {
+    width: 75%;
+    height: 8em;
+    position: absolute;
     bottom: 0;
     display: block;
-    background-color: blue;
+    background-color: rgba(255, 255, 255, 0.06);
+    border-radius: 1em;
+    z-index: 999;
+    padding-left: 2em;
+    transition: all 250ms ease;
+    opacity: 1;
+}
+
+#notif_popup a {
+    color: grey !important;
+    transition: all ease 250ms;
+}
+
+#notif_popup a:hover {
+    font-size: 1.1em
 }
 
 #notif_popup.hidden {
-    display: none;
+    opacity: 0;
+}
+
+#notif_popup h1 {
+    position: relative;
+    top: 2em
 }

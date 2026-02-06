@@ -751,10 +751,10 @@ function chatEvents(socket, user) {
 */
 
 function notification(usr, type, message) {
-    db.run('ISERT INTO notifications (user, type, message) VALUES (?, ?, ?)', [usr, type, message])
+    db.run('INSERT INTO notifications (user, type, message) VALUES (?, ?, ?)', [usr, type, message])
 
     let foo = users.find(u => u.id == usr)
-    if (foo) foo.socket.emit('notification', type, message)
+    if (foo && foo.socket) foo.socket.emit('notification', type, message)
 }
 
 function friendEvents(socket, user) {
@@ -768,6 +768,21 @@ function friendEvents(socket, user) {
                         return resolve(null)
                     }
                     if (row && row.status) return resolve(row.status)
+                    return resolve(null)
+                }
+            )
+        })
+    }
+
+    function getFirstUser(user1, user2) {
+        return new Promise((resolve) => {
+            db.get('SELECT id_1 FROM friends WHERE (id_1 = ? AND id_2 = ?) OR (id_2 = ? AND id_1 = ?)',
+                [user1, user2, user1, user2], (err, row) => {
+                    if (err) {
+                        console.log(err)
+                        return resolve(null)
+                    }
+                    if (row && row.id_1) return resolve(row.id_1)
                     return resolve(null)
                 }
             )
@@ -795,6 +810,10 @@ function friendEvents(socket, user) {
         })
     }
 
+    function linkTo(usr) {
+        return `<a href="/profile?usr=${usr}" target="_blank">${usr}</a>`
+    }
+
     socket.on('friendRequest', (from, to) => {
         console.log('Freind request event:', from, to)
 
@@ -804,17 +823,21 @@ function friendEvents(socket, user) {
         if (!Number.isFinite(from) || !Number.isFinite(to)) return
         if (from == to) return
 
-        
-        getStatus(from, to).then((status) => {
-            if (status == 'pending') {
-                updateFriendRecord(from, to, 'friends')
 
-                notification(to, 'Friendship', `You are now friends with ${from}`)
-                notification(from, 'Friendship', `You are now friends with ${to}`)
+        getStatus(from, to).then((status) => {
+            if (status == 'friends') return notification(from, 'Friendship', `You are already friends with ${linkTo(to)}.`)
+            if (status == 'pending') {
+                getFirstUser(from, to).then((u) => { 
+                    if (u == from) return 
+
+                    updateFriendRecord(from, to, 'friends')
+    
+                    notification(to, 'Friendship', `You are now friends with ${linkTo(from)}.`)
+                    notification(from, 'Friendship', `You are now friends with ${linkTo(to)}.`)
+                })
             } else {
                 newFriendRecord(from, to)
-
-                notification(to, 'Friendship', `You have a friend request from ${from}.`)
+                notification(to, 'Friendship', `You have a friend request from ${linkTo(from)}.`)
             }
         })
     })
