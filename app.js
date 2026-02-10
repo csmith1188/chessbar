@@ -152,18 +152,51 @@ app.get('/profile', (req, res) => {
     const viewingUser = req.query && req.query.usr ? Number(req.query.usr) : null
     const formbarId = viewingUser || Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
 
-    if (!formbarId) return res.render('profile', { avatarUrl: '/img/basic_avatar.png' })
+    if (!formbarId) return res.render('profile', { avatarUrl: '/img/basic_avatar.png', notifications: [], isOwnProfile: false })
 
-    db.get('SELECT avatar FROM users WHERE formbar_id = ?', [formbarId], (err, row) => {
-        if (err) {
-            console.error('DB error fetching avatar:', err)
-            return res.render('profile', { avatarUrl: '/img/basic_avatar.png' })
-        }
-        if (row && row.avatar) {
-            return res.render('profile', { avatarUrl: `/img/avatars/${row.avatar}` })
-        }
-        return res.render('profile', { avatarUrl: '/img/basic_avatar.png' })
-    })
+    // Determine whether the visitor is viewing their own profile
+    const signedInId = Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
+    const viewingOwnProfile = signedInId && signedInId === Number(formbarId)
+
+    // Helper to render with avatar and notifications
+    function renderWith(avatarUrl, notifications) {
+        // ensure notifications always provided to template
+        return res.render('profile', { avatarUrl, notifications: Array.isArray(notifications) ? notifications : [], isOwnProfile: viewingOwnProfile })
+    }
+
+    // If viewing own profile, fetch notifications; otherwise only fetch avatar
+    const fetchNotifications = viewingOwnProfile
+
+    if (fetchNotifications) {
+        db.all('SELECT notification, type, message, status FROM notifications WHERE user = ? ORDER BY notification DESC', [signedInId], (nerr, notes) => {
+            if (nerr) {
+                console.error('DB error fetching notifications:', nerr)
+                notes = []
+            }
+            // Now fetch avatar and render
+            db.get('SELECT avatar FROM users WHERE formbar_id = ?', [formbarId], (err, row) => {
+                if (err) {
+                    console.error('DB error fetching avatar:', err)
+                    return renderWith('/img/basic_avatar.png', notes)
+                }
+                if (row && row.avatar) {
+                    return renderWith(`/img/avatars/${row.avatar}`, notes)
+                }
+                return renderWith('/img/basic_avatar.png', notes)
+            })
+        })
+    } else {
+        db.get('SELECT avatar FROM users WHERE formbar_id = ?', [formbarId], (err, row) => {
+            if (err) {
+                console.error('DB error fetching avatar:', err)
+                return renderWith('/img/basic_avatar.png', [])
+            }
+            if (row && row.avatar) {
+                return renderWith(`/img/avatars/${row.avatar}`, [])
+            }
+            return renderWith('/img/basic_avatar.png', [])
+        })
+    }
 })
 
 // Accept avatar changes via either a data URL (from file upload) or a remote URL.
@@ -844,6 +877,44 @@ function friendEvents(socket, user) {
         })
     })
 }
+
+// Mark a notification as read (AJAX from profile page)
+app.post('/notifications/:id/read', (req, res) => {
+    if (!req.session || !req.session.user) return res.status(401).json({ error: 'Not authenticated' })
+    const nid = Number(req.params.id)
+    if (!Number.isInteger(nid) || nid <= 0) return res.status(400).json({ error: 'Invalid id' })
+    const userId = Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
+
+    db.get('SELECT user FROM notifications WHERE notification = ?', [nid], (err, row) => {
+        if (err) return res.status(500).json({ error: 'DB error' })
+        if (!row) return res.status(404).json({ error: 'Notification not found' })
+        if (Number(row.user) !== userId) return res.status(403).json({ error: 'Forbidden' })
+
+        db.run('UPDATE notifications SET status = ? WHERE notification = ?', ['read', nid], function (uerr) {
+            if (uerr) return res.status(500).json({ error: 'DB update error' })
+            return res.json({ success: true })
+        })
+    })
+})
+
+// Delete a notification (AJAX from profile page)
+app.post('/notifications/:id/delete', (req, res) => {
+    if (!req.session || !req.session.user) return res.status(401).json({ error: 'Not authenticated' })
+    const nid = Number(req.params.id)
+    if (!Number.isInteger(nid) || nid <= 0) return res.status(400).json({ error: 'Invalid id' })
+    const userId = Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
+
+    db.get('SELECT user FROM notifications WHERE notification = ?', [nid], (err, row) => {
+        if (err) return res.status(500).json({ error: 'DB error' })
+        if (!row) return res.status(404).json({ error: 'Notification not found' })
+        if (Number(row.user) !== userId) return res.status(403).json({ error: 'Forbidden' })
+
+        db.run('DELETE FROM notifications WHERE notification = ?', [nid], function (uerr) {
+            if (uerr) return res.status(500).json({ error: 'DB delete error' })
+            return res.json({ success: true })
+        })
+    })
+})
 
 /*
  ::::::::   ::::::::  ::::    ::: ::::    ::: :::::::::: :::::::: :::::::::::
