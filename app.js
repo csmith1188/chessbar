@@ -269,7 +269,7 @@ app.post('/profile/avatar', (req, res) => {
             })
 
             fileStream.on('error', (e) => {
-                try { fs.unlinkSync(filePath) } catch (e) {}
+                try { fs.unlinkSync(filePath) } catch (e) { }
                 return res.status(500).json({ error: 'Failed to save remote image' })
             })
         })
@@ -461,7 +461,7 @@ function initUser(socket) {
 ###        ###    ### ########## ########  ###     ### ###       ### ##########
 */
 
-function getVisibleGames() {
+function getVisibleGames(user) {
     // Return games visible to the current "user" (relies on the surrounding scope's `user`)
     return games
         .filter(g => {
@@ -527,10 +527,13 @@ function pregameEvents(socket, user) {
 
     // ---- Join game ----
     socket.on('join', (gameId) => {
+
         const found = games.find(game => (game.joinCode == gameId) || (game.id == gameId && game.visibility === 'public'))
         if (found) {
             found.join(user)
-        }
+        } else[
+            user.socket.emit('redirect', '/')
+        ]
 
         if (user.game) {
             if (user.game.messages) socket.emit('messageHistory', user.game.messages)
@@ -543,7 +546,7 @@ function pregameEvents(socket, user) {
 
     // ---- Request games list ----
     socket.on('gamesList', () => {
-        socket.emit('gamesList', getVisibleGames())
+        socket.emit('gamesList', getVisibleGames(user))
     })
 
     // ---- New game ----
@@ -563,7 +566,7 @@ function pregameEvents(socket, user) {
         game.update()
 
         // creator only sees private games they're in, so emit to creator only
-        socket.emit('gamesList', getVisibleGames())
+        socket.emit('gamesList', getVisibleGames(user))
         io.emit('refreshGames')
         socket.emit('redirect', `/game?code=${game.joinCode}`)
 
@@ -739,6 +742,72 @@ function chatEvents(socket, user) {
 }
 
 /*
+:::::::::: :::::::::  ::::::::::: :::::::::: ::::    ::: :::::::::   ::::::::
+:+:        :+:    :+:     :+:     :+:        :+:+:   :+: :+:    :+: :+:    :+:
++:+        +:+    +:+     +:+     +:+        :+:+:+  +:+ +:+    +:+ +:+
+:#::+::#   +#++:++#:      +#+     +#++:++#   +#+ +:+ +#+ +#+    +:+ +#++:++#++
++#+        +#+    +#+     +#+     +#+        +#+  +#+#+# +#+    +#+        +#+
+#+#        #+#    #+#     #+#     #+#        #+#   #+#+# #+#    #+# #+#    #+#
+###        ###    ### ########### ########## ###    #### #########   ########
+*/
+function friendEvents(socket, user) {
+
+    function getStatus(user1, user2) {
+        return new Promise((resolve) => {
+            db.get('SELECT status FROM friends WHERE (id_1 = ? AND id_2 = ?) OR (id_2 = ? AND id_1 = ?)',
+                [user1, user2, user1, user2], (err, row) => {
+                    if (err) {
+                        console.log(err)
+                        return resolve(null)
+                    }
+                    if (row && row.status) return resolve(row.status)
+                    return resolve(null)
+                }
+            )
+        })
+    }
+
+    function newFriendRecord(user1, user2) {
+
+        console.log(`Creating new friendship between ${user1} and ${user2}.`)
+
+        getStatus(user1, user2).then((status) => {
+            if (!status) {
+                db.run('INSERT INTO friends (id_1, id_2, status) VALUES (?, ?, "pending")', [user1, user2], (err) => { if (err) console.log(err) })
+            }
+        })
+    }
+
+    function updateFriendRecord(user1, user2, status) {
+        console.log(`Updating friendship between ${user1} and ${user2} to be status ${status}.`)
+
+        getStatus(user1, user2).then((existing) => {
+            if (existing) {
+                db.run('UPDATE friends SET status = ? WHERE (id_1 = ? AND id_2 = ?) OR (id_2 = ? AND id_1 = ?)', [status, user1, user2, user1, user2], (err) => { if (err) console.log(err) })
+            }
+        })
+    }
+
+    socket.on('friendRequest', (from, to) => {
+        console.log('Freind request event:', from, to)
+
+        from = Number(from)
+        to = Number(to)
+
+        if (!Number.isFinite(from) || !Number.isFinite(to)) return
+        if (from == to) return
+
+        getStatus(from, to).then((status) => {
+            if (status == 'pending') {
+                updateFriendRecord(from, to, 'friends')
+            } else {
+                newFriendRecord(from, to)
+            }
+        })
+    })
+}
+
+/*
  ::::::::   ::::::::  ::::    ::: ::::    ::: :::::::::: :::::::: :::::::::::
 :+:    :+: :+:    :+: :+:+:   :+: :+:+:   :+: :+:       :+:    :+:    :+:
 +:+        +:+    +:+ :+:+:+  +:+ :+:+:+  +:+ +:+       +:+           +:+
@@ -754,11 +823,12 @@ io.on('connection', (socket) => {
 
     logUsers()
 
-    socket.emit('gamesList', getVisibleGames())
+    socket.emit('gamesList', getVisibleGames(user))
 
     pregameEvents(socket, user)
     inGameEvents(socket, user)
     chatEvents(socket, user)
+    friendEvents(socket, user)
 
     //! Disconnection
     socket.on('disconnect', () => {

@@ -40,7 +40,7 @@ let soundMap = {
     break6: break6,
     alarm: alarm,
     warning: warning,
-    bullet_music: bullet_music,
+    bullet_music: bullet_music
 }
 
 socket.on('sound', (sound) => {
