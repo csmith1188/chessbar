@@ -14,7 +14,7 @@ let takenGameCodes = []
 */
 
 class Game {
-    constructor(visibility, name = null, chatOn = true, startWhite = true, time = null) {
+    constructor(visibility, name = null, chatOn = true, startWhite = true, musicOn = true, time = null) {
         this.visibility = visibility
         this.id = 1
 
@@ -24,6 +24,7 @@ class Game {
 
         this.chatOn = chatOn
         this.startWhite = startWhite
+        this.musicOn = musicOn
 
         this.name = name ? name : this.id
 
@@ -201,6 +202,10 @@ class Game {
             clearTimeout(this.leaveTimers[user.id])
             delete this.leaveTimers[user.id]
         }
+        if (this.musicOn == true) {
+            user.socket.emit('sound', 'bullet_music')
+        }
+
 
         this.users.push(user)
         user.game = this

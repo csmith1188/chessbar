@@ -41,6 +41,7 @@ fbSocket.on('connect', () => {
 
 const jwt = require('jsonwebtoken')
 const session = require('express-session')
+const { error } = require('console')
 
 const AUTH_URL = FORMBAR_URL
 // callback URL that Formbar should redirect back to with ?token=JWT
@@ -549,7 +550,7 @@ function pregameEvents(socket, user) {
     })
 
     // ---- New game ----
-    socket.on('newGame', (visibility = 'public', name = '', chatOn = true, startWhite = true, time = null) => {
+    socket.on('newGame', (visibility = 'public', name = '', chatOn = true, startWhite = true, musicOn = true, time = null) => {
         if (!(user && user.id > 0)) {
             socket.emit('redirect', '/login')
             return
@@ -560,7 +561,7 @@ function pregameEvents(socket, user) {
         const parsed = Number(time)
         const t = Number.isFinite(parsed) && parsed > 0 ? parsed : null
 
-        const game = new Game(visibility, name, chatOn, startWhite, t)
+        const game = new Game(visibility, name, chatOn, startWhite, musicOn, t)
         game.owner = user
         game.update()
 

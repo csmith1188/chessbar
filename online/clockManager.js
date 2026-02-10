@@ -57,6 +57,12 @@ function startClockManager(io, games, tickMs = 1000) {
                         const loserSide = game.whiteClock <= 0 ? 'white' : 'black'
                         const winnerSide = loserSide === 'white' ? 'black' : 'white'
 
+                        if (loserSide == 'white') {
+                            game.prevWhite.socket.emit('sound', 'alarm')
+                        } else {
+                            game.prevBlack.socket.emit('sound', 'alarm')
+                        }
+
                         const loser = game.users.find(u => u.side === loserSide)
                         const winner = game.users.find(u => u.side === winnerSide)
 

@@ -7,9 +7,10 @@
     <title>Profile - Chessbar</title>
     <link rel='stylesheet' href='/css/sidebar.css'>
     <link rel='stylesheet' href='/css/profile.css'>
+    <link rel='stylesheet' href='/css/game.css'>
 </head>
 
-<body class='with-sidebar'>
+<body class='with-sidebar' style="padding-top: 35px;">
     <%- include('partials/sidebar') %>
         <div id='player'>
             <div class='avatar-large'>
@@ -28,12 +29,28 @@
                     Friend<img src='/img/emoji-1.png' class='friend-emoji'></button>
                 <button id='challenge-btn' class='btn secondary'>⚔️ Challenge ⚔️</button>
             </div>
+
+            <div style="position: relative; right: 0px; bottom: 0px; padding: 0; width: 100%;" id='chat-container'>
+                <div id='chat-sidebar'>
+                    <h2>Users</h2>
+                </div>
+
+                <div id='chat-main'>
+                    <div id='messages'></div>
+
+                    <div id='inputBar'>
+                        <input type='text' id='msg' placeholder='Type your message here...' />
+                        <button id='send'>Send</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div id='profile'>
             <!-- Right column: main profile info -->
             <div class='profile-info'>
-                <div style='margin-top:12px; display:grid; grid-template-columns: repeat(2,1fr); gap:12px;'>
+                <div style='display:grid; grid-template-columns: repeat(2,1fr); gap:12px;'>
                     <div class='panel'>
                         <div class='small'>Win %</div>
                         <div id='winPercent'>0</div>
@@ -86,7 +103,6 @@
 <script src='js/socket.js'></script>
 <script>
     // Expose whether this page is the signed-in user's own profile.
-    // If `?usr=` is present and differs from the session user id, it's someone else's profile.
     (function () {
         try {
             const params = new URLSearchParams(window.location.search)
@@ -217,6 +233,10 @@
             socket.emit('friendRequest', me.id, viewingUser)
         })
     }
+</script>
+
+<script>
+
 </script>
 
 </html>

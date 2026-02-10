@@ -8,7 +8,10 @@
     <link rel='stylesheet' href='/css/sidebar.css'>
     <link rel='stylesheet' href='/css/profile.css'>
     <style>
-        :root { --guideline-color: #3f3f3f; }
+        :root {
+            --guideline-color: #3f3f3f;
+        }
+
         .admin-container {
             max-width: 1000px;
             margin: 24px auto;
@@ -28,6 +31,7 @@
             background: var(--panel-bg, #00000013);
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.719)
         }
+
         .admin-header {
             display: flex;
             justify-content: space-between;
@@ -35,15 +39,22 @@
             gap: 12px;
             flex-wrap: wrap;
         }
-        .admin-header p { margin: 0; }
+
+        .admin-header p {
+            margin: 0;
+        }
+
         .users-table-wrap {
             border: solid 3px var(--guideline-color);
             max-height: 65vh;
             overflow: auto;
             /* Hide native scrollbars but keep scrolling */
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE 10+ */
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE 10+ */
         }
+
         .users-toolbar {
             display: flex;
             justify-content: flex-end;
@@ -51,6 +62,7 @@
             align-items: center;
             margin: 8px 0;
         }
+
         .players-bar {
             display: flex;
             justify-content: space-between;
@@ -58,13 +70,19 @@
             gap: 12px;
             margin-bottom: 6px;
         }
-        .users-table-wrap::-webkit-scrollbar { display: none; } /* Chrome, Safari */
+
+        .users-table-wrap::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Chrome, Safari */
         /* Table styling: spaced rows with grey separators */
         #usersTable {
             width: 100%;
             font-size: 14px;
             background: var(--panel-bg, #ffffff1c);
         }
+
         #usersTable thead th {
             text-align: left;
             padding: 10px 12px;
@@ -77,46 +95,56 @@
             top: 0;
             z-index: 3;
         }
+
         #usersTable thead th:last-child {
             border-right: none;
         }
+
         /* Make the thead itself sticky and draw a thicker guideline that stays
-           attached to the header while scrolling. We override per-TH sticky
-           positioning so the thead pseudo-element can be positioned properly. */
+           attached to the header while scrolling. */
         #usersTable thead {
             position: sticky;
             top: 0;
             z-index: 6;
         }
+
         #usersTable thead th {
-            position: relative; /* ensure th content sits above the pseudo-element */
+            position: relative;
+            /* ensure th content sits above the pseudo-element */
             z-index: 7;
         }
+
         #usersTable tbody td {
             padding: 10px 12px;
             border-bottom: 1px solid var(--guideline-color);
             border-right: 1px solid var(--guideline-color);
             vertical-align: middle;
         }
+
         /* Remove right border on the last column so table edges look clean */
         #usersTable tbody td:last-child {
             border-right: none;
         }
+
         #usersTable tbody tr:last-child td {
             border-bottom: none;
         }
+
         #usersTable tbody tr:hover td {
             background: rgba(255, 255, 255, 0.254) !important;
         }
+
         /* Zebra striping: make every other row slightly lighter for readability */
         #usersTable tbody tr:nth-child(even) td {
             background: rgba(255, 255, 255, 0.06);
         }
+
         /* Remove native number input spinners */
         input[type=number] {
             -moz-appearance: textfield;
             appearance: textfield;
         }
+
         input[type=number]::-webkit-outer-spin-button,
         input[type=number]::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -131,22 +159,29 @@
             cursor: pointer;
             transition: transform .12s ease, box-shadow .12s ease, color .12s;
         }
+
         .user-link:hover {
             transform: translateY(-1px) scale(1.1);
-            box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
             color: var(--muted);
             text-decoration: underline;
         }
 
-        .award-btn, .set-btn {
+        .award-btn,
+        .set-btn {
             cursor: pointer;
             transition: transform .12s ease, box-shadow .12s ease, background .12s;
         }
-        .award-btn:hover, .set-btn:hover {
+
+        .award-btn:hover,
+        .set-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
         }
-        .award-btn:active, .set-btn:active, .user-link:active {
+
+        .award-btn:active,
+        .set-btn:active,
+        .user-link:active {
             transform: translateY(0);
         }
     </style>
@@ -154,59 +189,64 @@
 
 <body class="with-sidebar">
     <%- include('partials/sidebar') %>
-    <div class="admin-container">
-        <div class="admin-header">
-            <h1>Admin dashboard</h1>
-            <p>Signed in as: <strong>
-                <%= (user && user.displayName) || (user && user.display_name) || (user && user.email) || 'Unknown' %>
-            </strong></p>
+        <div class="admin-container">
+            <div class="admin-header">
+                <h1>Admin dashboard</h1>
+                <p>Signed in as: <strong>
+                        <%= (user && user.displayName) || (user && user.display_name) || (user && user.email)
+                            || 'Unknown' %>
+                    </strong></p>
+            </div>
+
+            <section>
+                <div class="players-bar">
+                    <h2>Players <button id="addFakeBtn"
+                            style="margin-left:12px;font-size:12px;padding:4px 8px;display:none">Add 50 test
+                            users</button></h2>
+                    <div class="users-toolbar">
+                        <label for="searchInput" style="font-weight:600;margin-right:4px">Search</label>
+                        <input id="searchInput" placeholder="Name or ID"
+                            style="padding:6px;border-radius:4px;border:1px solid #666;min-width:180px">
+                        <select id="searchMode" style="padding:6px;border-radius:4px;border:1px solid #666">
+                            <option value="name">Name</option>
+                            <option value="id">ID</option>
+                        </select>
+                        <button id="clearSearch" style="padding:6px 8px;font-size:12px">Clear</button>
+                    </div>
+                </div>
+                <div class="users-table-wrap">
+                    <table id="usersTable" style="width:100%; border-collapse:collapse">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left">Name</th>
+                                <th style="text-align:right">Wins</th>
+                                <th style="text-align:right">Losses</th>
+                                <th style="text-align:right">Draws</th>
+                                <th style="text-align:right">Started</th>
+                                <th style="text-align:right">Finished</th>
+                                <th style="text-align:center">Tokens</th>
+                                <th style="text-align:center">Award</th>
+                                <th style="text-align:center">Set</th>
+                                <th style="text-align:right">ID</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <a href='/' class='small back-link'
+                style='margin-top:18px;display:inline-block;text-decoration:none;color:var(--muted)'>← Back to games</a>
         </div>
 
-        <section>
-            <div class="players-bar">
-                <h2>Players <button id="addFakeBtn" style="margin-left:12px;font-size:12px;padding:4px 8px;display:none">Add 50 test users</button></h2>
-                <div class="users-toolbar">
-                    <label for="searchInput" style="font-weight:600;margin-right:4px">Search</label>
-                    <input id="searchInput" placeholder="Name or ID" style="padding:6px;border-radius:4px;border:1px solid #666;min-width:180px">
-                    <select id="searchMode" style="padding:6px;border-radius:4px;border:1px solid #666">
-                        <option value="name">Name</option>
-                        <option value="id">ID</option>
-                    </select>
-                    <button id="clearSearch" style="padding:6px 8px;font-size:12px">Clear</button>
-                </div>
-            </div>
-            <div class="users-table-wrap">
-                <table id="usersTable" style="width:100%; border-collapse:collapse">
-                    <thead>
-                        <tr>
-                            <th style="text-align:left">Name</th>
-                            <th style="text-align:right">Wins</th>
-                            <th style="text-align:right">Losses</th>
-                            <th style="text-align:right">Draws</th>
-                            <th style="text-align:right">Started</th>
-                            <th style="text-align:right">Finished</th>
-                            <th style="text-align:center">Tokens</th>
-                            <th style="text-align:center">Award</th>
-                            <th style="text-align:center">Set</th>
-                            <th style="text-align:right">ID</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </section>
-
-        <a href='/' class='small back-link' style='margin-top:18px;display:inline-block;text-decoration:none;color:var(--muted)'>← Back to games</a>
-    </div>
-
-    <script src='/js/sidebar.js'></script>
-    <script>
-        let currentUsers = []
+        <script src='/js/sidebar.js'></script>
+        <script>
+            let currentUsers = []
 
         function createRowElement(u) {
             const tr = document.createElement('tr')
             tr.innerHTML = `
-                <td><a href="/profile?usr=${u.formbar_id}" class="user-link" title="View profile" rel="noopener noreferrer">${u.display_name || u.displayName || ''}</a></td>
+                <td><a href="/profile?usr=${u.formbar_id}" class="user-link" title="View profile" target="_blank" rel="noopener noreferrer">${u.display_name || u.displayName || ''}</a></td>
                 <td style="text-align:right">${u.wins || 0}</td>
                 <td style="text-align:right">${u.losses || 0}</td>
                 <td style="text-align:right">${u.draws || u.draws === 0 ? u.draws : 0}</td>
@@ -224,134 +264,133 @@
                 <td style="text-align:right">${u.formbar_id}</td>
             `
 
-            // Award handler
-            tr.querySelector('.award-btn').addEventListener('click', async () => {
-                const amt = Number(tr.querySelector('.award-amt').value) || 1
-                if (u._fake) {
-                    u.tokens = (u.tokens || 0) + amt
+                // Award handler
+                tr.querySelector('.award-btn').addEventListener('click', async () => {
+                    const amt = Number(tr.querySelector('.award-amt').value) || 1
+                    if (u._fake) {
+                        u.tokens = (u.tokens || 0) + amt
+                        renderUsers(currentUsers)
+                        return
+                    }
+                    const resp = await fetch(`/admin/users/${u.formbar_id}/add`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ amount: amt })
+                    })
+                    if (!resp.ok) return alert('Failed to award tokens')
+                    await loadUsers()
+                })
+
+                // Set handler
+                tr.querySelector('.set-btn').addEventListener('click', async () => {
+                    const tokens = Number(tr.querySelector('.set-amt').value) || 0
+                    if (u._fake) {
+                        u.tokens = tokens
+                        renderUsers(currentUsers)
+                        return
+                    }
+                    const resp = await fetch(`/admin/users/${u.formbar_id}/set`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ tokens })
+                    })
+                    if (!resp.ok) return alert('Failed to set tokens')
+                    await loadUsers()
+                })
+
+                return tr
+            }
+
+            function getFilteredUsers() {
+                const qEl = document.getElementById('searchInput')
+                const modeEl = document.getElementById('searchMode')
+                if (!qEl || !modeEl) return currentUsers
+                const q = (qEl.value || '').trim().toLowerCase()
+                const mode = modeEl.value || 'name'
+                if (!q) return currentUsers
+                if (mode === 'id') {
+                    return currentUsers.filter(u => (u.formbar_id || '').toString().toLowerCase().includes(q))
+                }
+                return currentUsers.filter(u => ((u.display_name || u.displayName || '')).toString().toLowerCase().includes(q))
+            }
+
+            function renderUsers(users) {
+                const tbody = document.querySelector('#usersTable tbody')
+                tbody.innerHTML = ''
+                const list = Array.isArray(users) ? users : getFilteredUsers()
+                list.forEach(u => {
+                    const tr = createRowElement(u)
+                    tbody.appendChild(tr)
+                })
+            }
+
+            async function loadUsers() {
+                try {
+                    const res = await fetch('/admin/users')
+                    if (!res.ok) {
+                        const txt = await res.text()
+                        alert('Failed to load users: ' + txt)
+                        return
+                    }
+                    const data = await res.json()
+                    currentUsers = data.users || []
                     renderUsers(currentUsers)
-                    return
+                } catch (err) {
+                    console.error(err)
+                    alert('Error loading users')
                 }
-                const resp = await fetch(`/admin/users/${u.formbar_id}/add`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amount: amt })
-                })
-                if (!resp.ok) return alert('Failed to award tokens')
-                await loadUsers()
+            }
+
+            function generateFakeUsers(n) {
+                const start = currentUsers.length + 1
+                for (let i = 0; i < n; i++) {
+                    const id = `T${start + i}-${Math.floor(Math.random() * 90000) + 10000}`
+                    currentUsers.push({
+                        formbar_id: id,
+                        display_name: `Test User ${start + i}`,
+                        tokens: Math.floor(Math.random() * 200),
+                        wins: Math.floor(Math.random() * 50),
+                        losses: Math.floor(Math.random() * 50),
+                        draws: Math.floor(Math.random() * 20),
+                        started: Math.floor(Math.random() * 200),
+                        finished: Math.floor(Math.random() * 200),
+                        _fake: true
+                    })
+                }
+                renderUsers()
+            }
+
+            document.getElementById('addFakeBtn').addEventListener('click', () => generateFakeUsers(50))
+
+            // Show/hide the test-users button when the user presses the backtick (`) key.
+            // Ignore keypresses when typing into inputs/textareas or contenteditable areas.
+            document.addEventListener('keydown', (e) => {
+                const isBacktick = e.key === '`' || e.code === 'Backquote'
+                if (!isBacktick) return
+                const active = document.activeElement
+                if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return
+                const btn = document.getElementById('addFakeBtn')
+                if (!btn) return
+                // Toggle visibility
+                if (btn.style.display === 'none' || getComputedStyle(btn).display === 'none') {
+                    btn.style.display = ''
+                    // Small focus so the user can press it with Enter if desired
+                    btn.focus()
+                } else {
+                    btn.style.display = 'none'
+                }
             })
 
-            // Set handler
-            tr.querySelector('.set-btn').addEventListener('click', async () => {
-                const tokens = Number(tr.querySelector('.set-amt').value) || 0
-                if (u._fake) {
-                    u.tokens = tokens
-                    renderUsers(currentUsers)
-                    return
-                }
-                const resp = await fetch(`/admin/users/${u.formbar_id}/set`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ tokens })
-                })
-                if (!resp.ok) return alert('Failed to set tokens')
-                await loadUsers()
-            })
-
-            return tr
-        }
-
-        function getFilteredUsers() {
-            const qEl = document.getElementById('searchInput')
-            const modeEl = document.getElementById('searchMode')
-            if (!qEl || !modeEl) return currentUsers
-            const q = (qEl.value || '').trim().toLowerCase()
-            const mode = modeEl.value || 'name'
-            if (!q) return currentUsers
-            if (mode === 'id') {
-                return currentUsers.filter(u => (u.formbar_id || '').toString().toLowerCase().includes(q))
+            // Search handlers
+            const searchInput = document.getElementById('searchInput')
+            const searchMode = document.getElementById('searchMode')
+            const clearBtn = document.getElementById('clearSearch')
+            if (searchInput && searchMode) {
+                searchInput.addEventListener('input', () => renderUsers())
+                searchMode.addEventListener('change', () => renderUsers())
+                clearBtn.addEventListener('click', () => { searchInput.value = ''; renderUsers() })
             }
-            return currentUsers.filter(u => ((u.display_name || u.displayName || '')).toString().toLowerCase().includes(q))
-        }
-
-        function renderUsers(users) {
-            const tbody = document.querySelector('#usersTable tbody')
-            tbody.innerHTML = ''
-            const list = Array.isArray(users) ? users : getFilteredUsers()
-            list.forEach(u => {
-                const tr = createRowElement(u)
-                tbody.appendChild(tr)
-            })
-        }
-
-        async function loadUsers() {
-            try {
-                const res = await fetch('/admin/users')
-                if (!res.ok) {
-                    const txt = await res.text()
-                    alert('Failed to load users: ' + txt)
-                    return
-                }
-                const data = await res.json()
-                currentUsers = data.users || []
-                renderUsers(currentUsers)
-            } catch (err) {
-                console.error(err)
-                alert('Error loading users')
-            }
-        }
-
-        function generateFakeUsers(n) {
-            const start = currentUsers.length + 1
-            for (let i = 0; i < n; i++) {
-                const id = `T${start + i}-${Math.floor(Math.random() * 90000) + 10000}`
-                currentUsers.push({
-                    formbar_id: id,
-                    display_name: `Test User ${start + i}`,
-                    tokens: Math.floor(Math.random() * 200),
-                    wins: Math.floor(Math.random() * 50),
-                    losses: Math.floor(Math.random() * 50),
-                    draws: Math.floor(Math.random() * 20),
-                    started: Math.floor(Math.random() * 200),
-                    finished: Math.floor(Math.random() * 200),
-                    _fake: true
-                })
-            }
-            renderUsers()
-        }
-
-        document.getElementById('addFakeBtn').addEventListener('click', () => generateFakeUsers(50))
-
-        // Show/hide the test-users button when the user presses the backtick (`) key.
-        // Ignore keypresses when typing into inputs/textareas or contenteditable areas.
-        document.addEventListener('keydown', (e) => {
-            const isBacktick = e.key === '`' || e.code === 'Backquote'
-            if (!isBacktick) return
-            const active = document.activeElement
-            if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return
-            const btn = document.getElementById('addFakeBtn')
-            if (!btn) return
-            // Toggle visibility
-            if (btn.style.display === 'none' || getComputedStyle(btn).display === 'none') {
-                btn.style.display = ''
-                // Small focus so the user can press it with Enter if desired
-                btn.focus()
-            } else {
-                btn.style.display = 'none'
-            }
-        })
-
-        // Search handlers
-        const searchInput = document.getElementById('searchInput')
-        const searchMode = document.getElementById('searchMode')
-        const clearBtn = document.getElementById('clearSearch')
-        if (searchInput && searchMode) {
-            searchInput.addEventListener('input', () => renderUsers())
-            searchMode.addEventListener('change', () => renderUsers())
-            clearBtn.addEventListener('click', () => { searchInput.value = ''; renderUsers() })
-        }
 
         loadUsers()
     </script>
-    <%- include('partials/notificationPopup') %>
 </body>
 
 </html>

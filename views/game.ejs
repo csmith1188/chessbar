@@ -6,6 +6,7 @@
     <link href='https://fonts.googleapis.com/css2?family=Lavishly+Yours&display=swap' rel='stylesheet'>
     <link rel='stylesheet' href='/css/sidebar.css'>
     <link rel='stylesheet' href='/css/game.css'>
+    <link rel='stylesheet' href='/css/profile.css'>
 </head>
 
 <body class="with-sidebar">
@@ -62,7 +63,6 @@
                 <div id='inputBar'>
                     <input type='text' id='msg' placeholder='Type your message here...' />
                     <button id='send'>Send</button>
-                    <button id='export-pgn' title='Generate PGN from game moves'>Export PGN</button>
                 </div>
             </div>
         </div>
@@ -100,7 +100,6 @@
                     <input type='color' id='moveColor'>
                     <label for='moveAlpha'>Transparency (0-1):</label>
                     <input type='number' id='moveAlpha' min='0' max='1' step='0.01' value='0.31'>
-
                 </div>
 
                 <div class='setting-row'>
@@ -108,7 +107,6 @@
                     <input type='color' id='arrowColor'>
                     <label for='arrowAlpha'>Transparency (0-1):</label>
                     <input type='number' id='arrowAlpha' min='0' max='1' step='0.01' value='0.6'>
-
                 </div>
 
                 <div class='setting-row'>
@@ -150,6 +148,7 @@
                 </fieldset>
 
                 <div class='settings-actions'>
+                    <button id='export-pgn' type="button" title='Generate PGN from game moves'>Export PGN</button>
                     <button id='save-settings' type='button'>Save & reload</button>
                     <button id='reset-settings' type='button'>Reset</button>
                     <button id='close-settings' type='button' tabindex='0'>Close</button>
