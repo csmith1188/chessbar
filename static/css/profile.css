@@ -404,7 +404,7 @@ input:focus {
 /* chatbox and silt */
 
 #chat-container {
-    margin-top: 40px;
+    margin-top: 25px;
     width: 360px;
     max-height: calc(100vh - 36px);
     display: flex;
