@@ -828,7 +828,7 @@ function friendEvents(socket, user) {
             if (status == 'friends') return notification(from, 'Friendship', `You are already friends with ${linkTo(to)}.`)
             if (status == 'pending') {
                 getFirstUser(from, to).then((u) => { 
-                    if (u == from) return 
+                    if (u == from) return notification(from, 'Friendship', `You already have a pending request for ${linkTo(to)}.`)
 
                     updateFriendRecord(from, to, 'friends')
     
@@ -837,6 +837,7 @@ function friendEvents(socket, user) {
                 })
             } else {
                 newFriendRecord(from, to)
+                notification(from, 'Friendship', `Sent a friend request to ${linkTo(to)}.`)
                 notification(to, 'Friendship', `You have a friend request from ${linkTo(from)}.`)
             }
         })

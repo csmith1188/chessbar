@@ -58,12 +58,12 @@ const notifType = document.getElementById('notif_type')
 const notifMsg = document.getElementById('notif_message')
 
 socket.on('notification', (type, message) => {
-    if (!notifBox.classList.contains('hidden')) return
+    if (!notifBox.classList.contains('hide-popup')) return
     
     notifType.innerHTML = type
     notifMsg.innerHTML = message
 
-    notifBox.classList.toggle('hidden')
+    notifBox.classList.toggle('hide-popup')
 
-    setTimeout(() => { notifBox.classList.add('hidden') }, 5000)
+    setTimeout(() => { notifBox.classList.add('hide-popup') }, 5000)
 })
