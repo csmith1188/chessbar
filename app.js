@@ -845,7 +845,7 @@ function friendEvents(socket, user) {
     }
 
     function linkTo(usr) {
-        return `<a href="/profile?usr=${usr}" target="_blank">${usr}</a>`
+        return `<a href="/profile?usr=${usr}" target="_blank" rel="noopener noreferrer">${usr}</a>`
     }
 
     socket.on('friendRequest', (from, to) => {
