@@ -68,10 +68,12 @@
                     </div>
                     <div class='footer-note'>Public games are visible to everyone. Private games require the join code.
                     </div>
+                    <button id='newPublicGame' class='btn' onclick='openNav()'>New Game</button>
                 </div>
             </aside>
         </main>
     </div>
+    <%- include('partials/notificationPopup') %>
     <script src='/js/sidebar.js'></script>
 </body>
 <script src='/socket.io/socket.io.js'></script>
