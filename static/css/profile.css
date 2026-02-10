@@ -406,7 +406,7 @@ input:focus {
     flex-direction: column;
     gap: 8px;
     margin-top: 8px;
-    max-height: 25vh;
+    max-height: 50vh;
     overflow-y: auto;
     padding-right: 6px; /* room for scrollbar */
 }
