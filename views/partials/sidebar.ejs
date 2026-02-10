@@ -17,7 +17,12 @@
 
     <nav class="sidebar-nav" aria-label="Primary">
       <a href="/" class="sidebar-link">Select a game</a>
-      <a href="/profile" class="sidebar-link">Profile</a>
+      <a href="/profile" class="sidebar-link">
+        Profile
+        <% if (typeof unreadNotifCount !== 'undefined' && unreadNotifCount > 0) { %>
+          <span class="notif-badge"><%= unreadNotifCount %></span>
+        <% } %>
+      </a>
       <% if (typeof user === 'undefined' || !user) { %>
         <a href="/login" class="sidebar-link">Sign in</a>
       <% } %>

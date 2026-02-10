@@ -70,4 +70,28 @@ socket.on('notification', (type, message) => {
     notifBox.classList.toggle('hide-popup')
 
     setTimeout(() => { notifBox.classList.add('hide-popup') }, 5000)
+    
+    // Update the notification badge count in sidebar
+    updateNotifBadge(1)
 })
+
+// Function to update the notification badge count in the sidebar
+function updateNotifBadge(delta) {
+    const profileLink = document.querySelector('.sidebar-link[href="/profile"]')
+    if (!profileLink) return
+    
+    let badge = profileLink.querySelector('.notif-badge')
+    let currentCount = badge ? parseInt(badge.textContent) || 0 : 0
+    let newCount = Math.max(0, currentCount + delta)
+    
+    if (newCount > 0) {
+        if (!badge) {
+            badge = document.createElement('span')
+            badge.className = 'notif-badge'
+            profileLink.appendChild(badge)
+        }
+        badge.textContent = newCount
+    } else if (badge) {
+        badge.remove()
+    }
+}
