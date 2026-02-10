@@ -7,11 +7,9 @@
 #player {
     display: flex;
     flex-direction: column;
-    /* Align items at the top (start of the vertical/main axis) */
     justify-content: flex-start;
-    /* Center items along the horizontal/cross axis */
     align-items: center;
-    margin-top: 45px;
+    margin-top: 5px;
 }
 
 #pfp {
@@ -68,12 +66,10 @@ body {
 }
 
 body {
-    margin: 0;
     font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
     background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
     color: #eaf4fb;
     -webkit-font-smoothing: antialiased;
-    padding: 28px 18px;
     display: flex;
     gap: 20px;
     align-items: flex-start;
@@ -94,7 +90,6 @@ body {
     /* grid-template-columns: 160px 1fr; slightly narrower left column */
     gap: 20px;
     align-items: start;
-    margin: 18px 0;
     /* flex proportion: take up 2 parts out of 4 (50%) */
     flex: 2 1 0;
     /* Make sure profile visually sits on top of other page panels when they overlap */
@@ -126,6 +121,7 @@ body {
     display: flex;
     gap: 10px;
     justify-content: center;
+   
 }
 
 #btn-wrap button {
@@ -184,7 +180,6 @@ body {
 
 #buyTokens {
     max-width: 420px;
-    margin: 0;
     width: 100%;
     height: min-content
 }
@@ -403,6 +398,70 @@ input:focus {
 /* Change label color when checkbox is checked */
 .checkbox-item input[type='checkbox']:checked+label {
     color: #fff;
+}
+
+/* Notifications */
+.notification-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    max-height: 50vh;
+    overflow-y: auto;
+    padding-right: 6px; /* room for scrollbar */
+}
+.notification {
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.02);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+}
+.notification .notif-type {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--muted);
+}
+.notification .notif-message {
+    font-size: 14px;
+    color: #eaf4fb;
+    white-space: pre-wrap;
+}
+.notification.unread {
+    background: linear-gradient(90deg, rgba(94,234,212,0.06), rgba(94,234,212,0.03));
+    border-color: rgba(94,234,212,0.18);
+    box-shadow: 0 6px 14px rgba(2, 150, 120, 0.06);
+}
+.notif-delete {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 120ms ease;
+}
+.notif-delete:hover {
+    color: #fff;
+    border-color: rgba(255,255,255,0.16);
+    background: rgba(255,255,255,0.08);
+}
+.notif-delete:active {
+    transform: scale(0.96);
+}
+.no-notifs {
+    color: var(--muted);
+    padding: 10px 6px;
 }
 
 

@@ -1,11 +1,32 @@
-#notif_popup{
-    width: 100%;
-    position: abosolute;
+#notif_popup {
+    width: 75%;
+    height: 8em;
+    position: absolute;
     bottom: 0;
+    background-color: rgba(255, 255, 255, 0.06);
+    border-radius: 1em;
+    z-index: 999;
+    padding-left: 2em;
     display: block;
-    background-color: blue;
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 250ms ease;
 }
 
-#notif_popup.hidden {
-    display: none;
+#notif_popup a {
+    color: grey !important;
+    transition: all ease 250ms;
+}
+
+#notif_popup a:hover {
+    font-size: 1.1em;
+}
+
+#notif_popup.hide-popup {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#notif_popup h2 {
+    padding-top: 2em
 }

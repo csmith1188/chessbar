@@ -38,7 +38,8 @@ db.serialize(() => {
             notification INTEGER PRIMARY KEY AUTOINCREMENT,
             user INTEGER NOT NULL,
             type TEXT,
-            message TEXT NOT NULL
+            message TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT "unread"
     );`)
 
 });

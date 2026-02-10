@@ -5,6 +5,7 @@
 body.with-sidebar {
     padding-left: var(--sidebar-width);
     transition: padding-left 180ms ease;
+    margin-left: 10px;
 }
 
 body.sidebar-collapsed.with-sidebar {

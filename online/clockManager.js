@@ -60,6 +60,22 @@ function startClockManager(io, games, tickMs = 1000) {
                         const loser = game.users.find(u => u.side === loserSide)
                         const winner = game.users.find(u => u.side === winnerSide)
 
+                        const prevWhite = game.prevWhite
+                        const prevBlack = game.prevBlack
+
+                        if (loserSide === 'white') {
+                            if (prevWhite && prevWhite.socket) {
+                                prevWhite.socket.emit('sound', 'alarm')
+                            } else if (loser && loser.socket) {
+                                loser.socket.emit('sound', 'alarm')
+                            }
+                        } else {
+                            if (prevBlack && prevBlack.socket) {
+                                prevBlack.socket.emit('sound', 'alarm')
+                            } else if (loser && loser.socket) {
+                                loser.socket.emit('sound', 'alarm')
+                            }
+                        }
                         // record winner/loser on the game object
                         if (winner) game.winner = winner
                         if (loser) game.loser = loser

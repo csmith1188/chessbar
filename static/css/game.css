@@ -451,10 +451,6 @@ input:focus {
     outline-offset: 2px
 }
 
-.hidden {
-    display: none
-}
-
 ::-webkit-scrollbar {
     display: none;
 }

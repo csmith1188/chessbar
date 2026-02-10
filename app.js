@@ -41,6 +41,7 @@ fbSocket.on('connect', () => {
 
 const jwt = require('jsonwebtoken')
 const session = require('express-session')
+const { error } = require('console')
 
 const AUTH_URL = FORMBAR_URL
 // callback URL that Formbar should redirect back to with ?token=JWT
@@ -151,18 +152,51 @@ app.get('/profile', (req, res) => {
     const viewingUser = req.query && req.query.usr ? Number(req.query.usr) : null
     const formbarId = viewingUser || Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
 
-    if (!formbarId) return res.render('profile', { avatarUrl: '/img/basic_avatar.png' })
+    if (!formbarId) return res.render('profile', { avatarUrl: '/img/basic_avatar.png', notifications: [], isOwnProfile: false })
 
-    db.get('SELECT avatar FROM users WHERE formbar_id = ?', [formbarId], (err, row) => {
-        if (err) {
-            console.error('DB error fetching avatar:', err)
-            return res.render('profile', { avatarUrl: '/img/basic_avatar.png' })
-        }
-        if (row && row.avatar) {
-            return res.render('profile', { avatarUrl: `/img/avatars/${row.avatar}` })
-        }
-        return res.render('profile', { avatarUrl: '/img/basic_avatar.png' })
-    })
+    // Determine whether the visitor is viewing their own profile
+    const signedInId = Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
+    const viewingOwnProfile = signedInId && signedInId === Number(formbarId)
+
+    // Helper to render with avatar and notifications
+    function renderWith(avatarUrl, notifications) {
+        // ensure notifications always provided to template
+        return res.render('profile', { avatarUrl, notifications: Array.isArray(notifications) ? notifications : [], isOwnProfile: viewingOwnProfile })
+    }
+
+    // If viewing own profile, fetch notifications; otherwise only fetch avatar
+    const fetchNotifications = viewingOwnProfile
+
+    if (fetchNotifications) {
+        db.all('SELECT notification, type, message, status FROM notifications WHERE user = ? ORDER BY notification DESC', [signedInId], (nerr, notes) => {
+            if (nerr) {
+                console.error('DB error fetching notifications:', nerr)
+                notes = []
+            }
+            // Now fetch avatar and render
+            db.get('SELECT avatar FROM users WHERE formbar_id = ?', [formbarId], (err, row) => {
+                if (err) {
+                    console.error('DB error fetching avatar:', err)
+                    return renderWith('/img/basic_avatar.png', notes)
+                }
+                if (row && row.avatar) {
+                    return renderWith(`/img/avatars/${row.avatar}`, notes)
+                }
+                return renderWith('/img/basic_avatar.png', notes)
+            })
+        })
+    } else {
+        db.get('SELECT avatar FROM users WHERE formbar_id = ?', [formbarId], (err, row) => {
+            if (err) {
+                console.error('DB error fetching avatar:', err)
+                return renderWith('/img/basic_avatar.png', [])
+            }
+            if (row && row.avatar) {
+                return renderWith(`/img/avatars/${row.avatar}`, [])
+            }
+            return renderWith('/img/basic_avatar.png', [])
+        })
+    }
 })
 
 // Accept avatar changes via either a data URL (from file upload) or a remote URL.
@@ -549,7 +583,7 @@ function pregameEvents(socket, user) {
     })
 
     // ---- New game ----
-    socket.on('newGame', (visibility = 'public', name = '', chatOn = true, startWhite = true, time = null) => {
+    socket.on('newGame', (visibility = 'public', name = '', chatOn = true, startWhite = true, musicOn = true, time = null) => {
         if (!(user && user.id > 0)) {
             socket.emit('redirect', '/login')
             return
@@ -560,7 +594,7 @@ function pregameEvents(socket, user) {
         const parsed = Number(time)
         const t = Number.isFinite(parsed) && parsed > 0 ? parsed : null
 
-        const game = new Game(visibility, name, chatOn, startWhite, t)
+        const game = new Game(visibility, name, chatOn, startWhite, musicOn, t)
         game.owner = user
         game.update()
 
@@ -751,10 +785,10 @@ function chatEvents(socket, user) {
 */
 
 function notification(usr, type, message) {
-    db.run('ISERT INTO notifications (user, type, message) VALUES (?, ?, ?)', [usr, type, message])
+    db.run('INSERT INTO notifications (user, type, message) VALUES (?, ?, ?)', [usr, type, message])
 
     let foo = users.find(u => u.id == usr)
-    if (foo) foo.socket.emit('notification', type, message)
+    if (foo && foo.socket) foo.socket.emit('notification', type, message)
 }
 
 function friendEvents(socket, user) {
@@ -768,6 +802,21 @@ function friendEvents(socket, user) {
                         return resolve(null)
                     }
                     if (row && row.status) return resolve(row.status)
+                    return resolve(null)
+                }
+            )
+        })
+    }
+
+    function getFirstUser(user1, user2) {
+        return new Promise((resolve) => {
+            db.get('SELECT id_1 FROM friends WHERE (id_1 = ? AND id_2 = ?) OR (id_2 = ? AND id_1 = ?)',
+                [user1, user2, user1, user2], (err, row) => {
+                    if (err) {
+                        console.log(err)
+                        return resolve(null)
+                    }
+                    if (row && row.id_1) return resolve(row.id_1)
                     return resolve(null)
                 }
             )
@@ -795,6 +844,10 @@ function friendEvents(socket, user) {
         })
     }
 
+    function linkTo(usr) {
+        return `<a href="/profile?usr=${usr}" target="_blank" rel="noopener noreferrer">${usr}</a>`
+    }
+
     socket.on('friendRequest', (from, to) => {
         console.log('Freind request event:', from, to)
 
@@ -804,21 +857,64 @@ function friendEvents(socket, user) {
         if (!Number.isFinite(from) || !Number.isFinite(to)) return
         if (from == to) return
 
-        
-        getStatus(from, to).then((status) => {
-            if (status == 'pending') {
-                updateFriendRecord(from, to, 'friends')
 
-                notification(to, 'Friendship', `You are now friends with ${from}`)
-                notification(from, 'Friendship', `You are now friends with ${to}`)
+        getStatus(from, to).then((status) => {
+            if (status == 'friends') return notification(from, 'Friendship', `You are already friends with ${linkTo(to)}.`)
+            if (status == 'pending') {
+                getFirstUser(from, to).then((u) => { 
+                    if (u == from) return notification(from, 'Friendship', `You already have a pending request for ${linkTo(to)}.`)
+
+                    updateFriendRecord(from, to, 'friends')
+    
+                    notification(to, 'Friendship', `You are now friends with ${linkTo(from)}.`)
+                    notification(from, 'Friendship', `You are now friends with ${linkTo(to)}.`)
+                })
             } else {
                 newFriendRecord(from, to)
-
-                notification(to, 'Friendship', `You have a friend request from ${from}.`)
+                notification(from, 'Friendship', `Sent a friend request to ${linkTo(to)}.`)
+                notification(to, 'Friendship', `You have a friend request from ${linkTo(from)}.`)
             }
         })
     })
 }
+
+// Mark a notification as read (AJAX from profile page)
+app.post('/notifications/:id/read', (req, res) => {
+    if (!req.session || !req.session.user) return res.status(401).json({ error: 'Not authenticated' })
+    const nid = Number(req.params.id)
+    if (!Number.isInteger(nid) || nid <= 0) return res.status(400).json({ error: 'Invalid id' })
+    const userId = Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
+
+    db.get('SELECT user FROM notifications WHERE notification = ?', [nid], (err, row) => {
+        if (err) return res.status(500).json({ error: 'DB error' })
+        if (!row) return res.status(404).json({ error: 'Notification not found' })
+        if (Number(row.user) !== userId) return res.status(403).json({ error: 'Forbidden' })
+
+        db.run('UPDATE notifications SET status = ? WHERE notification = ?', ['read', nid], function (uerr) {
+            if (uerr) return res.status(500).json({ error: 'DB update error' })
+            return res.json({ success: true })
+        })
+    })
+})
+
+// Delete a notification (AJAX from profile page)
+app.post('/notifications/:id/delete', (req, res) => {
+    if (!req.session || !req.session.user) return res.status(401).json({ error: 'Not authenticated' })
+    const nid = Number(req.params.id)
+    if (!Number.isInteger(nid) || nid <= 0) return res.status(400).json({ error: 'Invalid id' })
+    const userId = Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
+
+    db.get('SELECT user FROM notifications WHERE notification = ?', [nid], (err, row) => {
+        if (err) return res.status(500).json({ error: 'DB error' })
+        if (!row) return res.status(404).json({ error: 'Notification not found' })
+        if (Number(row.user) !== userId) return res.status(403).json({ error: 'Forbidden' })
+
+        db.run('DELETE FROM notifications WHERE notification = ?', [nid], function (uerr) {
+            if (uerr) return res.status(500).json({ error: 'DB delete error' })
+            return res.json({ success: true })
+        })
+    })
+})
 
 /*
  ::::::::   ::::::::  ::::    ::: ::::    ::: :::::::::: :::::::: :::::::::::

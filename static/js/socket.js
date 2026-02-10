@@ -23,6 +23,8 @@ const break4 = new Audio('sfx/break4.mp3')
 const break5 = new Audio('sfx/break5.mp3')
 const break6 = new Audio('sfx/break6.mp3')
 const alarm = new Audio('sfx/clock/alarm.mp3')
+const warning = new Audio('sfx/clock/warning.mp3')
+const bullet_music = new Audio('sfx/clock/bullet_music.mp3')
 
 let soundMap = {
     move: move,
@@ -37,6 +39,8 @@ let soundMap = {
     break5: break5,
     break6: break6,
     alarm: alarm,
+    warning: warning,
+    bullet_music: bullet_music
 }
 
 socket.on('sound', (sound) => {
@@ -58,12 +62,12 @@ const notifType = document.getElementById('notif_type')
 const notifMsg = document.getElementById('notif_message')
 
 socket.on('notification', (type, message) => {
-    if (!notifBox.classList.contains('hidden')) return
-    
-    notifType.innerText = type
-    notifMsg.innerText = message
+    if (!notifBox || !notifType || !notifMsg) return
+    if (!notifBox.classList.contains('hide-popup')) return
+    notifType.innerHTML = type
+    notifMsg.innerHTML = message
 
-    notifBox.classList.toggle('hidden')
+    notifBox.classList.toggle('hide-popup')
 
-    setInterval(() => {notifBox.classList.toggle('hidden')}, 5000)
+    setTimeout(() => { notifBox.classList.add('hide-popup') }, 5000)
 })

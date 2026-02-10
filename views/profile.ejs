@@ -7,9 +7,10 @@
     <title>Profile - Chessbar</title>
     <link rel='stylesheet' href='/css/sidebar.css'>
     <link rel='stylesheet' href='/css/profile.css'>
+    <link rel='stylesheet' href='/css/game.css'>
 </head>
 
-<body class='with-sidebar'>
+<body class='with-sidebar' style="padding-top: 35px;">
     <%- include('partials/sidebar') %>
         <div id='player'>
             <div class='avatar-large'>
@@ -28,12 +29,28 @@
                     Friend<img src='/img/emoji-1.png' class='friend-emoji'></button>
                 <button id='challenge-btn' class='btn secondary'>⚔️ Challenge ⚔️</button>
             </div>
+
+            <div style="position: relative; right: 0px; bottom: 0px; padding: 0; width: 100%;" id='chat-container'>
+                <div id='chat-sidebar'>
+                    <h2>Users</h2>
+                </div>
+
+                <div id='chat-main'>
+                    <div id='messages'></div>
+
+                    <div id='inputBar'>
+                        <input type='text' id='msg' placeholder='Type your message here...' />
+                        <button id='send'>Send</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div id='profile'>
             <!-- Right column: main profile info -->
             <div class='profile-info'>
-                <div style='margin-top:12px; display:grid; grid-template-columns: repeat(2,1fr); gap:12px;'>
+                <div style='display:grid; grid-template-columns: repeat(2,1fr); gap:12px;'>
                     <div class='panel'>
                         <div class='small'>Win %</div>
                         <div id='winPercent'>0</div>
@@ -56,28 +73,54 @@
                     </div>
                 </div>
             </div>
+
         </div>
 
-        <div id='buyTokens' class='panel'>
-            <h3>Purchase tokens</h3>
-            <input type='password' inputmode='numeric' pattern='[0-9]*' placeholder='Your PIN...' id='pinInput'
-                class='input'>
-            <input type='number' placeholder='Amount?' id='amount' class='input' min='1' value='1'>
+        <div id='buyTokens'>
+            <div class="panel">
+                <h3>Purchase tokens</h3>
+                <input type='password' inputmode='numeric' pattern='[0-9]*' placeholder='Your PIN...' id='pinInput'
+                    class='input'>
+                <input type='number' placeholder='Amount?' id='amount' class='input' min='1' value='1'>
 
-            <div class='checkbox-item'>
-                <input type='checkbox' id='saveToCookies' name='box'>
-                <label for='saveToCookies'>Save PIN for quick pay?</label>
-            </div>
-            <p>Saving your pin will automatically purchase a token when you try to join a game without tokens.</p>
+                <div class='checkbox-item'>
+                    <input type='checkbox' id='saveToCookies' name='box'>
+                    <label for='saveToCookies'>Save PIN for quick pay?</label>
+                </div>
+                <p>Saving your pin will automatically purchase a token when you try to join a game without tokens.</p>
 
-            <div class='actions'>
-                <button id='submit' class='btn'>Buy (<%= PLAY_PRICE %>)</button>
+                <div class='actions'>
+                    <button id='submit' class='btn'>Buy (<%= PLAY_PRICE %>)</button>
+                </div>
             </div>
+
+            <% if (typeof isOwnProfile !=='undefined' && isOwnProfile) { %>
+                <div class="panel" id='notifications-panel' style='margin-top:12px;'>
+                    <h3>Notifications</h3>
+                    <div class='notification-list'>
+                        <% if (typeof notifications !=='undefined' && notifications && notifications.length) { %>
+                            <% notifications.forEach(function(n){ %>
+                                <div class='notification <%= n.status && String(n.status).toLowerCase() !== ' read'
+                                    ? 'unread' : '' %>' data-id='<%= n.notification %>'>
+                                        <div class='notif-type'>
+                                            <%= n.type || 'Notice' %>
+                                        </div>
+                                        <div class='notif-message'><%= n.message %></div>
+                                        <button class='notif-delete' title='Delete'>✖</button>
+                                </div>
+                                <% }) %>
+                                    <% } else { %>
+                                        <div class='no-notifs'>No notifications</div>
+                                        <% } %>
+                    </div>
+                </div>
+                <% } %>
         </div>
 
         <a href='/' class='small back-link'
             style='margin:8px 0 0 18px;display:inline-block;text-decoration:none;color:var(--muted); height:min-content'>←
             Back to games</a>
+        <%- include('partials/notificationPopup') %>
 </body>
 
 <script src='/js/sidebar.js'></script>
@@ -85,7 +128,6 @@
 <script src='js/socket.js'></script>
 <script>
     // Expose whether this page is the signed-in user's own profile.
-    // If `?usr=` is present and differs from the session user id, it's someone else's profile.
     (function () {
         try {
             const params = new URLSearchParams(window.location.search)
@@ -93,8 +135,82 @@
             const sessionUserId = <%= user && user.id ? user.id : 'null' %>
                 // true if no query param (own profile) or query matches session id
                 window.isOwnProfile = (!q) || String(q) === String(sessionUserId)
+            // hide buttons immediately when this is the signed-in user's own profile
+            try {
+                if (window.isOwnProfile) {
+                    const btnWrap = document.getElementById('btn-wrap')
+                    if (btnWrap) btnWrap.style.display = 'none'
+                }
+            } catch (e) { /* ignore */ }
         } catch (e) { window.isOwnProfile = true }
     })()
+</script>
+
+<script>
+        // Allow clicking a notification to mark it as read (only on your own profile)
+        (function () {
+            try {
+                const list = document.querySelectorAll('.notification-list .notification')
+                if (!list || list.length === 0) return
+                list.forEach(el => {
+                    el.style.cursor = 'pointer'
+                    el.addEventListener('click', (e) => {
+                        if (e && e.target && e.target.classList && e.target.classList.contains('notif-delete')) return
+                        const id = el.getAttribute('data-id')
+                        if (!id) return
+                        // If already read, nothing to do visually
+                        if (!el.classList.contains('unread')) return
+                        fetch(`/notifications/${encodeURIComponent(id)}/read`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'same-origin'
+                        }).then(r => r.json()).then(json => {
+                            if (json && json.success) {
+                                el.classList.remove('unread')
+                            }
+                        }).catch(() => {
+                            // ignore
+                        })
+                    })
+                })
+            } catch (e) { /* ignore */ }
+        })()
+</script>
+
+<script>
+        // Delete a notification (only on your own profile)
+        (function () {
+            try {
+                const deleteButtons = document.querySelectorAll('.notification-list .notif-delete')
+                if (!deleteButtons || deleteButtons.length === 0) return
+                deleteButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        const parent = btn.closest('.notification')
+                        if (!parent) return
+                        const id = parent.getAttribute('data-id')
+                        if (!id) return
+                        fetch(`/notifications/${encodeURIComponent(id)}/delete`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'same-origin'
+                        }).then(r => r.json()).then(json => {
+                            if (json && json.success) {
+                                parent.remove()
+                                const remaining = document.querySelectorAll('.notification-list .notification')
+                                if (!remaining || remaining.length === 0) {
+                                    const list = document.querySelector('.notification-list')
+                                    if (list) list.innerHTML = '<div class="no-notifs">No notifications</div>'
+                                }
+                            }
+                        }).catch(() => {
+                            // ignore
+                        })
+                    })
+                })
+            } catch (e) { /* ignore */ }
+        })()
 </script>
 
 <script src='/js/profilePfp.js'></script>
@@ -204,9 +320,11 @@
 
     // Add a friend
     const addFriendButton = document.getElementById('friends-btn')
-    addFriendButton.addEventListener('click', (e) => {
-        socket.emit('friendRequest', me.id, viewingUser)
-    })
+    if (addFriendButton) {
+        addFriendButton.addEventListener('click', (e) => {
+            socket.emit('friendRequest', me.id, viewingUser)
+        })
+    }
 </script>
 
 </html>

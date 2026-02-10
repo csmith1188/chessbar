@@ -49,14 +49,14 @@ body {
 }
 
 .brand h1 {
-    font-size: 18px;
+    font-size: 20px;
     margin: 0;
     font-weight: 700
 }
 
 .controls {
     display: flex;
-    gap: 10px;
+    margin-right: 20px;
     align-items: center
 }
 
@@ -117,7 +117,6 @@ body {
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
     border-radius: 12px;
     padding: 16px;
-    box-shadow: 0 8px 32px rgba(3, 8, 18, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.03)
 }
 
@@ -223,6 +222,7 @@ body {
 
 .footer-note {
     margin-top: 8px;
+    margin-bottom: 8px;
     color: var(--muted);
     font-size: 13px
 }
@@ -232,6 +232,38 @@ button:focus,
 .input:focus {
     outline: 3px solid rgba(94, 234, 212, 0.12);
     outline-offset: 2px
+}
+
+/* Simple nav message (appears when transfers fail) */
+.nav-message {
+    display: none;
+    margin-left: 12px;
+    padding: 6px 10px;
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    font-size: 0.9rem
+}
+
+.nav-message.visible {
+    display: inline-block
+}
+
+/* Message inside the new-game overlay */
+.overlay-message {
+    display: none;
+    margin-top: 8px;
+    padding: 8px 10px;
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    font-size: 0.95rem
+}
+
+.overlay-message.visible {
+    display: block
 }
 
 /* end */
