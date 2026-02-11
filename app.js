@@ -81,12 +81,12 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
     res.locals.unreadNotifCount = 0
     // Only fetch count for HTML page requests, not API/AJAX requests
-    const isApiRequest = req.xhr || req.path.startsWith('/notifications/') || 
-                        req.path.startsWith('/api/') || req.headers.accept?.includes('application/json')
+    const isApiRequest = req.xhr || req.path.startsWith('/notifications/') ||
+        req.path.startsWith('/api/') || req.headers.accept?.includes('application/json')
     if (isApiRequest || !req.session || !req.session.user) {
         return next()
     }
-    
+
     const userId = Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
     if (userId) {
         db.get('SELECT COUNT(*) as count FROM notifications WHERE user = ? AND status = ?', [userId, 'unread'], (err, row) => {
@@ -808,10 +808,13 @@ function chatEvents(socket, user) {
 */
 
 function notification(usr, type, message) {
-    db.run('INSERT INTO notifications (user, type, message) VALUES (?, ?, ?)', [usr, type, message])
-
     let foo = users.find(u => u.id == usr)
-    if (foo && foo.socket) foo.socket.emit('notification', type, message)
+    const status = (foo && foo.socket) ? 'read' : 'unread'
+    db.run('INSERT INTO notifications (user, type, message, status) VALUES (?, ?, ?, ?)', [usr, type, message, status])
+
+    if (foo && foo.socket) {
+        foo.socket.emit('notification', type, message)
+    }
 }
 
 function friendEvents(socket, user) {
@@ -884,11 +887,11 @@ function friendEvents(socket, user) {
         getStatus(from, to).then((status) => {
             if (status == 'friends') return notification(from, 'Friendship', `You are already friends with ${linkTo(to)}.`)
             if (status == 'pending') {
-                getFirstUser(from, to).then((u) => { 
+                getFirstUser(from, to).then((u) => {
                     if (u == from) return notification(from, 'Friendship', `You already have a pending request for ${linkTo(to)}.`)
 
                     updateFriendRecord(from, to, 'friends')
-    
+
                     notification(to, 'Friendship', `You are now friends with ${linkTo(from)}.`)
                     notification(from, 'Friendship', `You are now friends with ${linkTo(to)}.`)
                 })
