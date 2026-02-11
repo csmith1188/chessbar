@@ -17,7 +17,7 @@ let sql
 
 const db = new sqlite3.Database('database/database.db', sqlite3.OPEN_READWRITE, (err) => {
     if (err) return console.error('Error connecting to database:', err.message)
-    
+
     // Run startup migrations to ensure schema is up-to-date
     runStartupMigrations()
 })
@@ -436,6 +436,7 @@ app.post('/admin/users/:id/add', requireAdmin, (req, res) => {
 
             db.get('SELECT * FROM users WHERE formbar_id = ?', [id], (err2, updated) => {
                 if (err2) return res.status(500).json({ error: 'DB error' })
+                notification(id, 'Tokens', `God has gifted you ${amount} ${amount == 1 ? 'token' : 'tokens'}.`)
                 return res.json({ user: updated })
             })
         })
@@ -461,6 +462,7 @@ app.post('/admin/users/:id/set', requireAdmin, (req, res) => {
             db.get('SELECT * FROM users WHERE formbar_id = ?', [id], (err2, updated) => {
 
                 if (err2) return res.status(500).json({ error: 'DB error' })
+                notification(id, 'Tokens', `God has set your token balence to ${tokens}.`)
                 return res.json({ user: updated })
 
             })
@@ -492,6 +494,7 @@ server.listen(PORT, () => {
 })
 
 function logUsers() {
+    /*
     console.clear()
     console.log('Users:')
     users.forEach(u => console.log(`Name: ${u.displayName} | ID: ${u.id} | Active: ${u.active ? ' Active ' : 'Inactive'} | Tokens: ${u.tokens}`))
@@ -503,6 +506,7 @@ function logUsers() {
         g.users.forEach(u => console.log(`  Name: ${u.displayName}`))
     })
     console.log()
+    */
 }
 
 let users = []
@@ -833,6 +837,7 @@ function chatEvents(socket, user) {
 
 function notification(usr, type, message) {
     let foo = users.find(u => u.id == usr)
+    console.log(foo)
     const status = (foo && foo.socket) ? 'read' : 'unread'
     db.run('INSERT INTO notifications (user, type, message, status) VALUES (?, ?, ?, ?)', [usr, type, message, status])
 
@@ -965,6 +970,23 @@ app.post('/notifications/:id/delete', (req, res) => {
         })
     })
 })
+
+app.get('/notifications/unread', (req, res) => {
+    if (!req.session || !req.session.user) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const userId = Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0;
+    if (userId) {
+        db.get('SELECT COUNT(*) as count FROM notifications WHERE user = ? AND status = ?', [userId, 'unread'], (err, row) => {
+            if (err) {
+                return res.status(500).json({ error: 'Database error' });
+            }
+            res.json({ count: row.count || 0 });
+        });
+    } else {
+        res.json({ count: 0 });
+    }
+});
 
 /*
  ::::::::   ::::::::  ::::    ::: ::::    ::: :::::::::: :::::::: :::::::::::

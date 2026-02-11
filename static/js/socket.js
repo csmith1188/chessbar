@@ -70,9 +70,6 @@ socket.on('notification', (type, message) => {
     notifBox.classList.toggle('hide-popup')
 
     setTimeout(() => { notifBox.classList.add('hide-popup') }, 5000)
-    
-    // Update the notification badge count in sidebar
-    updateNotifBadge(1)
 })
 
 // Function to update the notification badge count in the sidebar
@@ -95,3 +92,34 @@ function updateNotifBadge(delta) {
         badge.remove()
     }
 }
+
+// Function to fetch unread notifications
+async function fetchUnreadNotifications() {
+    try {
+        const response = await fetch('/notifications/unread'); 
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        return data.unreadCount; // Adjust based on actual response structure
+    } catch (error) {
+        console.error('Error fetching unread notifications:', error);
+        return 0; // Return 0 if there's an error
+    }
+}
+
+// Function to update the notification badge
+function updateNotificationBadge(count) {
+    const badge = document.getElementById('notification-badge'); 
+    if (badge) {
+        badge.textContent = count > 0 ? count : '';
+        badge.style.display = count > 0 ? 'block' : 'none';
+    }
+}
+
+// Check unread notifications on page load
+window.onload = async function() {
+    const unreadCount = await fetchUnreadNotifications();
+    updateNotificationBadge(unreadCount);
+};
+

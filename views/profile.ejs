@@ -100,7 +100,7 @@
                     <div class='notification-list'>
                         <% if (typeof notifications !=='undefined' && notifications && notifications.length) { %>
                             <% notifications.forEach(function(n){ %>
-                                <div class='notification <%= n.status && String(n.status).toLowerCase() !== ' read'
+                                <div class='notification <%= n.status && String(n.status).toLowerCase() !== 'read'
                                     ? 'unread' : '' %>' data-id='<%= n.notification %>'>
                                         <div class='notif-type'>
                                             <%= n.type || 'Notice' %>
