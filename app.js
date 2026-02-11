@@ -17,9 +17,33 @@ let sql
 
 const db = new sqlite3.Database('database/database.db', sqlite3.OPEN_READWRITE, (err) => {
     if (err) return console.error('Error connecting to database:', err.message)
+    
+    // Run startup migrations to ensure schema is up-to-date
+    runStartupMigrations()
 })
 
 const PLAY_PRICE = 100
+
+// Startup migrations to handle schema changes for existing databases
+function runStartupMigrations() {
+    // Ensure notifications table has status column
+    db.all("PRAGMA table_info(notifications);", [], (err, cols) => {
+        if (err) {
+            console.error('Migration error checking notifications table:', err)
+            return
+        }
+        const hasStatus = Array.isArray(cols) && cols.some(c => c && c.name === 'status')
+        if (!hasStatus) {
+            db.run('ALTER TABLE notifications ADD COLUMN status TEXT DEFAULT "unread"', [], (alterErr) => {
+                if (alterErr) {
+                    console.error('Migration error adding status column:', alterErr)
+                } else {
+                    console.log('Migration: Added status column to notifications table')
+                }
+            })
+        }
+    })
+}
 
 //! For digipogs
 
