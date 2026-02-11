@@ -168,7 +168,7 @@
                             if (json && json.success) {
                                 el.classList.remove('unread')
                                 // Update badge count
-                                if (typeof updateNotifBadge === 'function') updateNotifBadge(-1)
+                                updateNotifBadge(-1)
                             }
                         }).catch(() => {
                             // ignore
@@ -207,7 +207,7 @@
                                     if (list) list.innerHTML = '<div class="no-notifs">No notifications</div>'
                                 }
                                 // Update badge count if notification was unread
-                                if (wasUnread && typeof updateNotifBadge === 'function') updateNotifBadge(-1)
+                                if (wasUnread) updateNotifBadge(-1)
                             }
                         }).catch(() => {
                             // ignore
