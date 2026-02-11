@@ -77,6 +77,29 @@ app.use((req, res, next) => {
     next()
 })
 
+// Fetch unread notification count for the current user and make it available to templates
+app.use((req, res, next) => {
+    res.locals.unreadNotifCount = 0
+    // Only fetch count for HTML page requests, not API/AJAX requests
+    const isApiRequest = req.xhr || req.path.startsWith('/notifications/') || 
+                        req.path.startsWith('/api/') || req.headers.accept?.includes('application/json')
+    if (isApiRequest || !req.session || !req.session.user) {
+        return next()
+    }
+    
+    const userId = Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
+    if (userId) {
+        db.get('SELECT COUNT(*) as count FROM notifications WHERE user = ? AND status = ?', [userId, 'unread'], (err, row) => {
+            if (!err && row) {
+                res.locals.unreadNotifCount = row.count || 0
+            }
+            next()
+        })
+        return
+    }
+    next()
+})
+
 // Friendly error for payloads that exceed the JSON body parser limit
 app.use((err, req, res, next) => {
     if (err && (err.type === 'entity.too.large' || err instanceof Error && err.status === 413)) {
