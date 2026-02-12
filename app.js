@@ -113,7 +113,7 @@ app.use((req, res, next) => {
 
     const userId = Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
     if (userId) {
-        db.get('SELECT COUNT(*) as count FROM notifications WHERE user = ? AND status = ?', [userId, 'unread'], (err, row) => {
+        db.get('SELECT COUNT(*) as count FROM notifications WHERE user = ? AND (status IS NULL OR status = ?)', [userId, 'unread'], (err, row) => {
             if (!err && row) {
                 res.locals.unreadNotifCount = row.count || 0
             }
