@@ -2,5 +2,5 @@
 cd database
 echo Initializing database
 del *.db
-node init-db
+node migrate
 cd ../

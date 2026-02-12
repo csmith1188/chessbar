@@ -6,7 +6,6 @@ copy template.env .env
 echo Initializing database
 cd database
 del *.db
-node init-db
 node migrate
 cd ../
 echo Initialization complete
