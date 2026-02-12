@@ -981,10 +981,10 @@ app.get('/notifications/unread', (req, res) => {
             if (err) {
                 return res.status(500).json({ error: 'Database error' });
             }
-            res.json({ count: row.count || 0 });
+            res.json({ unreadCount: row.count || 0, count: row.count || 0 });
         });
     } else {
-        res.json({ count: 0 });
+        res.json({ unreadCount: 0, count: 0 });
     }
 });
 
