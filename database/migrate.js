@@ -76,7 +76,7 @@ const tables = [
         new Column('message', 'TEXT NOT NULL'),
         new Column('status', 'TEXT NOT NULL DEFAULT "unread"'),
         new Column('created_time', 'DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP'),
-        new Column('read_time', 'DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP'),
+        new Column('read_time', 'DATETIME'),
     ])
 ];
 
