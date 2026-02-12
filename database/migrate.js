@@ -83,12 +83,18 @@ const tables = [
 // Create / modify the database
 
 (async () => {
-    for (let table of tables) {
-        table.create();
+    try {
+        for (let table of tables) {
+            table.create();
 
-        for (let column of table.columns) {
-            const exists = await column.checkExistence(table.name);
-            if (!exists) column.create(table.name);
+            for (let column of table.columns) {
+                const exists = await column.checkExistence(table.name);
+                if (!exists) column.create(table.name);
+            }
         }
+    } catch (err) {
+        console.log(err)
+    } finally {
+        db.close()
     }
 })();
