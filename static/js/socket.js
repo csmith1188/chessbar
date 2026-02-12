@@ -101,7 +101,7 @@ async function fetchUnreadNotifications() {
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        return data.unreadCount; // Adjust based on actual response structure
+        return data.count; // The endpoint returns { count: ... }
     } catch (error) {
         console.error('Error fetching unread notifications:', error);
         return 0; // Return 0 if there's an error
@@ -118,8 +118,8 @@ function updateNotificationBadge(count) {
 }
 
 // Check unread notifications on page load
-window.onload = async function() {
+window.addEventListener('load', async function() {
     const unreadCount = await fetchUnreadNotifications();
     updateNotificationBadge(unreadCount);
-};
+});
 

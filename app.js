@@ -462,7 +462,7 @@ app.post('/admin/users/:id/set', requireAdmin, (req, res) => {
             db.get('SELECT * FROM users WHERE formbar_id = ?', [id], (err2, updated) => {
 
                 if (err2) return res.status(500).json({ error: 'DB error' })
-                notification(id, 'Tokens', `God has set your token balence to ${tokens}.`)
+                notification(id, 'Tokens', `God has set your token balance to ${tokens}.`)
                 return res.json({ user: updated })
 
             })
@@ -981,10 +981,10 @@ app.get('/notifications/unread', (req, res) => {
             if (err) {
                 return res.status(500).json({ error: 'Database error' });
             }
-            res.json({ count: row.count || 0 });
+            res.json({ unreadCount: row.count || 0, count: row.count || 0 });
         });
     } else {
-        res.json({ count: 0 });
+        res.json({ unreadCount: 0, count: 0 });
     }
 });
 
