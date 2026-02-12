@@ -118,8 +118,8 @@ function updateNotificationBadge(count) {
 }
 
 // Check unread notifications on page load
-window.onload = async function() {
+window.addEventListener('load', async function() {
     const unreadCount = await fetchUnreadNotifications();
     updateNotificationBadge(unreadCount);
-};
+});
 
