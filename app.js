@@ -837,7 +837,6 @@ function chatEvents(socket, user) {
 
 function notification(usr, type, message) {
     let foo = users.find(u => u.id == usr)
-    console.log(foo)
     const status = (foo && foo.socket) ? 'read' : 'unread'
     db.run('INSERT INTO notifications (user, type, message, status) VALUES (?, ?, ?, ?)', [usr, type, message, status])
 
