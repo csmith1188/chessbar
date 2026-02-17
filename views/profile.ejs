@@ -99,13 +99,14 @@
                     <h3>Notifications</h3>
                     <div class='notification-list'>
                         <% if (typeof notifications !=='undefined' && notifications && notifications.length) { %>
-                            <% notifications.forEach(function(n){ %>
+                            <% notifications.forEach((n) => { %>
                                 <div class='notification <%= (n.status == null || String(n.status).toLowerCase() !== 'read')
                                     ? 'unread' : '' %>' data-id='<%= n.notification %>'>
                                         <div class='notif-type'>
                                             <%= n.type || 'Notice' %>
                                         </div>
                                         <div class='notif-message'><%- n.message %></div>
+                                        <div class='notif-creation'>Created at <%= n.created_time || '00:00:00' %> </div>
                                         <button class='notif-delete' title='Delete'>✖</button>
                                 </div>
                                 <% }) %>

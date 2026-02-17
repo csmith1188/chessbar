@@ -215,21 +215,45 @@ app.get('/profile', (req, res) => {
     const fetchNotifications = viewingOwnProfile
 
     if (fetchNotifications) {
-        db.all('SELECT notification, type, message, status FROM notifications WHERE user = ? ORDER BY notification DESC', [signedInId], (nerr, notes) => {
-            if (nerr) {
-                console.error('DB error fetching notifications:', nerr)
-                notes = []
-            }
-            // Now fetch avatar and render
-            db.get('SELECT avatar FROM users WHERE formbar_id = ?', [formbarId], (err, row) => {
-                if (err) {
-                    console.error('DB error fetching avatar:', err)
+        const oneHourAgo = Date.now() - 60 * 60 * 1000
+
+        const fetchAndRender = () => {
+            db.all('SELECT notification, type, message, status, created_time FROM notifications WHERE user = ? ORDER BY notification DESC', [signedInId], (nerr, notes) => {
+                if (nerr) {
+                    console.error('DB error fetching notifications:', nerr)
+                    notes = []
+                }
+                // Now fetch avatar and render
+                db.get('SELECT avatar FROM users WHERE formbar_id = ?', [formbarId], (err, row) => {
+                    if (err) {
+                        console.error('DB error fetching avatar:', err)
+                        return renderWith('/img/basic_avatar.png', notes)
+                    }
+                    if (row && row.avatar) {
+                        return renderWith(`/img/avatars/${row.avatar}`, notes)
+                    }
                     return renderWith('/img/basic_avatar.png', notes)
-                }
-                if (row && row.avatar) {
-                    return renderWith(`/img/avatars/${row.avatar}`, notes)
-                }
-                return renderWith('/img/basic_avatar.png', notes)
+                })
+            })
+        }
+
+        db.all('SELECT notification, read_time FROM notifications WHERE user = ? AND status = ? AND read_time IS NOT NULL', [signedInId, 'read'], (cerr, rows) => {
+            if (cerr || !Array.isArray(rows) || rows.length === 0) {
+                if (cerr) console.error('DB error fetching read notifications:', cerr)
+                return fetchAndRender()
+            }
+
+            const toDelete = rows
+                .map(r => ({ id: r.notification, time: Date.parse(r.read_time) }))
+                .filter(r => Number.isFinite(r.time) && r.time <= oneHourAgo)
+                .map(r => r.id)
+
+            if (toDelete.length === 0) return fetchAndRender()
+
+            const placeholders = toDelete.map(() => '?').join(',')
+            db.run(`DELETE FROM notifications WHERE user = ? AND notification IN (${placeholders})`, [signedInId, ...toDelete], (derr) => {
+                if (derr) console.error('DB error deleting old read notifications:', derr)
+                return fetchAndRender()
             })
         })
     } else {
@@ -837,8 +861,13 @@ function chatEvents(socket, user) {
 
 function notification(usr, type, message) {
     let foo = users.find(u => u.id == usr)
-    const status = (foo && foo.socket) ? 'read' : 'unread'
-    db.run('INSERT INTO notifications (user, type, message, status) VALUES (?, ?, ?, ?)', [usr, type, message, status])
+    let status = 'unread'
+    let read = null
+    if (foo && foo.socket) {
+        status = 'read'
+        read = new Date().toString()
+    }
+    db.run('INSERT INTO notifications (user, type, message, status, read_time) VALUES (?, ?, ?, ?, ?)', [usr, type, message, status, read])
 
     if (foo && foo.socket) {
         foo.socket.emit('notification', type, message)
@@ -899,11 +928,11 @@ function friendEvents(socket, user) {
     }
 
     function linkTo(usr) {
-        return `<a href="/profile?usr=${usr}" target="_blank" rel="noopener noreferrer">${usr}</a>`
+        return `<a href="/profile?usr=${usr}">${usr}</a>`
     }
 
     socket.on('friendRequest', (from, to) => {
-        console.log('Freind request event:', from, to)
+        console.log('Friend request event:', from, to)
 
         from = Number(from)
         to = Number(to)
@@ -945,6 +974,10 @@ app.post('/notifications/:id/read', (req, res) => {
         if (Number(row.user) !== userId) return res.status(403).json({ error: 'Forbidden' })
 
         db.run('UPDATE notifications SET status = ? WHERE notification = ?', ['read', nid], function (uerr) {
+            if (uerr) return res.status(500).json({ error: 'DB update error' })
+        })
+
+        db.run('UPDATE notifications SET read_time = ? WHERE notification = ?', [new Date().toString(), nid], function (uerr) {
             if (uerr) return res.status(500).json({ error: 'DB update error' })
             return res.json({ success: true })
         })
