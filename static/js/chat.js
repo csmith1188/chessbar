@@ -183,6 +183,8 @@ function buildPGNFromMoves(moves, meta = {}) {
             }
 
             const toSq = square(to)
+            const letterMap = { 'Knight': 'N', 'Bishop': 'B', 'Rook': 'R', 'Queen': 'Q', 'King': 'K' }
+            const pLetter = letterMap[mover.name] || ''
 
             if (mover.name === 'Pawn') {
                 if (m.takes) {
@@ -197,9 +199,7 @@ function buildPGNFromMoves(moves, meta = {}) {
                 }
             }
 
-            // Other pieces
-            const letterMap = { 'Knight': 'N', 'Bishop': 'B', 'Rook': 'R', 'Queen': 'Q', 'King': 'K' }
-            const pLetter = letterMap[mover.name] || ''
+            // Other pieces - standard PGN format
             const capture = m.takes ? 'x' : ''
             return `${pLetter}${capture}${toSq}`
         }
@@ -304,20 +304,23 @@ socket.on('userList', (users) => {
 
 function isValidMove(board, move) {
     const { from, to } = move;
-    const piece = board[from.y][from.x];
+    const piece = board[from.y] && board[from.y][from.x];
 
     // Check if the target square is within bounds
     if (to.x < 0 || to.x >= board[0].length || to.y < 0 || to.y >= board.length) {
         return false;
     }
 
-    // Check if the piece can legally move to the target square
-    // (This is a simplified check; you may want to expand this based on piece type)
-    if (!piece || (board[to.y][to.x] && board[to.y][to.x].color === piece.color)) {
+    // Check if there is a piece to move
+    if (!piece) {
         return false;
     }
 
-    // Add additional rules for specific piece movements here
+    // Check if capturing own piece
+    const targetPiece = board[to.y] && board[to.y][to.x];
+    if (targetPiece && targetPiece.side === piece.side) {
+        return false;
+    }
 
     return true; // If all checks pass, the move is valid
 }
