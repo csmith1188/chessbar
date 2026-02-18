@@ -7,6 +7,8 @@ const exportPgnBtn = document.getElementById('export-pgn');
 let msgHistory = []
 let prevSender
 
+let pgn = ''; // Initialize PGN string
+
 function renderMessages(history) {
     messages.innerHTML = '';
     history.forEach(({ sender, message }) => {
@@ -95,16 +97,22 @@ function buildPGNFromMoves(moves, meta = {}) {
         ]
     }
 
+    function updatePGN(move) {
+        const files = 'abcdefgh';
+        const fromSquare = square(move.from);
+        const toSquare = square(move.to);
+        const moveNotation = `${move.side === 'white' ? '' : '...'}${fromSquare}${toSquare}`;
+        pgn += moveNotation + ' '; // Append move to PGN
+    }
+
     function applyMoveToBoard(bd, m) {
         const fx = m.from.x, fy = m.from.y
         const tx = m.to.x, ty = m.to.y
         const mover = bd[fy] && bd[fy][fx]
-        if (!mover) {
-            // If mover missing, create a generic piece (best-effort)
-            bd[ty] = bd[ty] || []
-            bd[ty][tx] = { name: 'Pawn', side: m.side }
-            if (bd[fy]) bd[fy][fx] = null
-            return
+
+        if (!mover || !isValidMove(bd, m)) {
+            console.warn(`Invalid move detected: ${JSON.stringify(m)}`);
+            return; // Skip invalid moves
         }
 
         // Handle en-passant capture removal: captured pawn sits at (to.x, from.y)
@@ -139,6 +147,8 @@ function buildPGNFromMoves(moves, meta = {}) {
         if (m.promotion) {
             mover.name = m.promotion
         }
+
+        updatePGN(m); // Update PGN after applying the move
     }
 
     // Build SAN-ish notation (basic): pawns as e4 / exd5, pieces as Nf3 / Rxa1, castling O-O/O-O-O, promotions =Q
@@ -173,6 +183,8 @@ function buildPGNFromMoves(moves, meta = {}) {
             }
 
             const toSq = square(to)
+            const letterMap = { 'Knight': 'N', 'Bishop': 'B', 'Rook': 'R', 'Queen': 'Q', 'King': 'K' }
+            const pLetter = letterMap[mover.name] || ''
 
             if (mover.name === 'Pawn') {
                 if (m.takes) {
@@ -187,9 +199,7 @@ function buildPGNFromMoves(moves, meta = {}) {
                 }
             }
 
-            // Other pieces
-            const letterMap = { 'Knight': 'N', 'Bishop': 'B', 'Rook': 'R', 'Queen': 'Q', 'King': 'K' }
-            const pLetter = letterMap[mover.name] || ''
+            // Other pieces - standard PGN format
             const capture = m.takes ? 'x' : ''
             return `${pLetter}${capture}${toSq}`
         }
@@ -229,6 +239,22 @@ function buildPGNFromMoves(moves, meta = {}) {
     return headers.join('\n') + '\n\n' + movetext + '\n*'
 }
 
+function logPGNFromGameData(gameData) {
+    if (!gameData || !Array.isArray(gameData.moves)) {
+        console.warn('No moves found in gameData.');
+        return;
+    }
+    const pgn = buildPGNFromMoves(gameData.moves, {
+        white: gameData.prevWhite,
+        black: gameData.prevBlack,
+        whiteName: gameData.prevWhite && gameData.prevWhite.displayName,
+        blackName: gameData.prevBlack && gameData.prevBlack.displayName
+    });
+    console.log('--- PGN START ---');
+    console.log(pgn);
+    console.log('--- PGN END ---');
+}
+
 function exportPGNToChat() {
     try {
         if (typeof gameData === 'undefined' || !gameData || !Array.isArray(gameData.moves)) {
@@ -243,7 +269,7 @@ function exportPGNToChat() {
             blackName: (gameData.prevBlack && gameData.prevBlack.displayName) ? gameData.prevBlack.displayName : null
         }
 
-        const pgn = buildPGNFromMoves(gameData.moves, meta)
+        const pgn = buildPGNFromMoves(gameData.moves); // Removed meta parameter to match function signature
 
         // Log PGN to console instead of pasting into chat input
         try {
@@ -275,3 +301,26 @@ socket.on('userList', (users) => {
         sidebar.appendChild(p);
     });
 });
+
+function isValidMove(board, move) {
+    const { from, to } = move;
+    const piece = board[from.y] && board[from.y][from.x];
+
+    // Check if the target square is within bounds
+    if (to.x < 0 || to.x >= board[0].length || to.y < 0 || to.y >= board.length) {
+        return false;
+    }
+
+    // Check if there is a piece to move
+    if (!piece) {
+        return false;
+    }
+
+    // Check if capturing own piece
+    const targetPiece = board[to.y] && board[to.y][to.x];
+    if (targetPiece && targetPiece.side === piece.side) {
+        return false;
+    }
+
+    return true; // If all checks pass, the move is valid
+}

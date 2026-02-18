@@ -254,8 +254,6 @@ class Game {
                 enPassant: enPassant || false,
                 promotion: false
             })
-
-            console.log(this.moves)
         }
 
         let promotion = false

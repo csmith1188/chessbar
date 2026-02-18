@@ -420,6 +420,14 @@ input:focus {
     gap: 6px;
     position: relative;
 }
+
+.notif-creation {
+    font-size: 10px;
+    font-weight: bolder;
+    color: #7b8183;
+    white-space: pre-wrap;
+}
+
 .notification .notif-type {
     font-weight: 700;
     font-size: 13px;

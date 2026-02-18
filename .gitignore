@@ -5,3 +5,4 @@ database/freeTokens.js
 .env
 /static/img/avatars/*
 apikey
+/.vscode

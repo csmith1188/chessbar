@@ -99,13 +99,14 @@
                     <h3>Notifications</h3>
                     <div class='notification-list'>
                         <% if (typeof notifications !=='undefined' && notifications && notifications.length) { %>
-                            <% notifications.forEach(function(n){ %>
-                                <div class='notification <%= n.status && String(n.status).toLowerCase() !== ' read'
+                            <% notifications.forEach((n) => { %>
+                                <div class='notification <%= (n.status == null || String(n.status).toLowerCase() !== 'read')
                                     ? 'unread' : '' %>' data-id='<%= n.notification %>'>
                                         <div class='notif-type'>
                                             <%= n.type || 'Notice' %>
                                         </div>
-                                        <div class='notif-message'><%= n.message %></div>
+                                        <div class='notif-message'><%- n.message %></div>
+                                        <div class='notif-creation'>Created at <%= n.created_time || '00:00:00' %> </div>
                                         <button class='notif-delete' title='Delete'>✖</button>
                                 </div>
                                 <% }) %>
@@ -167,6 +168,8 @@
                         }).then(r => r.json()).then(json => {
                             if (json && json.success) {
                                 el.classList.remove('unread')
+                                // Update badge count
+                                updateNotifBadge(-1)
                             }
                         }).catch(() => {
                             // ignore
@@ -191,6 +194,7 @@
                         if (!parent) return
                         const id = parent.getAttribute('data-id')
                         if (!id) return
+                        const wasUnread = parent.classList.contains('unread')
                         fetch(`/notifications/${encodeURIComponent(id)}/delete`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -203,6 +207,8 @@
                                     const list = document.querySelector('.notification-list')
                                     if (list) list.innerHTML = '<div class="no-notifs">No notifications</div>'
                                 }
+                                // Update badge count if notification was unread
+                                if (wasUnread) updateNotifBadge(-1)
                             }
                         }).catch(() => {
                             // ignore
