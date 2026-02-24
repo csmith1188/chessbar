@@ -60,11 +60,6 @@
     box-sizing: border-box
 }
 
-html,
-body {
-    height: 100%
-}
-
 body {
     font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
     background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
@@ -73,7 +68,7 @@ body {
     display: flex;
     gap: 20px;
     align-items: flex-start;
-    min-height: 100vh;
+    width: 95vw;
 }
 
 .page-wrap {
@@ -121,7 +116,6 @@ body {
     display: flex;
     gap: 10px;
     justify-content: center;
-   
 }
 
 #btn-wrap button {
@@ -189,11 +183,11 @@ body {
    - center `#profile` -> 1/2 (flex:2)
    - right `#buyTokens`-> 1/4 (flex:1)
 */
-body>#player {
+#player {
     flex: 1 1 0;
 }
 
-body>#buyTokens {
+#buyTokens {
     flex: 1 1 0;
     max-width: none;
 }
@@ -408,13 +402,15 @@ input:focus {
     margin-top: 8px;
     max-height: 50vh;
     overflow-y: auto;
-    padding-right: 6px; /* room for scrollbar */
+    padding-right: 6px;
+    /* room for scrollbar */
 }
+
 .notification {
     padding: 10px;
     border-radius: 8px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.02);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.02);
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -433,16 +429,19 @@ input:focus {
     font-size: 13px;
     color: var(--muted);
 }
+
 .notification .notif-message {
     font-size: 14px;
     color: #eaf4fb;
     white-space: pre-wrap;
 }
+
 .notification.unread {
-    background: linear-gradient(90deg, rgba(94,234,212,0.06), rgba(94,234,212,0.03));
-    border-color: rgba(94,234,212,0.18);
+    background: linear-gradient(90deg, rgba(94, 234, 212, 0.06), rgba(94, 234, 212, 0.03));
+    border-color: rgba(94, 234, 212, 0.18);
     box-shadow: 0 6px 14px rgba(2, 150, 120, 0.06);
 }
+
 .notif-delete {
     position: absolute;
     top: 8px;
@@ -450,8 +449,8 @@ input:focus {
     width: 24px;
     height: 24px;
     border-radius: 6px;
-    border: 1px solid rgba(255,255,255,0.08);
-    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
     color: var(--muted);
     display: inline-flex;
     align-items: center;
@@ -459,14 +458,17 @@ input:focus {
     cursor: pointer;
     transition: all 120ms ease;
 }
+
 .notif-delete:hover {
     color: #fff;
-    border-color: rgba(255,255,255,0.16);
-    background: rgba(255,255,255,0.08);
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.08);
 }
+
 .notif-delete:active {
     transform: scale(0.96);
 }
+
 .no-notifs {
     color: var(--muted);
     padding: 10px 6px;

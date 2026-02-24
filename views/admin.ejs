@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/css/admin.css">
 </head>
 
-<body class="with-sidebar">
+<body>
     <%- include('partials/sidebar') %>
         <div class="admin-container">
             <div class="admin-header">
@@ -21,7 +21,7 @@
                     </strong></p>
             </div>
 
-            <section>
+            <div id="table-container">
                 <div class="players-bar">
                     <h2>Players <button id="addFakeBtn"
                             style="margin-left:12px;font-size:12px;padding:4px 8px;display:none">Add 50 test
@@ -56,7 +56,7 @@
                         <tbody></tbody>
                     </table>
                 </div>
-            </section>
+            </div>
 
             <a href='/' class='small back-link'
                 style='margin-top:18px;display:inline-block;text-decoration:none;color:var(--muted)'>← Back to games</a>
