@@ -44,7 +44,8 @@
                     </div>
                 </div>
             </div>
-
+            //temp button
+            <button onclick="fetchFriends()"></button>
         </div>
 
         <div id='profile'>
@@ -236,11 +237,38 @@
 </script>
 
 <script>
+    function fetchFriends() {
+        fetch('/api/friends')
+            .then(response => response.json())
+            .then(friends => {
+                console.log(friends); // Debug the response
+    
+                if (Array.isArray(friends)) {
+                    const friendsContainer = document.getElementById('chat-sidebar');
+                    friendsContainer.innerHTML = '<h2>Users</h2>'; // Clear existing content
+    
+                    friends.forEach(friend => {
+                        const friendElement = document.createElement('div');
+                        friendElement.classList.add('friend');
+                        friendElement.innerText = friend.display_name;
+                        friendElement.dataset.friendId = friend.id;
+    
+                        // Add click event to open chat
+                        friendElement.addEventListener('click', () => openChat(friend.id, friend.display_name));
+                        friendsContainer.appendChild(friendElement);
+                    });
+                } else {
+                    console.error('Unexpected response format:', friends);
+                }
+            })
+            .catch(err => console.error('Error fetching friends:', err));
+    }
+
     // friend list population
     const friends = document.getElementById('chat-sidebar')
 
     function populateFriends() {
-        
+
     }
 </script>
 
