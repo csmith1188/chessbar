@@ -1,3 +1,54 @@
+@media (max-width: 1280px) {
+    body {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+    }
+    #profile {
+        width: 100%;
+        max-width: 900px;
+        margin-bottom: 18px;
+    }
+    #buyTokens {
+        width: 100%;
+        max-width: 420px;
+        margin: 0 auto;
+        order: 3;
+    }
+    #player {
+        width: 100%;
+        max-width: 420px;
+        margin: 0 auto 18px auto;
+    }
+
+    #profile {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+    }
+
+    /* Stack the three columns on small screens */
+    body {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+        width: 100vw;
+        overflow-x: hidden;
+    }
+
+    body > #player,
+    body > #profile,
+    body > #buyTokens {
+        flex: none;
+        width: 100%;
+        max-width: none;
+    }
+}
 /* profile.css — adapted to site theme (dark gradients, shared variables) */
 
 @import url('colors.css');
@@ -68,7 +119,9 @@ body {
     display: flex;
     gap: 20px;
     align-items: flex-start;
-    width: 95vw;
+    min-height: 100vh;
+    /* Removed width: 95vw to prevent overflow */
+    box-sizing: border-box;
 }
 
 .page-wrap {
@@ -166,6 +219,10 @@ body {
     font-weight: 700;
 }
 
+.profile-info {
+    text-align: center;
+}
+
 
 .profile-info p {
     margin: 0 0 12px 0;
@@ -261,33 +318,6 @@ body {
 .btn:hover {
     transform: translateY(-2px);
     filter: brightness(1.03);
-}
-
-@media (max-width: 920px) {
-    #profile {
-        grid-template-columns: 1fr;
-    }
-
-    .profile-avatar {
-        width: 120px;
-        height: 120px;
-        margin: 0 auto;
-    }
-
-    /* Stack the three columns on small screens */
-    body {
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-    }
-
-    body>#player,
-    body>#profile,
-    body>#buyTokens {
-        flex: none;
-        width: 100%;
-        max-width: none;
-    }
 }
 
 /* accessibility focus styles consistent with site */
