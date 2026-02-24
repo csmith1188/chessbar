@@ -60,10 +60,6 @@ body {
     align-items: center
 }
 
-#signed-in-link {
-    font-size: 1px; 
-}
-
 .small {
     font-size: 13px;
     color: var(--muted)

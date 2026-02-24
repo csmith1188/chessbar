@@ -62,8 +62,8 @@ const notifType = document.getElementById('notif_type')
 const notifMsg = document.getElementById('notif_message')
 
 socket.on('notification', (type, message) => {
+    if (!notifBox || !notifType || !notifMsg) return
     if (!notifBox.classList.contains('hide-popup')) return
-    
     notifType.innerHTML = type
     notifMsg.innerHTML = message
 
@@ -71,3 +71,55 @@ socket.on('notification', (type, message) => {
 
     setTimeout(() => { notifBox.classList.add('hide-popup') }, 5000)
 })
+
+// Function to update the notification badge count in the sidebar
+function updateNotifBadge(delta) {
+    const profileLink = document.querySelector('.sidebar-link[href="/profile"]')
+    if (!profileLink) return
+    
+    let badge = profileLink.querySelector('.notif-badge')
+    let currentCount = badge ? parseInt(badge.textContent) || 0 : 0
+    let newCount = Math.max(0, currentCount + delta)
+    
+    if (newCount > 0) {
+        if (!badge) {
+            badge = document.createElement('span')
+            badge.className = 'notif-badge'
+            profileLink.appendChild(badge)
+        }
+        badge.textContent = newCount
+    } else if (badge) {
+        badge.remove()
+    }
+}
+
+// Function to fetch unread notifications
+async function fetchUnreadNotifications() {
+    try {
+        const response = await fetch('/notifications/unread'); 
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        return data.count; // The endpoint returns { count: ... }
+    } catch (error) {
+        console.error('Error fetching unread notifications:', error);
+        return 0; // Return 0 if there's an error
+    }
+}
+
+// Function to update the notification badge
+function updateNotificationBadge(count) {
+    const badge = document.getElementById('notification-badge'); 
+    if (badge) {
+        badge.textContent = count > 0 ? count : '';
+        badge.style.display = count > 0 ? 'block' : 'none';
+    }
+}
+
+// Check unread notifications on page load
+window.addEventListener('load', async function() {
+    const unreadCount = await fetchUnreadNotifications();
+    updateNotificationBadge(unreadCount);
+});
+

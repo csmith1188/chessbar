@@ -17,9 +17,33 @@ let sql
 
 const db = new sqlite3.Database('database/database.db', sqlite3.OPEN_READWRITE, (err) => {
     if (err) return console.error('Error connecting to database:', err.message)
+
+    // Run startup migrations to ensure schema is up-to-date
+    runStartupMigrations()
 })
 
 const PLAY_PRICE = 100
+
+// Startup migrations to handle schema changes for existing databases
+function runStartupMigrations() {
+    // Ensure notifications table has status column
+    db.all("PRAGMA table_info(notifications);", [], (err, cols) => {
+        if (err) {
+            console.error('Migration error checking notifications table:', err)
+            return
+        }
+        const hasStatus = Array.isArray(cols) && cols.some(c => c && c.name === 'status')
+        if (!hasStatus) {
+            db.run('ALTER TABLE notifications ADD COLUMN status TEXT DEFAULT "unread"', [], (alterErr) => {
+                if (alterErr) {
+                    console.error('Migration error adding status column:', alterErr)
+                } else {
+                    console.log('Migration: Added status column to notifications table')
+                }
+            })
+        }
+    })
+}
 
 //! For digipogs
 
@@ -74,6 +98,29 @@ app.use(sessionMiddleware)
 // make the session user available to all templates via res.locals
 app.use((req, res, next) => {
     res.locals.user = req.session ? req.session.user : null
+    next()
+})
+
+// Fetch unread notification count for the current user and make it available to templates
+app.use((req, res, next) => {
+    res.locals.unreadNotifCount = 0
+    // Only fetch count for HTML page requests, not API/AJAX requests
+    const isApiRequest = req.xhr || req.path.startsWith('/notifications/') ||
+        req.path.startsWith('/api/') || req.headers.accept?.includes('application/json')
+    if (isApiRequest || !req.session || !req.session.user) {
+        return next()
+    }
+
+    const userId = Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
+    if (userId) {
+        db.get('SELECT COUNT(*) as count FROM notifications WHERE user = ? AND (status IS NULL OR status = ?)', [userId, 'unread'], (err, row) => {
+            if (!err && row) {
+                res.locals.unreadNotifCount = row.count || 0
+            }
+            next()
+        })
+        return
+    }
     next()
 })
 
@@ -152,18 +199,75 @@ app.get('/profile', (req, res) => {
     const viewingUser = req.query && req.query.usr ? Number(req.query.usr) : null
     const formbarId = viewingUser || Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
 
-    if (!formbarId) return res.render('profile', { avatarUrl: '/img/basic_avatar.png' })
+    if (!formbarId) return res.render('profile', { avatarUrl: '/img/basic_avatar.png', notifications: [], isOwnProfile: false })
 
-    db.get('SELECT avatar FROM users WHERE formbar_id = ?', [formbarId], (err, row) => {
-        if (err) {
-            console.error('DB error fetching avatar:', err)
-            return res.render('profile', { avatarUrl: '/img/basic_avatar.png' })
+    // Determine whether the visitor is viewing their own profile
+    const signedInId = Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
+    const viewingOwnProfile = signedInId && signedInId === Number(formbarId)
+
+    // Helper to render with avatar and notifications
+    function renderWith(avatarUrl, notifications) {
+        // ensure notifications always provided to template
+        return res.render('profile', { avatarUrl, notifications: Array.isArray(notifications) ? notifications : [], isOwnProfile: viewingOwnProfile })
+    }
+
+    // If viewing own profile, fetch notifications; otherwise only fetch avatar
+    const fetchNotifications = viewingOwnProfile
+
+    if (fetchNotifications) {
+        const oneHourAgo = Date.now() - 60 * 60 * 1000
+
+        const fetchAndRender = () => {
+            db.all('SELECT notification, type, message, status, created_time FROM notifications WHERE user = ? ORDER BY notification DESC', [signedInId], (nerr, notes) => {
+                if (nerr) {
+                    console.error('DB error fetching notifications:', nerr)
+                    notes = []
+                }
+                // Now fetch avatar and render
+                db.get('SELECT avatar FROM users WHERE formbar_id = ?', [formbarId], (err, row) => {
+                    if (err) {
+                        console.error('DB error fetching avatar:', err)
+                        return renderWith('/img/basic_avatar.png', notes)
+                    }
+                    if (row && row.avatar) {
+                        return renderWith(`/img/avatars/${row.avatar}`, notes)
+                    }
+                    return renderWith('/img/basic_avatar.png', notes)
+                })
+            })
         }
-        if (row && row.avatar) {
-            return res.render('profile', { avatarUrl: `/img/avatars/${row.avatar}` })
-        }
-        return res.render('profile', { avatarUrl: '/img/basic_avatar.png' })
-    })
+
+        db.all('SELECT notification, read_time FROM notifications WHERE user = ? AND status = ? AND read_time IS NOT NULL', [signedInId, 'read'], (cerr, rows) => {
+            if (cerr || !Array.isArray(rows) || rows.length === 0) {
+                if (cerr) console.error('DB error fetching read notifications:', cerr)
+                return fetchAndRender()
+            }
+
+            const toDelete = rows
+                .map(r => ({ id: r.notification, time: Date.parse(r.read_time) }))
+                .filter(r => Number.isFinite(r.time) && r.time <= oneHourAgo)
+                .map(r => r.id)
+
+            if (toDelete.length === 0) return fetchAndRender()
+
+            const placeholders = toDelete.map(() => '?').join(',')
+            db.run(`DELETE FROM notifications WHERE user = ? AND notification IN (${placeholders})`, [signedInId, ...toDelete], (derr) => {
+                if (derr) console.error('DB error deleting old read notifications:', derr)
+                return fetchAndRender()
+            })
+        })
+    } else {
+        db.get('SELECT avatar FROM users WHERE formbar_id = ?', [formbarId], (err, row) => {
+            if (err) {
+                console.error('DB error fetching avatar:', err)
+                return renderWith('/img/basic_avatar.png', [])
+            }
+            if (row && row.avatar) {
+                return renderWith(`/img/avatars/${row.avatar}`, [])
+            }
+            return renderWith('/img/basic_avatar.png', [])
+        })
+    }
 })
 
 // Accept avatar changes via either a data URL (from file upload) or a remote URL.
@@ -356,6 +460,7 @@ app.post('/admin/users/:id/add', requireAdmin, (req, res) => {
 
             db.get('SELECT * FROM users WHERE formbar_id = ?', [id], (err2, updated) => {
                 if (err2) return res.status(500).json({ error: 'DB error' })
+                notification(id, 'Tokens', `God has gifted you ${amount} ${amount == 1 ? 'token' : 'tokens'}.`)
                 return res.json({ user: updated })
             })
         })
@@ -381,6 +486,7 @@ app.post('/admin/users/:id/set', requireAdmin, (req, res) => {
             db.get('SELECT * FROM users WHERE formbar_id = ?', [id], (err2, updated) => {
 
                 if (err2) return res.status(500).json({ error: 'DB error' })
+                notification(id, 'Tokens', `God has set your token balance to ${tokens}.`)
                 return res.json({ user: updated })
 
             })
@@ -412,6 +518,7 @@ server.listen(PORT, () => {
 })
 
 function logUsers() {
+    /*
     console.clear()
     console.log('Users:')
     users.forEach(u => console.log(`Name: ${u.displayName} | ID: ${u.id} | Active: ${u.active ? ' Active ' : 'Inactive'} | Tokens: ${u.tokens}`))
@@ -423,6 +530,7 @@ function logUsers() {
         g.users.forEach(u => console.log(`  Name: ${u.displayName}`))
     })
     console.log()
+    */
 }
 
 let users = []
@@ -774,10 +882,18 @@ app.get('/api/friends', (req, res) => {
 */
 
 function notification(usr, type, message) {
-    db.run('INSERT INTO notifications (user, type, message) VALUES (?, ?, ?)', [usr, type, message])
-
     let foo = users.find(u => u.id == usr)
-    if (foo && foo.socket) foo.socket.emit('notification', type, message)
+    let status = 'unread'
+    let read = null
+    if (foo && foo.socket) {
+        status = 'read'
+        read = new Date().toString()
+    }
+    db.run('INSERT INTO notifications (user, type, message, status, read_time) VALUES (?, ?, ?, ?, ?)', [usr, type, message, status, read])
+
+    if (foo && foo.socket) {
+        foo.socket.emit('notification', type, message)
+    }
 }
 
 function friendEvents(socket, user) {
@@ -834,11 +950,11 @@ function friendEvents(socket, user) {
     }
 
     function linkTo(usr) {
-        return `<a href="/profile?usr=${usr}" target="_blank">${usr}</a>`
+        return `<a href="/profile?usr=${usr}">${usr}</a>`
     }
 
     socket.on('friendRequest', (from, to) => {
-        console.log('Freind request event:', from, to)
+        console.log('Friend request event:', from, to)
 
         from = Number(from)
         to = Number(to)
@@ -850,11 +966,11 @@ function friendEvents(socket, user) {
         getStatus(from, to).then((status) => {
             if (status == 'friends') return notification(from, 'Friendship', `You are already friends with ${linkTo(to)}.`)
             if (status == 'pending') {
-                getFirstUser(from, to).then((u) => { 
+                getFirstUser(from, to).then((u) => {
                     if (u == from) return notification(from, 'Friendship', `You already have a pending request for ${linkTo(to)}.`)
 
                     updateFriendRecord(from, to, 'friends')
-    
+
                     notification(to, 'Friendship', `You are now friends with ${linkTo(from)}.`)
                     notification(from, 'Friendship', `You are now friends with ${linkTo(to)}.`)
                 })
@@ -866,6 +982,65 @@ function friendEvents(socket, user) {
         })
     })
 }
+
+// Mark a notification as read (AJAX from profile page)
+app.post('/notifications/:id/read', (req, res) => {
+    if (!req.session || !req.session.user) return res.status(401).json({ error: 'Not authenticated' })
+    const nid = Number(req.params.id)
+    if (!Number.isInteger(nid) || nid <= 0) return res.status(400).json({ error: 'Invalid id' })
+    const userId = Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
+
+    db.get('SELECT user FROM notifications WHERE notification = ?', [nid], (err, row) => {
+        if (err) return res.status(500).json({ error: 'DB error' })
+        if (!row) return res.status(404).json({ error: 'Notification not found' })
+        if (Number(row.user) !== userId) return res.status(403).json({ error: 'Forbidden' })
+
+        db.run('UPDATE notifications SET status = ? WHERE notification = ?', ['read', nid], function (uerr) {
+            if (uerr) return res.status(500).json({ error: 'DB update error' })
+        })
+
+        db.run('UPDATE notifications SET read_time = ? WHERE notification = ?', [new Date().toString(), nid], function (uerr) {
+            if (uerr) return res.status(500).json({ error: 'DB update error' })
+            return res.json({ success: true })
+        })
+    })
+})
+
+// Delete a notification (AJAX from profile page)
+app.post('/notifications/:id/delete', (req, res) => {
+    if (!req.session || !req.session.user) return res.status(401).json({ error: 'Not authenticated' })
+    const nid = Number(req.params.id)
+    if (!Number.isInteger(nid) || nid <= 0) return res.status(400).json({ error: 'Invalid id' })
+    const userId = Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
+
+    db.get('SELECT user FROM notifications WHERE notification = ?', [nid], (err, row) => {
+        if (err) return res.status(500).json({ error: 'DB error' })
+        if (!row) return res.status(404).json({ error: 'Notification not found' })
+        if (Number(row.user) !== userId) return res.status(403).json({ error: 'Forbidden' })
+
+        db.run('DELETE FROM notifications WHERE notification = ?', [nid], function (uerr) {
+            if (uerr) return res.status(500).json({ error: 'DB delete error' })
+            return res.json({ success: true })
+        })
+    })
+})
+
+app.get('/notifications/unread', (req, res) => {
+    if (!req.session || !req.session.user) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const userId = Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0;
+    if (userId) {
+        db.get('SELECT COUNT(*) as count FROM notifications WHERE user = ? AND status = ?', [userId, 'unread'], (err, row) => {
+            if (err) {
+                return res.status(500).json({ error: 'Database error' });
+            }
+            res.json({ unreadCount: row.count || 0, count: row.count || 0 });
+        });
+    } else {
+        res.json({ unreadCount: 0, count: 0 });
+    }
+});
 
 /*
  ::::::::   ::::::::  ::::    ::: ::::    ::: :::::::::: :::::::: :::::::::::

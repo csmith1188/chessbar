@@ -400,6 +400,78 @@ input:focus {
     color: #fff;
 }
 
+/* Notifications */
+.notification-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    max-height: 50vh;
+    overflow-y: auto;
+    padding-right: 6px; /* room for scrollbar */
+}
+.notification {
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.02);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+}
+
+.notif-creation {
+    font-size: 10px;
+    font-weight: bolder;
+    color: #7b8183;
+    white-space: pre-wrap;
+}
+
+.notification .notif-type {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--muted);
+}
+.notification .notif-message {
+    font-size: 14px;
+    color: #eaf4fb;
+    white-space: pre-wrap;
+}
+.notification.unread {
+    background: linear-gradient(90deg, rgba(94,234,212,0.06), rgba(94,234,212,0.03));
+    border-color: rgba(94,234,212,0.18);
+    box-shadow: 0 6px 14px rgba(2, 150, 120, 0.06);
+}
+.notif-delete {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 120ms ease;
+}
+.notif-delete:hover {
+    color: #fff;
+    border-color: rgba(255,255,255,0.16);
+    background: rgba(255,255,255,0.08);
+}
+.notif-delete:active {
+    transform: scale(0.96);
+}
+.no-notifs {
+    color: var(--muted);
+    padding: 10px 6px;
+}
+
 
 /* chatbox and silt */
 
