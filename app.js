@@ -751,13 +751,14 @@ app.get('/api/friends', (req, res) => {
     const userId_1 = req.session.user.id;
 
     //db.run(`...SQL...`, [params], (err, result) => { ... } )
- 
+
     db.get(`SELECT * FROM friends WHERE (id_1 = ? OR id_2 = ?) AND status = "friends"`, [userId_1, userId_1], (err, rows) => {
         if (err) {
             console.error('DB error fetching friends:', err)
             return res.status(500).json({ error: 'DB error' })
         }
-        return res.json({ friends: rows })
+        res.json(rows)
+        return rows
     })
 })
 
