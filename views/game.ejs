@@ -4,9 +4,7 @@
 <head>
     <title>Game - Chessbar</title>
     <link href='https://fonts.googleapis.com/css2?family=Lavishly+Yours&display=swap' rel='stylesheet'>
-    <link rel='stylesheet' href='/css/sidebar.css'>
     <link rel='stylesheet' href='/css/game.css'>
-    <link rel='stylesheet' href='/css/profile.css'>
 </head>
 
 <body class="with-sidebar">
@@ -29,11 +27,21 @@
                 </div>
             </div>
 
-            <div id='sidebar'>
-                <!-- <div id='CapturedW' class='captureBox'></div>
-            <div id='CapturedB' class='captureBox'></div> -->
+            <!-- === Chat Section === -->
+            <div id='chat-container'>
+                <div id='chat-sidebar'>
+                    <h2>Users</h2>
+                </div>
+
+                <div id='chat-main'>
+                    <div id='messages'></div>
+
+                    <div id='inputBar'>
+                        <input type='text' id='msg' placeholder='Type your message here...' />
+                        <button id='send'>Send</button>
+                    </div>
+                </div>
             </div>
-            <script src='/js/sidebar.js'></script>
         </div>
 
         <!-- Waiting overlay shown when opponent hasn't joined -->
@@ -49,22 +57,6 @@
             <img src="" id="rook">
             <img src="" id="bishop">
             <img src="" id="knight">
-        </div>
-
-        <!-- === Chat Section === -->
-        <div id='chat-container'>
-            <div id='chat-sidebar'>
-                <h2>Users</h2>
-            </div>
-
-            <div id='chat-main'>
-                <div id='messages'></div>
-
-                <div id='inputBar'>
-                    <input type='text' id='msg' placeholder='Type your message here...' />
-                    <button id='send'>Send</button>
-                </div>
-            </div>
         </div>
 
         <a href='/' id='back-link'>Back to game selection</a>

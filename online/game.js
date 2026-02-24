@@ -196,6 +196,7 @@ class Game {
     }
 
     join(user) {
+        if (!user || !user.socket) return
         user.side = 'unassigned'
         // If the joining user had an outstanding leave timer, cancel it (they rejoined)
         if (this.leaveTimers[user.id]) {

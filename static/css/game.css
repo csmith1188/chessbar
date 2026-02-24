@@ -15,7 +15,7 @@ body {
 
 body {
     font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-    background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+    background: var(--bg-1);
     color: #eaf5fb;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -27,7 +27,8 @@ body {
     gap: 18px;
     align-items: flex-start;
     justify-content: center;
-    max-width: 1200px;
+    min-width: 100%;
+    min-height: 100%;
     margin: 0 auto
 }
 
@@ -36,9 +37,11 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    align-items: center;
+    align-items: top center;
     /* allow the column to shrink/grow alongside the sidebar */
-    flex: 0 0 auto;
+    flex: 1 1 auto;
+    order: 1;
+    justify-content: center
 }
 
 /* Canvas: only visual styling here — JS must set width/height attributes for drawing */
@@ -48,6 +51,8 @@ body {
     box-shadow: 0 10px 40px rgba(2, 8, 20, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.02);
     touch-action: none;
     display: block;
+    height: 85vmin;
+    width: 85vmin;
 }
 
 /* Sidebar */
@@ -70,17 +75,14 @@ body {
 
 /* Chat (fixed) - keep visible; container hides overflow, only messages scroll */
 #chat-container {
-    position: fixed;
-    right: 18px;
-    bottom: 18px;
     width: 360px;
-    max-height: calc(100vh - 36px);
+    max-height: 95vh;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding: 8px;
-    z-index: 1200;
-    overflow: hidden
+    overflow: hidden;
+    flex: 0 0 auto;
+    order: 2
 }
 
 #chat-sidebar {
@@ -417,9 +419,9 @@ a {
     margin: 12px
 }
 
-@media (max-width:920px) {
+@media (max-width:1205px) {
 
-    /* mobile: chat full width anchored to bottom */
+    /* tablet/mobile: chat full width below canvas */
     #container {
         flex-direction: column;
         align-items: center
@@ -430,13 +432,11 @@ a {
     }
 
     #chat-container {
-        left: 0;
-        right: 0;
-        bottom: 0;
-        position: fixed;
         width: 100%;
         max-height: 50vh;
-        padding: 8px 12px
+        padding: 8px 12px;
+        position: static;
+        order: 2
     }
 
     #chat-sidebar {
@@ -516,7 +516,7 @@ input:focus {
     border-radius: 10px;
     border: 2px solid var(--bg-2);
     /* changed: use static image file instead of inline SVG data URL */
-    background-color: var(--bg-1);
+    background-color: #ffffff42;
     background-image: url('../img/settings.png');
     background-repeat: no-repeat;
     background-position: center;
