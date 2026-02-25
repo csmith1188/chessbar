@@ -2,16 +2,6 @@
 
 /* sidebar-specific styles follow (variables are in colors.css) */
 
-body.with-sidebar {
-    padding-left: var(--sidebar-width);
-    transition: padding-left 180ms ease;
-    margin-left: 10px;
-}
-
-body.sidebar-collapsed.with-sidebar {
-    padding-left: var(--sidebar-collapsed);
-}
-
 .global-sidebar {
     position: fixed;
     inset: 0 auto 0 0;
@@ -23,19 +13,13 @@ body.sidebar-collapsed.with-sidebar {
     padding: 16px 14px 18px;
     display: flex;
     align-items: stretch;
-    z-index: 1200;
+    z-index: 12000;
     transform: translateX(0);
     transition: transform 180ms ease;
 }
 
 body.sidebar-collapsed .global-sidebar {
     transform: translateX(calc(-1 * var(--sidebar-width)));
-}
-
-@media (max-width: 900px) {
-    body.with-sidebar {
-        padding-left: var(--sidebar-collapsed);
-    }
 }
 
 a {

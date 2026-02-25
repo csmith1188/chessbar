@@ -5,12 +5,12 @@
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Admin - Chessbar</title>
-    <link rel='stylesheet' href='/css/sidebar.css'>
     <link rel='stylesheet' href='/css/profile.css'>
     <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/colors.css">
 </head>
 
-<body>
+<body class="with-sidebar">
     <%- include('partials/sidebar') %>
         <div class="admin-container">
             <div class="admin-header">
@@ -62,7 +62,6 @@
                 style='margin-top:18px;display:inline-block;text-decoration:none;color:var(--muted)'>← Back to games</a>
         </div>
 
-        <script src='/js/sidebar.js'></script>
         <script>
             let currentUsers = []
 
