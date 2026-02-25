@@ -45,7 +45,7 @@
                 </div>
             </div>
             //temp button
-            <button onclick="fetchFriends()"></button>
+            <button onclick="await fetchFriends()"></button>
         </div>
 
         <div id='profile'>
@@ -336,48 +336,17 @@
 </script>
 
 <script>
-    function fetchFriends() {
-        fetch('/api/friends')
-            .then(response => response.json())
-            .then(friends => {
-                console.log(friends); // Debug the response
-                friendsArray = [];
-                if (!Array.isArray(friends)) {
-                    friendsArray.push(friends);
-                } else {
-                    friendsArray = friends;
-                }
-
-                const friendsContainer = document.getElementById('chat-sidebar');
-                friendsContainer.innerHTML = '<h2>Users</h2>'; // Clear existing content
-
-                friendsArray.forEach(friend => {
-                    const friendElement = document.createElement('div');
-                    friendElement.classList.add('friend');
-                    friendElement.innerText = friend.display_name;
-                    friendElement.dataset.friendId = friend.id;
-
-                    // Add click event to open chat
-                    friendElement.addEventListener('click', () => openChat(friend.id, friend.display_name));
-                    friendsContainer.appendChild(friendElement);
-                });
-            })
-            .catch(err => console.error('Error fetching friends:', err));
-
-        // friend list population
-        const friends = document.getElementById('chat-sidebar');
-
-        function populateFriends() {
-            // Add logic for populating friends here if needed
+    async function fetchFriends() {
+        try {
+            const response = await fetch('/api/friends');
+            const friends = await response.json();
+            console.log(friends); // Debug the response
+        } catch (err) {
+            console.error('Error fetching friends:', err);
         }
     }
-
     // friend list population
     const friends = document.getElementById('chat-sidebar')
-
-    function populateFriends() {
-
-    }
 </script>
 
 </html>
