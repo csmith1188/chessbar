@@ -45,7 +45,7 @@
                 </div>
             </div>
             //temp button
-            <button id="get-friends"></button>
+            <button onclick="await fetchFriends()"></button>
         </div>
 
         <div id='profile'>
@@ -336,8 +336,17 @@
 </script>
 
 <script>
-
-   
+    async function fetchFriends() {
+        try {
+            const response = await fetch('/api/friends');
+            const friends = await response.json();
+            console.log(friends); // Debug the response
+        } catch (err) {
+            console.error('Error fetching friends:', err);
+        }
+    }
+    // friend list population
+    const friends = document.getElementById('chat-sidebar')
 </script>
 
 </html>

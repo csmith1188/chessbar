@@ -851,7 +851,25 @@ function chatEvents(socket, user) {
 
 //kayden was here, making the dm chat
 
-    
+app.get('/api/friends', (req, res) => { 
+    if (!req.session || !req.session.user) {
+        return res.status(401).json({ error: 'Not authenticated' })
+    }
+
+    const userId_1 = req.session.user.id;
+
+    //db.run(`...SQL...`, [params], (err, result) => { ... } )
+
+    db.get(`SELECT * FROM friends WHERE (id_1 = ? OR id_2 = ?) AND status = "friends"`, [userId_1, userId_1], (err, rows) => {
+        if (err) {
+            console.error('DB error fetching friends:', err)
+            return res.status(500).json({ error: 'DB error' })
+        }
+        res.json(rows)
+        return rows
+    })
+})
+
 
 /*
 :::::::::: :::::::::  ::::::::::: :::::::::: ::::    ::: :::::::::   ::::::::
