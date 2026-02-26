@@ -151,7 +151,7 @@ function buildPGNFromMoves(moves, meta = {}) {
         updatePGN(m); // Update PGN after applying the move
     }
 
-    // Build SAN-ish notation (basic): pawns as e4 / exd5, pieces as Nf3 / Rxa1, castling O-O/O-O-O, promotions =Q
+    // Build long algebraic notation: e2e4, exd5, Rh8h2, castling O-O/O-O-O, promotions =Q
     const boardState = initBoard()
     const parts = []
 
@@ -182,26 +182,21 @@ function buildPGNFromMoves(moves, meta = {}) {
                 return (to.x === 6) ? 'O-O' : 'O-O-O'
             }
 
+            const fromSq = square(from)
             const toSq = square(to)
             const letterMap = { 'Knight': 'N', 'Bishop': 'B', 'Rook': 'R', 'Queen': 'Q', 'King': 'K' }
             const pLetter = letterMap[mover.name] || ''
 
             if (mover.name === 'Pawn') {
-                if (m.takes) {
-                    const file = files[from.x]
-                    let s = `${file}x${toSq}`
-                    if (m.promotion) s += `=${String(m.promotion).charAt(0).toUpperCase()}`
-                    return s
-                } else {
-                    let s = `${toSq}`
-                    if (m.promotion) s += `=${String(m.promotion).charAt(0).toUpperCase()}`
-                    return s
-                }
+                const capture = m.takes ? 'x' : ''
+                let s = `${fromSq}${capture}${toSq}`
+                if (m.promotion) s += `=${String(m.promotion).charAt(0).toUpperCase()}`
+                return s
             }
 
-            // Other pieces - standard PGN format
+            // Other pieces - long algebraic format
             const capture = m.takes ? 'x' : ''
-            return `${pLetter}${capture}${toSq}`
+            return `${pLetter}${fromSq}${capture}${toSq}`
         }
 
         const whiteSAN = whiteMove ? sanFor(whiteMove) : ''
@@ -269,20 +264,27 @@ function exportPGNToChat() {
             blackName: (gameData.prevBlack && gameData.prevBlack.displayName) ? gameData.prevBlack.displayName : null
         }
 
-        const pgn = buildPGNFromMoves(gameData.moves); // Removed meta parameter to match function signature
+        const pgn = buildPGNFromMoves(gameData.moves, meta);
 
-        // Log PGN to console instead of pasting into chat input
-        try {
+        // Copy PGN to clipboard
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(pgn).then(() => {
+                console.log('PGN copied to clipboard')
+                alert('PGN copied to clipboard!')
+            }).catch(err => {
+                console.error('Failed to copy to clipboard:', err)
+                // Fallback: log to console
+                console.log('--- Exported PGN START ---')
+                console.log(pgn)
+                console.log('--- Exported PGN END ---')
+                alert('Could not copy to clipboard. PGN logged to console.')
+            })
+        } else {
+            // Fallback for browsers without clipboard API or non-HTTPS contexts
             console.log('--- Exported PGN START ---')
             console.log(pgn)
             console.log('--- Exported PGN END ---')
-        } catch (e) {
-            // fallback: put into chat input if console fails for some reason
-            if (msgInput) {
-                msgInput.value = pgn
-                msgInput.focus()
-                try { msgInput.select() } catch (e) {}
-            }
+            alert('Clipboard API not available. PGN logged to console.')
         }
     } catch (e) {
         console.error('Failed to export PGN', e)
