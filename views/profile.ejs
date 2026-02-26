@@ -100,15 +100,14 @@
                     <h3>Notifications</h3>
                     <div class='notification-list'>
                         <% if (typeof notifications !=='undefined' && notifications && notifications.length) { %>
-                            <% notifications.forEach((n)=> { %>
-                                <div class='notification <%= (n.status == null || String(n.status).toLowerCase() !== '
-                                    read') ? 'unread' : '' %>' data-id='<%= n.notification %>'>
+                            <% notifications.forEach((n) => { %>
+                                <div class='notification <%= (n.status == null || String(n.status).toLowerCase() !== 'read')
+                                    ? 'unread' : '' %>' data-id='<%= n.notification %>'>
                                         <div class='notif-type'>
                                             <%= n.type || 'Notice' %>
                                         </div>
                                         <div class='notif-message'><%- n.message %></div>
-                                        <div class='notif-creation'>Created at <%= n.created_time || '00:00:00' %>
-                                        </div>
+                                        <div class='notif-creation'>Created at <%= n.created_time || '00:00:00' %> </div>
                                         <button class='notif-delete' title='Delete'>✖</button>
                                 </div>
                                 <% }) %>
@@ -341,35 +340,26 @@
             .then(response => response.json())
             .then(friends => {
                 console.log(friends); // Debug the response
-                friendsArray = [];
-                if (!Array.isArray(friends)) {
-                    friendsArray.push(friends);
+    
+                if (Array.isArray(friends)) {
+                    const friendsContainer = document.getElementById('chat-sidebar');
+                    friendsContainer.innerHTML = '<h2>Users</h2>'; // Clear existing content
+    
+                    friends.forEach(friend => {
+                        const friendElement = document.createElement('div');
+                        friendElement.classList.add('friend');
+                        friendElement.innerText = friend.display_name;
+                        friendElement.dataset.friendId = friend.id;
+    
+                        // Add click event to open chat
+                        friendElement.addEventListener('click', () => openChat(friend.id, friend.display_name));
+                        friendsContainer.appendChild(friendElement);
+                    });
                 } else {
-                    friendsArray = friends;
+                    console.error('Unexpected response format:', friends);
                 }
-
-                const friendsContainer = document.getElementById('chat-sidebar');
-                friendsContainer.innerHTML = '<h2>Users</h2>'; // Clear existing content
-
-                friendsArray.forEach(friend => {
-                    const friendElement = document.createElement('div');
-                    friendElement.classList.add('friend');
-                    friendElement.innerText = friend.display_name;
-                    friendElement.dataset.friendId = friend.id;
-
-                    // Add click event to open chat
-                    friendElement.addEventListener('click', () => openChat(friend.id, friend.display_name));
-                    friendsContainer.appendChild(friendElement);
-                });
             })
             .catch(err => console.error('Error fetching friends:', err));
-
-        // friend list population
-        const friends = document.getElementById('chat-sidebar');
-
-        function populateFriends() {
-            // Add logic for populating friends here if needed
-        }
     }
 
     // friend list population
