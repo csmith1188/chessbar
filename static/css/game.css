@@ -19,7 +19,7 @@ body {
     color: #eaf5fb;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    padding: 18px 18px 18px 0;
+    padding-top: 10px;
 }
 
 #container {
@@ -181,7 +181,7 @@ body {
 #resign-btn:hover {
     /* transform: translateY(-2px); */
     background-size: 70% 70%;
-    box-shadow: 0 10px 22px rgba(2,8,20,0.18);
+    box-shadow: 0 10px 22px rgba(2, 8, 20, 0.18);
 }
 
 #resign-btn:focus {
@@ -196,16 +196,6 @@ body {
         width: calc(100% - 40px);
         /* slightly smaller on mobile so it doesn't dominate */
         font-size: 16px;
-    }
-}
-
-/* Light-theme variant */
-@media (prefers-color-scheme: light) {
-    #InfoBox {
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(245, 245, 245, 0.96));
-        color: #10212b;
-        border: 1px solid rgba(0, 0, 0, 0.06);
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
     }
 }
 
@@ -240,7 +230,7 @@ body {
     z-index: 3200;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 200ms cubic-bezier(.2,.9,.3,1), transform 200ms cubic-bezier(.2,.9,.3,1);
+    transition: opacity 200ms cubic-bezier(.2, .9, .3, 1), transform 200ms cubic-bezier(.2, .9, .3, 1);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -261,7 +251,7 @@ body {
     min-width: 360px;
     max-width: 760px;
     width: min(70vw, 760px);
-    box-shadow: 0 18px 60px rgba(0,0,0,0.6);
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.6);
     text-align: center;
 }
 
@@ -300,18 +290,18 @@ body {
     opacity: 0;
     pointer-events: none;
     transform: translateY(-6px) scale(0.99);
-    transition: opacity 220ms cubic-bezier(.2,.9,.3,1), transform 220ms cubic-bezier(.2,.9,.3,1);
+    transition: opacity 220ms cubic-bezier(.2, .9, .3, 1), transform 220ms cubic-bezier(.2, .9, .3, 1);
 }
 
 #waitingOverlay .waiting-inner {
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.16));
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.16));
     color: #eaf5fb;
     padding: 18px;
     border-radius: 10px;
     font-size: 20px;
     font-weight: 700;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-    border: 1px solid rgba(255,255,255,0.03);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 #waitingOverlay .waiting-inner .waiting-actions {
@@ -323,7 +313,7 @@ body {
 #waitingOverlay .waiting-inner .btn {
     padding: 8px 12px;
     border-radius: 8px;
-    background: rgba(255,255,255,0.04);
+    background: rgba(255, 255, 255, 0.04);
     color: #eaf5fb;
     text-decoration: none;
     font-weight: 700;
@@ -403,7 +393,7 @@ body {
 
 #send:hover {
     transform: translateY(-2px) scale(1.1);
-    transition: transform 180ms cubic-bezier(.2,.9,.3,1);
+    transition: transform 180ms cubic-bezier(.2, .9, .3, 1);
 }
 
 a {
@@ -422,10 +412,10 @@ a {
 
     #chat-container {
         width: 100%;
-        max-height: 50vh;
         padding: 8px 12px;
         position: static;
-        order: 2
+        order: 2;
+        height: 100vh
     }
 
     #chat-sidebar {
@@ -465,7 +455,7 @@ input:focus {
 #promotion img {
     display: inline-block;
     cursor: pointer;
-    transition: transform 180ms cubic-bezier(.2,.9,.3,1), box-shadow 180ms ease;
+    transition: transform 180ms cubic-bezier(.2, .9, .3, 1), box-shadow 180ms ease;
     will-change: transform, box-shadow;
     border-radius: 6px;
     /* provide a subtle elevation baseline */
@@ -476,7 +466,7 @@ input:focus {
 #promotion img:hover,
 #promotion img:focus {
     transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 10px 22px rgba(2,8,20,0.18);
+    box-shadow: 0 10px 22px rgba(2, 8, 20, 0.18);
 }
 
 #promotion img:active {
@@ -484,14 +474,6 @@ input:focus {
     transform: none !important;
     transition: none !important;
     box-shadow: none !important;
-}
-
-/* Respect reduced motion preference */
-@media (prefers-reduced-motion: reduce) {
-    #promotion img {
-        transition: none;
-        transform: none !important;
-    }
 }
 
 /* Settings button + modal */
@@ -525,8 +507,8 @@ input:focus {
 /* Join code badge (top-left) */
 #join-code-badge {
     position: fixed;
-    top: 12px;
-    left: 12px;
+    bottom: 12px;
+    right: 12px;
     z-index: 1450;
     padding: 8px 12px;
     background: rgba(0, 0, 0, 0.6);
@@ -559,6 +541,8 @@ input:focus {
     max-width: calc(100% - 24px);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.04);
+    max-height: 95vh;
+    overflow-y: auto;
 }
 
 #settings-panel h3 {
@@ -644,13 +628,14 @@ input:focus {
 /* Clickable username affordance: slight pop-up on hover */
 .username[role="link"] {
     display: inline-block;
-    transition: transform 180ms cubic-bezier(.2,.9,.2,1), box-shadow 180ms cubic-bezier(.2,.9,.2,1);
+    transition: transform 180ms cubic-bezier(.2, .9, .2, 1), box-shadow 180ms cubic-bezier(.2, .9, .2, 1);
     will-change: transform, box-shadow;
     transform-origin: center bottom;
 }
+
 .username[role="link"]:hover {
     transform: translateY(-1px) scale(1.06);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.28);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.28);
 }
 
 /* Status dot styles */
@@ -660,7 +645,7 @@ input:focus {
     border-radius: 50%;
     margin-left: 6px;
     display: inline-block;
-    transition: background-color 0.18s ease, transform 0.28s cubic-bezier(.2,.9,.2,1);
+    transition: background-color 0.18s ease, transform 0.28s cubic-bezier(.2, .9, .2, 1);
     transform: translateX(0);
 }
 
@@ -685,7 +670,8 @@ input:focus {
     color: #b0bbc2;
     margin-left: 8px;
     margin-right: 6px;
-    min-width: 40px; /* reserve space so layout doesn't jump when it appears */
+    min-width: 40px;
+    /* reserve space so layout doesn't jump when it appears */
     opacity: 0;
     transition: opacity 0.18s ease;
 }
@@ -694,6 +680,7 @@ input:focus {
 .userdiv.went-offline .status-dot {
     transform: translateX(18px);
 }
+
 .userdiv.went-offline .inactive-duration {
     /* delay the fade to allow dot to slide first */
     transition-delay: 0.28s;
@@ -717,9 +704,10 @@ input:focus {
     align-items: center;
     padding: 6px 8px;
     /* max-width: 220px; */
-    background: rgb(73, 73, 73); /* light grey to contrast black pieces */
+    background: rgb(73, 73, 73);
+    /* light grey to contrast black pieces */
     border-radius: 8px;
-    border: 1px solid rgba(0,0,0,0.06);
+    border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 /* Hide capture containers when there are no pieces captured */
@@ -764,8 +752,10 @@ input:focus {
     display: inline-flex;
     align-items: center;
 }
+
 .cap-adv.positive {
-    background: #00000015; /* green */
+    background: #00000015;
+    /* green */
 }
 
 /* Clock displays under the board: match page typography and appearance */
@@ -784,6 +774,7 @@ input:focus {
 
 /* Slightly smaller on small screens to keep layout compact */
 @media (max-width: 920px) {
+
     #whiteClock,
     #blackClock {
         font-size: 14px;
@@ -793,6 +784,7 @@ input:focus {
 
 /* Touch-friendly improvements */
 @media (pointer: coarse) {
+
     /* Increase touch target sizes for promotion pieces on touch devices */
     #promotion img {
         padding: 4px;
@@ -801,7 +793,8 @@ input:focus {
     }
 
     /* Improve button touch targets */
-    button, .btn {
+    button,
+    .btn {
         min-height: 44px;
         min-width: 44px;
     }
