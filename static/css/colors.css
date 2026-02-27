@@ -26,9 +26,13 @@
 
     --max-width: 1100px;
 }
-
-@media (max-width: 920px) {
+@media (max-width: 1010px) {
     :root {
-        --sidebar-width: calc(100vw - 28px);
+        --sidebar-width: 252px;
+    }
+}
+@media (max-width: 500px) {
+    :root {
+        --sidebar-width: calc(100vw - 35px);
     }
 }

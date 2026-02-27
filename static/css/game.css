@@ -51,8 +51,8 @@ body {
     box-shadow: 0 10px 40px rgba(2, 8, 20, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.02);
     touch-action: none;
     display: block;
-    height: 85vmin;
-    width: 85vmin;
+    height: 90vmin;
+    width: 90vmin;
 }
 
 .captureBox {

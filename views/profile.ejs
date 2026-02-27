@@ -30,8 +30,27 @@
             </div>
 
             <div style="position: relative; right: 0px; bottom: 0px; padding: 0; width: 100%;" id='chat-container'>
-                <div id='chat-sidebar'>
-                    <h2>Users</h2>
+
+                <div class="panel" id='friends-panel' style='margin-top:12px;'>
+                    <h3>Friends</h3>
+                    <div class='friends-list'>
+                        <% if (typeof friends !=='undefined' && friends && friends.length) { %>
+                            <% friends.forEach((friend)=> { %>
+                                <div class='friend-item'>
+                                    <a href='/profile?usr=<%= friend.formbar_id %>' class='friend-link'>
+                                        <div class='friend-avatar'
+                                            style='background-image: url(<%= friend.avatar ? "/img/avatars/" + friend.avatar : "/img/basic_avatar.png" %>)'>
+                                        </div>
+                                        <div class='friend-username'>
+                                            <%= friend.display_name || 'User' %>
+                                        </div>
+                                    </a>
+                                </div>
+                                <% }) %>
+                                    <% } else { %>
+                                        <div class='no-friends'>No friends yet</div>
+                                        <% } %>
+                    </div>
                 </div>
 
                 <div id='chat-main'>
@@ -98,15 +117,16 @@
                     <h3>Notifications</h3>
                     <div class='notification-list'>
                         <% if (typeof notifications !=='undefined' && notifications && notifications.length) { %>
-                            <% notifications.forEach((n) => { %>
-                                <div class='notification <%= (n.status == null || String(n.status).toLowerCase() !== 'read')
-                                    ? 'unread' : '' %>' data-id='<%= n.notification %>'>
-                                        <div class='notif-type'>
-                                            <%= n.type || 'Notice' %>
-                                        </div>
-                                        <div class='notif-message'><%- n.message %></div>
-                                        <div class='notif-creation'>Created at <%= n.created_time || '00:00:00' %> </div>
-                                        <button class='notif-delete' title='Delete'>✖</button>
+                            <% notifications.forEach((n)=> { %>
+                                <div class='notification <%= (n.status == null || String(n.status).toLowerCase() !== "read") ? "unread" : "" %>'
+                                    data-id='<%= n.notification %>'>
+                                    <div class='notif-type'>
+                                        <%= n.type || 'Notice' %>
+                                    </div>
+                                    <div class='notif-message'><%- n.message %></div>
+                                    <div class='notif-creation'>Created at <%= n.created_time || '00:00:00' %>
+                                    </div>
+                                    <button class='notif-delete' title='Delete'>✖</button>
                                 </div>
                                 <% }) %>
                                     <% } else { %>

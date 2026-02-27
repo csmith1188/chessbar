@@ -147,8 +147,7 @@ body {
 
 .panel {
     /* lower-contrast panel so profile feels lighter */
-    min-height: 150px;
-    min-width: 300px;
+    min-height: 4em;
 
     background: rgba(255, 255, 255, 0.012);
     border-radius: 10px;
@@ -190,12 +189,12 @@ body {
 #finished,
 #wdl {
     font-weight: 700;
-    font-size: 40px;
+    font-size: 5vmin;
     margin-top: 6px;
 }
 
 .panel .small {
-    font-size: 25px;
+    font-size: 4vmin;
     /* Increase the font size */
     font-weight: 700;
 }
@@ -279,7 +278,7 @@ body {
 
 #buyTokens input[type='number'],
 #buyTokens input[type='text'] {
-    width: calc(100% - 12px);
+    width: 100%;
     padding: 10px 12px;
     margin: 6px 0 10px 0;
     border-radius: 10px;
@@ -433,7 +432,13 @@ input:focus {
     max-height: 50vh;
     overflow-y: auto;
     padding-right: 6px;
-    /* room for scrollbar */
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.notification-list::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
 }
 
 .notification {
@@ -500,6 +505,60 @@ input:focus {
 }
 
 .no-notifs {
+    color: var(--muted);
+    padding: 10px 6px;
+}
+
+/* Friends List */
+.friends-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    max-height: 50vh;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.friend-item {
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 120ms ease;
+}
+
+.friend-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateX(2px);
+}
+
+.friend-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.friend-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+}
+
+.friend-username {
+    font-size: 14px;
+    color: #eaf4fb;
+    font-weight: 500;
+}
+
+.no-friends {
     color: var(--muted);
     padding: 10px 6px;
 }

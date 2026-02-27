@@ -199,16 +199,21 @@ app.get('/profile', (req, res) => {
     const viewingUser = req.query && req.query.usr ? Number(req.query.usr) : null
     const formbarId = viewingUser || Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
 
-    if (!formbarId) return res.render('profile', { avatarUrl: '/img/basic_avatar.png', notifications: [], isOwnProfile: false })
+    if (!formbarId) return res.render('profile', { avatarUrl: '/img/basic_avatar.png', notifications: [], friends: [], isOwnProfile: false })
 
     // Determine whether the visitor is viewing their own profile
     const signedInId = Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
     const viewingOwnProfile = signedInId && signedInId === Number(formbarId)
 
-    // Helper to render with avatar and notifications
-    function renderWith(avatarUrl, notifications) {
-        // ensure notifications always provided to template
-        return res.render('profile', { avatarUrl, notifications: Array.isArray(notifications) ? notifications : [], isOwnProfile: viewingOwnProfile })
+    // Helper to render with avatar, notifications, and friends
+    function renderWith(avatarUrl, notifications, friends) {
+        // ensure notifications and friends always provided to template
+        return res.render('profile', { 
+            avatarUrl, 
+            notifications: Array.isArray(notifications) ? notifications : [], 
+            friends: Array.isArray(friends) ? friends : [],
+            isOwnProfile: viewingOwnProfile 
+        })
     }
 
     // If viewing own profile, fetch notifications; otherwise only fetch avatar
@@ -223,16 +228,27 @@ app.get('/profile', (req, res) => {
                     console.error('DB error fetching notifications:', nerr)
                     notes = []
                 }
-                // Now fetch avatar and render
-                db.get('SELECT avatar FROM users WHERE formbar_id = ?', [formbarId], (err, row) => {
-                    if (err) {
-                        console.error('DB error fetching avatar:', err)
-                        return renderWith('/img/basic_avatar.png', notes)
+                // Fetch friends
+                db.all(`SELECT u.formbar_id, u.display_name, u.avatar 
+                        FROM friends f 
+                        JOIN users u ON (CASE WHEN f.id_1 = ? THEN f.id_2 ELSE f.id_1 END) = u.formbar_id 
+                        WHERE (f.id_1 = ? OR f.id_2 = ?) AND f.status = 'friends'`, 
+                        [formbarId, formbarId, formbarId], (ferr, friends) => {
+                    if (ferr) {
+                        console.error('DB error fetching friends:', ferr)
+                        friends = []
                     }
-                    if (row && row.avatar) {
-                        return renderWith(`/img/avatars/${row.avatar}`, notes)
-                    }
-                    return renderWith('/img/basic_avatar.png', notes)
+                    // Now fetch avatar and render
+                    db.get('SELECT avatar FROM users WHERE formbar_id = ?', [formbarId], (err, row) => {
+                        if (err) {
+                            console.error('DB error fetching avatar:', err)
+                            return renderWith('/img/basic_avatar.png', notes, friends)
+                        }
+                        if (row && row.avatar) {
+                            return renderWith(`/img/avatars/${row.avatar}`, notes, friends)
+                        }
+                        return renderWith('/img/basic_avatar.png', notes, friends)
+                    })
                 })
             })
         }
@@ -257,15 +273,26 @@ app.get('/profile', (req, res) => {
             })
         })
     } else {
-        db.get('SELECT avatar FROM users WHERE formbar_id = ?', [formbarId], (err, row) => {
-            if (err) {
-                console.error('DB error fetching avatar:', err)
-                return renderWith('/img/basic_avatar.png', [])
+        // Fetch friends for the profile being viewed
+        db.all(`SELECT u.formbar_id, u.display_name, u.avatar 
+                FROM friends f 
+                JOIN users u ON (CASE WHEN f.id_1 = ? THEN f.id_2 ELSE f.id_1 END) = u.formbar_id 
+                WHERE (f.id_1 = ? OR f.id_2 = ?) AND f.status = 'friends'`, 
+                [formbarId, formbarId, formbarId], (ferr, friends) => {
+            if (ferr) {
+                console.error('DB error fetching friends:', ferr)
+                friends = []
             }
-            if (row && row.avatar) {
-                return renderWith(`/img/avatars/${row.avatar}`, [])
-            }
-            return renderWith('/img/basic_avatar.png', [])
+            db.get('SELECT avatar FROM users WHERE formbar_id = ?', [formbarId], (err, row) => {
+                if (err) {
+                    console.error('DB error fetching avatar:', err)
+                    return renderWith('/img/basic_avatar.png', [], friends)
+                }
+                if (row && row.avatar) {
+                    return renderWith(`/img/avatars/${row.avatar}`, [], friends)
+                }
+                return renderWith('/img/basic_avatar.png', [], friends)
+            })
         })
     }
 })

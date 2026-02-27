@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let hoverTimer = null
     const HOVER_MS = 1000
+    let touchTimer = null
+    let touchStarted = false
 
     function showOverlay() {
         overlay.style.opacity = '1'
@@ -28,6 +30,37 @@ document.addEventListener('DOMContentLoaded', () => {
     container.addEventListener('mouseleave', () => {
         clearTimeout(hoverTimer)
         hideOverlay()
+    })
+
+    // Touch events for mobile (long press)
+    container.addEventListener('touchstart', (e) => {
+        touchStarted = true
+        touchTimer = setTimeout(() => {
+            if (touchStarted) {
+                showOverlay()
+            }
+        }, HOVER_MS)
+    })
+    
+    container.addEventListener('touchend', () => {
+        touchStarted = false
+        clearTimeout(touchTimer)
+    })
+    
+    container.addEventListener('touchcancel', () => {
+        touchStarted = false
+        clearTimeout(touchTimer)
+        hideOverlay()
+    })
+    
+    container.addEventListener('touchmove', () => {
+        touchStarted = false
+        clearTimeout(touchTimer)
+    })
+
+    // Prevent context menu on long press
+    container.addEventListener('contextmenu', (e) => {
+        e.preventDefault()
     })
 
     overlay.addEventListener('click', (e) => {
