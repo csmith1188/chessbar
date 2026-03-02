@@ -252,8 +252,16 @@ function logPGNFromGameData(gameData) {
 
 function exportPGNToChat() {
     try {
+        // Diagnostic logging for clipboard API
+        console.log('Clipboard diagnostics:', {
+            isSecure: window.isSecureContext,
+            hasUserActivation: navigator.userActivation?.isActive,
+            inIframe: window.top !== window.self,
+            clipboardAvailable: !!navigator.clipboard
+        });
+
         if (typeof gameData === 'undefined' || !gameData || !Array.isArray(gameData.moves)) {
-            alert('No game moves available to export.')
+            console.warn('No game moves available to export.')
             return
         }
 
@@ -270,29 +278,37 @@ function exportPGNToChat() {
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(pgn).then(() => {
                 console.log('PGN copied to clipboard')
-                alert('PGN copied to clipboard!')
+                // Use console notification instead of alert to preserve user gesture context
+                console.log('✓ PGN successfully copied to clipboard!')
+                msgInput.value = pgn;
             }).catch(err => {
                 console.error('Failed to copy to clipboard:', err)
-                // Fallback: log to console
-                console.log('--- Exported PGN START ---')
+                // Fallback: paste into chat input
+                msgInput.value = pgn;
+                console.log('PGN pasted into chat input (clipboard API failed)')
+                console.log('--- Exported PGN ---')
                 console.log(pgn)
-                console.log('--- Exported PGN END ---')
-                alert('Could not copy to clipboard. PGN logged to console.')
             })
         } else {
             // Fallback for browsers without clipboard API or non-HTTPS contexts
-            console.log('--- Exported PGN START ---')
+            // Paste PGN directly into the chat input field
+            msgInput.value = pgn;
+            console.log('✓ PGN pasted into chat input (Clipboard API unavailable)')
+            console.log('--- Exported PGN ---')
             console.log(pgn)
-            console.log('--- Exported PGN END ---')
-            alert('Clipboard API not available. PGN logged to console.')
         }
     } catch (e) {
         console.error('Failed to export PGN', e)
-        alert('Failed to export PGN. See console for details.')
     }
 }
 
-if (exportPgnBtn) exportPgnBtn.addEventListener('click', exportPGNToChat)
+// IMPORTANT: Call exportPGNToChat() directly inside the click handler to preserve user gesture context
+// Do NOT pass the function reference, as it breaks the Clipboard API's user-gesture requirement
+if (exportPgnBtn) {
+    exportPgnBtn.addEventListener('click', () => {
+        exportPGNToChat();
+    });
+}
 
 // Update user list
 socket.on('userList', (users) => {

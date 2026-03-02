@@ -15,10 +15,10 @@ body {
 body {
     margin: 0;
     font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-    background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+    background: var(--bg-1);
     color: #eaf4fb;
     -webkit-font-smoothing: antialiased;
-    padding: 28px 18px 28px 0;
+    padding: 1em;
     display: flex;
     justify-content: center;
 }
@@ -32,7 +32,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 18px
+    margin-bottom: 18px;
+    margin-left: 5px
 }
 
 .brand {
@@ -103,7 +104,7 @@ body {
     align-items: start
 }
 
-@media (max-width:920px) {
+@media (max-width: 920px) {
     .main {
         grid-template-columns: 1fr
     }
