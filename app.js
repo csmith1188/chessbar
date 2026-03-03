@@ -791,6 +791,25 @@ function inGameEvents(socket, user) {
 
         socket.emit('validMoves', validMoves)
     })
+    // ---- Rematch ----
+    socket.on('rematch', () => {
+        if (!user.game) return; // Ensure the user is in a game
+
+        const opponent = user.side === 'white' ? user.game.blackPlayer : user.game.whitePlayer;
+
+        // Reset the game state
+        user.game.reset();
+
+        // Notify both players
+        socket.emit('rematchAccepted', { message: 'Rematch started!' });
+        if (opponent && opponent.socket) {
+            opponent.socket.emit('rematchAccepted', { message: 'Rematch started!' });
+        }
+
+        console.log('Rematch started between players.');
+    });
+
+
 }
 
 /*
@@ -851,7 +870,7 @@ function chatEvents(socket, user) {
 
 //kayden was here, making the dm chat
 
-app.get('/api/friends', (req, res) => { 
+app.get('/api/friends', (req, res) => {
     if (!req.session || !req.session.user) {
         return res.status(401).json({ error: 'Not authenticated' })
     }

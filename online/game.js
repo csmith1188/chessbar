@@ -432,6 +432,21 @@ class Game {
         }
     }
 
+    //reset
+    reset() {
+        this.board = new Board()
+        this.prevMove = {}
+        this.moves = []
+        this.finished = false
+        this.winner = null
+        this.loser = null
+        this.prevWhite = null
+        this.prevBlack = null
+        this.assignSides()
+        this.emptyUpdate()
+        console.log('Game reset')
+    }
+
     endPromotion() {
         this.promotionPending = false
         this.promotionSide = null
