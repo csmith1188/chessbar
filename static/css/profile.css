@@ -4,17 +4,20 @@
         align-items: center;
         gap: 16px;
     }
+
     #profile {
         width: 100%;
         max-width: 900px;
         margin-bottom: 18px;
     }
+
     #buyTokens {
         width: 100%;
         max-width: 420px;
         margin: 0 auto;
         order: 3;
     }
+
     #player {
         width: 100%;
         max-width: 420px;
@@ -41,14 +44,15 @@
         overflow-x: hidden;
     }
 
-    body > #player,
-    body > #profile,
-    body > #buyTokens {
+    body>#player,
+    body>#profile,
+    body>#buyTokens {
         flex: none;
         width: 100%;
         max-width: none;
     }
 }
+
 /* profile.css — adapted to site theme (dark gradients, shared variables) */
 
 @import url('colors.css');
@@ -433,12 +437,15 @@ input:focus {
     overflow-y: auto;
     padding-right: 6px;
     /* Hide scrollbar for Chrome, Safari and Opera */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
 }
 
 .notification-list::-webkit-scrollbar {
-    display: none; /* Chrome, Safari and Opera */
+    display: none;
+    /* Chrome, Safari and Opera */
 }
 
 .notification {
@@ -512,34 +519,53 @@ input:focus {
 /* Friends List */
 .friends-list {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 8px;
     margin-top: 8px;
     max-height: 50vh;
-    overflow-y: auto;
+    overflow: hidden;
     padding-right: 6px;
+    max-width: 100%
 }
 
 .friend-item {
-    border-radius: 8px;
+    border-radius: 50%;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    transition: all 120ms ease;
+    transition: border-radius 180ms ease, background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
+    width: 52px;
+    flex: 0 0 52px;
+    overflow: visible;
+    position: relative;
+    z-index: 1;
 }
 
 .friend-item:hover {
     background: rgba(255, 255, 255, 0.04);
     border-color: rgba(255, 255, 255, 0.1);
-    transform: translateX(2px);
+    transform: scale(1.06);
+    z-index: 3;
 }
 
 .friend-link {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 12px;
-    padding: 10px;
+    padding: 5px;
     text-decoration: none;
     color: inherit;
+    white-space: nowrap;
+}
+
+.friend-link a {
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 220ms ease 100ms;
+}
+
+.friend-item:hover .friend-link a {
+    opacity: 1;
 }
 
 .friend-avatar {
@@ -553,9 +579,25 @@ input:focus {
 }
 
 .friend-username {
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
     font-size: 14px;
     color: #eaf4fb;
     font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgba(7, 12, 18, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    transition: opacity 160ms ease;
+}
+
+.friend-item:hover .friend-username {
+    opacity: 1;
 }
 
 .no-friends {
