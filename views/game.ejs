@@ -167,6 +167,11 @@
     resign.onclick = function () {
         socket.emit('resign')
     }
+    // temp rematch
+    const rematchButton = document.getElementById('rematch-button');
+    rematchButton.addEventListener('click', () => {
+        socket.emit('rematch');
+    });
 </script>
 
 <script>
