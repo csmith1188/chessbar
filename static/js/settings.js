@@ -69,8 +69,7 @@ function openSettingsUI() {
     settingOpen = true
     const modal = document.getElementById('settings-modal')
     if (modal) {
-        modal.classList.remove('hidden')
-        try { modal.style.display = 'grid' } catch (e) { }
+        modal.classList.add('active')
         modal.setAttribute('aria-hidden', 'false')
         const closeBtn = document.getElementById('close-settings')
         if (closeBtn) closeBtn.focus()
@@ -80,8 +79,7 @@ function openSettingsUI() {
 function closeSettingsUI() {
     const modal = document.getElementById('settings-modal')
     if (modal) {
-        modal.classList.add('hidden')
-        try { modal.style.display = 'none' } catch (e) { }
+        modal.classList.remove('active')
         modal.setAttribute('aria-hidden', 'true')
         const btn = document.getElementById('settings-btn')
         if (btn) btn.focus()

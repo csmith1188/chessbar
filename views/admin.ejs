@@ -5,9 +5,9 @@
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Admin - Chessbar</title>
-    <link rel='stylesheet' href='/css/sidebar.css'>
     <link rel='stylesheet' href='/css/profile.css'>
     <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/colors.css">
 </head>
 
 <body class="with-sidebar">
@@ -21,7 +21,7 @@
                     </strong></p>
             </div>
 
-            <section>
+            <div id="table-container">
                 <div class="players-bar">
                     <h2>Players <button id="addFakeBtn"
                             style="margin-left:12px;font-size:12px;padding:4px 8px;display:none">Add 50 test
@@ -56,13 +56,12 @@
                         <tbody></tbody>
                     </table>
                 </div>
-            </section>
+            </div>
 
             <a href='/' class='small back-link'
                 style='margin-top:18px;display:inline-block;text-decoration:none;color:var(--muted)'>← Back to games</a>
         </div>
 
-        <script src='/js/sidebar.js'></script>
         <script>
             let currentUsers = []
 

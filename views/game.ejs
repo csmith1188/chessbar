@@ -2,14 +2,14 @@
 <html>
 
 <head>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
     <title>Game - Chessbar</title>
-    <link href='https://fonts.googleapis.com/css2?family=Lavishly+Yours&display=swap' rel='stylesheet'>
     <link rel='stylesheet' href='/css/game.css'>
+    <link rel="stylesheet" href="/css/colors.css">
 </head>
 
 <body class="with-sidebar">
     <%- include('partials/sidebar') %>
-        <!-- Join code badge (top-left) -->
         <div id='join-code-badge' role='button' tabindex='0' aria-live='polite' aria-label='Copy join code'
             title='Click to copy join code' style='display:none'></div>
 
@@ -72,8 +72,8 @@
         </div>
 
         <!-- Settings modal (hidden by default) -->
-        <div id='settings-modal' class='hidden' role='dialog' aria-modal='true' aria-labelledby='settings-title'
-            aria-hidden='true' style='display:none'>
+        <div id='settings-modal' role='dialog' aria-modal='true' aria-labelledby='settings-title'
+            aria-hidden='true'>
             <div id='settings-panel'>
                 <h3 id='settings-title'>Settings</h3>
 

@@ -3,7 +3,6 @@
     if (!sidebar) return
 
     const toggle = sidebar.querySelector('[data-sidebar-toggle]')
-    const chevron = toggle ? toggle.querySelector('.chevron') : null
     const body = document.body
     const storageKey = 'sidebar-state'
 
@@ -12,15 +11,50 @@
     })()
     const prefersCollapsed = window.matchMedia('(max-width: 900px)').matches
     let collapsed = saved ? saved === 'collapsed' : prefersCollapsed
+    let shouldAutoClose = collapsed === false  // Track if sidebar should auto-close on load
 
-    function applyState() {
+    function applyState(skipAnimation = false) {
         body.classList.add('with-sidebar')
+        if (skipAnimation) {
+            body.classList.add('no-transition')
+        }
         body.classList.toggle('sidebar-collapsed', collapsed)
-        if (toggle) toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true')
-        if (chevron) chevron.textContent = collapsed ? '>' : '<'
+        if (skipAnimation) {
+            // Trigger reflow to apply no-transition class, then remove it
+            void body.offsetWidth
+            body.classList.remove('no-transition')
+        }
+        if (toggle) {
+            toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true')
+            toggle.classList.toggle('is-active', !collapsed)
+                // Switch icon between hamburger, <, and X
+                const chevron = toggle.querySelector('.chevron')
+                const closeX = toggle.querySelector('.close-x')
+                const hamburger = toggle.querySelector('.hamburger')
+                if (chevron && closeX && hamburger) {
+                    if (!collapsed) {
+                        chevron.style.display = 'none'
+                        closeX.style.display = ''
+                        hamburger.style.display = 'none'
+                    } else {
+                        chevron.style.display = 'none'
+                        closeX.style.display = 'none'
+                        hamburger.style.display = ''
+                    }
+                }
+        }
     }
 
-    applyState()
+    // Initial state
+    applyState(true)
+    
+    // Auto-close after initial render to trigger animation
+    if (shouldAutoClose) {
+        requestAnimationFrame(() => {
+            collapsed = true
+            applyState(false)
+        })
+    }
 
     if (toggle) {
         toggle.addEventListener('click', () => {

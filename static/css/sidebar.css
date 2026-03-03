@@ -2,16 +2,6 @@
 
 /* sidebar-specific styles follow (variables are in colors.css) */
 
-body.with-sidebar {
-    padding-left: var(--sidebar-width);
-    transition: padding-left 180ms ease;
-    margin-left: 10px;
-}
-
-body.sidebar-collapsed.with-sidebar {
-    padding-left: var(--sidebar-collapsed);
-}
-
 .global-sidebar {
     position: fixed;
     inset: 0 auto 0 0;
@@ -23,19 +13,13 @@ body.sidebar-collapsed.with-sidebar {
     padding: 16px 14px 18px;
     display: flex;
     align-items: stretch;
-    z-index: 1200;
+    z-index: 12000;
     transform: translateX(0);
     transition: transform 180ms ease;
 }
 
 body.sidebar-collapsed .global-sidebar {
     transform: translateX(calc(-1 * var(--sidebar-width)));
-}
-
-@media (max-width: 900px) {
-    body.with-sidebar {
-        padding-left: var(--sidebar-collapsed);
-    }
 }
 
 a {
@@ -111,9 +95,12 @@ a {
 }
 
 @keyframes pulse-badge {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 2px 8px rgba(94, 234, 212, 0.3);
     }
+
     50% {
         box-shadow: 0 2px 12px rgba(94, 234, 212, 0.6);
     }
@@ -134,7 +121,7 @@ a {
 
 .sidebar-toggle {
     position: absolute;
-    top: 16px;
+    top: -7px;
     right: -28px;
     width: 28px;
     height: 44px;
@@ -148,16 +135,22 @@ a {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background 120ms ease, color 120ms ease, box-shadow 120ms ease;
+    transition: background 120ms ease, color 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+    min-width: 0 !important;
+    padding: 0;
+}
+
+body.sidebar-collapsed .sidebar-toggle {
+    opacity: 0.5;
 }
 
 .sidebar-toggle:hover {
-    background: rgba(255, 255, 255, 0.05);
+    opacity: 1 !important;
 }
 
-.sidebar-toggle:focus-visible {
-    outline: 2px solid var(--sidebar-highlight);
-    outline-offset: 3px;
+.sidebar-toggle:focus {
+    outline: none !important;
+    opacity: 1;
 }
 
 .sidebar-toggle .chevron {

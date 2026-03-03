@@ -3,9 +3,25 @@
 }
 
 .admin-container {
-    max-width: 1000px;
+    max-width: 95vw;
     margin: 24px auto;
     padding: 12px;
+}
+
+@media (max-width: 500px) {
+    .admin-container {
+        width: 95vw;
+    }
+    .players-bar .users-toolbar {
+        display: block
+    }
+}
+
+@media (max-height: 670px) {
+    .users-table-wrap {
+        height: 50vh;
+
+    }
 }
 
 .admin-actions {
@@ -37,12 +53,9 @@
 .users-table-wrap {
     border: solid 3px var(--guideline-color);
     max-height: 65vh;
-    overflow: auto;
-    /* Hide native scrollbars but keep scrolling */
-    scrollbar-width: none;
-    /* Firefox */
-    -ms-overflow-style: none;
-    /* IE 10+ */
+    scrollbar-width: thin;
+    overflow-x: auto;
+    overflow-y: auto;
 }
 
 .users-toolbar {
@@ -61,8 +74,24 @@
     margin-bottom: 6px;
 }
 
+/* Visible horizontal scrollbar at the bottom */
 .users-table-wrap::-webkit-scrollbar {
-    display: none;
+    height: 12px;
+    width: 12px;
+}
+
+.users-table-wrap::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.users-table-wrap::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 8px;
+    border: 2px solid rgba(0, 0, 0, 0.25);
+}
+
+.users-table-wrap::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.55);
 }
 
 /* Chrome, Safari */
@@ -173,4 +202,14 @@ input[type=number]::-webkit-inner-spin-button {
 .set-btn:active,
 .user-link:active {
     transform: translateY(0);
+}
+
+#table-container {
+    display: flex;
+    flex-direction: column;
+    max-width: 95vw
+}
+
+body {
+    margin: 0;
 }

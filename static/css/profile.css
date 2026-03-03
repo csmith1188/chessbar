@@ -1,3 +1,54 @@
+@media (max-width: 1280px) {
+    body {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+    }
+    #profile {
+        width: 100%;
+        max-width: 900px;
+        margin-bottom: 18px;
+    }
+    #buyTokens {
+        width: 100%;
+        max-width: 420px;
+        margin: 0 auto;
+        order: 3;
+    }
+    #player {
+        width: 100%;
+        max-width: 420px;
+        margin: 0 auto 18px auto;
+    }
+
+    #profile {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+    }
+
+    /* Stack the three columns on small screens */
+    body {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+        width: 100vw;
+        overflow-x: hidden;
+    }
+
+    body > #player,
+    body > #profile,
+    body > #buyTokens {
+        flex: none;
+        width: 100%;
+        max-width: none;
+    }
+}
 /* profile.css — adapted to site theme (dark gradients, shared variables) */
 
 @import url('colors.css');
@@ -60,11 +111,6 @@
     box-sizing: border-box
 }
 
-html,
-body {
-    height: 100%
-}
-
 body {
     font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
     background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
@@ -74,6 +120,8 @@ body {
     gap: 20px;
     align-items: flex-start;
     min-height: 100vh;
+    /* Removed width: 95vw to prevent overflow */
+    box-sizing: border-box;
 }
 
 .page-wrap {
@@ -99,8 +147,7 @@ body {
 
 .panel {
     /* lower-contrast panel so profile feels lighter */
-    min-height: 150px;
-    min-width: 300px;
+    min-height: 4em;
 
     background: rgba(255, 255, 255, 0.012);
     border-radius: 10px;
@@ -121,7 +168,6 @@ body {
     display: flex;
     gap: 10px;
     justify-content: center;
-   
 }
 
 #btn-wrap button {
@@ -143,12 +189,12 @@ body {
 #finished,
 #wdl {
     font-weight: 700;
-    font-size: 40px;
+    font-size: 5vmin;
     margin-top: 6px;
 }
 
 .panel .small {
-    font-size: 25px;
+    font-size: 4vmin;
     /* Increase the font size */
     font-weight: 700;
 }
@@ -172,6 +218,10 @@ body {
     font-weight: 700;
 }
 
+.profile-info {
+    text-align: center;
+}
+
 
 .profile-info p {
     margin: 0 0 12px 0;
@@ -189,11 +239,11 @@ body {
    - center `#profile` -> 1/2 (flex:2)
    - right `#buyTokens`-> 1/4 (flex:1)
 */
-body>#player {
+#player {
     flex: 1 1 0;
 }
 
-body>#buyTokens {
+#buyTokens {
     flex: 1 1 0;
     max-width: none;
 }
@@ -228,7 +278,7 @@ body>#buyTokens {
 
 #buyTokens input[type='number'],
 #buyTokens input[type='text'] {
-    width: calc(100% - 12px);
+    width: 100%;
     padding: 10px 12px;
     margin: 6px 0 10px 0;
     border-radius: 10px;
@@ -267,33 +317,6 @@ body>#buyTokens {
 .btn:hover {
     transform: translateY(-2px);
     filter: brightness(1.03);
-}
-
-@media (max-width: 920px) {
-    #profile {
-        grid-template-columns: 1fr;
-    }
-
-    .profile-avatar {
-        width: 120px;
-        height: 120px;
-        margin: 0 auto;
-    }
-
-    /* Stack the three columns on small screens */
-    body {
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-    }
-
-    body>#player,
-    body>#profile,
-    body>#buyTokens {
-        flex: none;
-        width: 100%;
-        max-width: none;
-    }
 }
 
 /* accessibility focus styles consistent with site */
@@ -408,13 +431,21 @@ input:focus {
     margin-top: 8px;
     max-height: 50vh;
     overflow-y: auto;
-    padding-right: 6px; /* room for scrollbar */
+    padding-right: 6px;
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
 }
+
+.notification-list::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+}
+
 .notification {
     padding: 10px;
     border-radius: 8px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.02);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.02);
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -433,16 +464,19 @@ input:focus {
     font-size: 13px;
     color: var(--muted);
 }
+
 .notification .notif-message {
     font-size: 14px;
     color: #eaf4fb;
     white-space: pre-wrap;
 }
+
 .notification.unread {
-    background: linear-gradient(90deg, rgba(94,234,212,0.06), rgba(94,234,212,0.03));
-    border-color: rgba(94,234,212,0.18);
+    background: linear-gradient(90deg, rgba(94, 234, 212, 0.06), rgba(94, 234, 212, 0.03));
+    border-color: rgba(94, 234, 212, 0.18);
     box-shadow: 0 6px 14px rgba(2, 150, 120, 0.06);
 }
+
 .notif-delete {
     position: absolute;
     top: 8px;
@@ -450,8 +484,8 @@ input:focus {
     width: 24px;
     height: 24px;
     border-radius: 6px;
-    border: 1px solid rgba(255,255,255,0.08);
-    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
     color: var(--muted);
     display: inline-flex;
     align-items: center;
@@ -459,15 +493,72 @@ input:focus {
     cursor: pointer;
     transition: all 120ms ease;
 }
+
 .notif-delete:hover {
     color: #fff;
-    border-color: rgba(255,255,255,0.16);
-    background: rgba(255,255,255,0.08);
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.08);
 }
+
 .notif-delete:active {
     transform: scale(0.96);
 }
+
 .no-notifs {
+    color: var(--muted);
+    padding: 10px 6px;
+}
+
+/* Friends List */
+.friends-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    max-height: 50vh;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.friend-item {
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 120ms ease;
+}
+
+.friend-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateX(2px);
+}
+
+.friend-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.friend-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+}
+
+.friend-username {
+    font-size: 14px;
+    color: #eaf4fb;
+    font-weight: 500;
+}
+
+.no-friends {
     color: var(--muted);
     padding: 10px 6px;
 }
@@ -633,4 +724,9 @@ input:focus {
 #send:hover {
     transform: translateY(-2px) scale(1.1);
     transition: transform 180ms cubic-bezier(.2, .9, .3, 1);
+}
+
+body {
+    margin: 0;
+    padding: 2rem
 }

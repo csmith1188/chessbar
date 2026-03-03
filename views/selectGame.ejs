@@ -5,9 +5,9 @@
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Chess</title>
-    <link rel='stylesheet' href='/css/sidebar.css'>
     <link rel='stylesheet' href='/css/selectGame.css'>
     <link rel='stylesheet' href='/css/newGame.css'>
+    <link rel="stylesheet" href="/css/colors.css">
 </head>
 
 <body class="with-sidebar">
@@ -29,7 +29,7 @@
                         <label for='startWhite'>Start as white</label>
                     </div>
                     <div class='checkbox-item'>
-                        <input type="checkbox" id='musicOn' name='lockInMusic' checked>
+                        <input type="checkbox" id='musicOn' name='lockInMusic'>
                         <label for='musicOn'>Lock in music</label>
                     </div>
                 </div>
@@ -68,13 +68,14 @@
                     </div>
                     <div class='footer-note'>Public games are visible to everyone. Private games require the join code.
                     </div>
+
+                    <label class="small">Create a new game</label>
                     <button id='newPublicGame' class='btn' onclick='openNav()'>New Game</button>
                 </div>
             </aside>
         </main>
     </div>
     <%- include('partials/notificationPopup') %>
-    <script src='/js/sidebar.js'></script>
 </body>
 <script src='/socket.io/socket.io.js'></script>
 <script src='js/socket.js'></script>
