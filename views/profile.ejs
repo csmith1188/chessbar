@@ -380,10 +380,26 @@
         friendContextMenu.style.minWidth = '150px'
         friendContextMenu.style.padding = '8px'
 
+        const goToProfileBtn = document.createElement('button')
+        goToProfileBtn.type = 'button'
+        goToProfileBtn.className = 'btn small-menu-btn'
+        goToProfileBtn.style.width = '70%'
+        goToProfileBtn.style.marginBottom = '6px'
+        goToProfileBtn.textContent = 'Go to profile'
+        friendContextMenu.appendChild(goToProfileBtn)
+
+        const challengeBtn = document.createElement('button')
+        challengeBtn.type = 'button'
+        challengeBtn.className = 'btn small-menu-btn'
+        challengeBtn.style.width = '70%'
+        challengeBtn.style.marginBottom = '6px'
+        challengeBtn.textContent = 'Send Challenge Request'
+        friendContextMenu.appendChild(challengeBtn)
+
         const toggleBlockBtn = document.createElement('button')
         toggleBlockBtn.type = 'button'
-        toggleBlockBtn.className = 'btn block-button'
-        toggleBlockBtn.style.width = '100%'
+        toggleBlockBtn.className = 'btn block-button small-menu-btn'
+        toggleBlockBtn.style.width = '70%'
         toggleBlockBtn.textContent = 'Block user'
         friendContextMenu.appendChild(toggleBlockBtn)
         document.body.appendChild(friendContextMenu)
@@ -516,6 +532,26 @@
                 socket.emit('blockFriend', contextTarget.id)
             }
             hideContextMenu()
+        })
+
+        goToProfileBtn.addEventListener('click', () => {
+            if (!contextTarget || !Number.isFinite(contextTarget.id)) {
+                hideContextMenu()
+                return
+            }
+            const targetId = Number(contextTarget.id)
+            hideContextMenu()
+            window.location.href = `/profile?usr=${encodeURIComponent(targetId)}`
+        })
+
+        challengeBtn.addEventListener('click', () => {
+            if (!contextTarget || !Number.isFinite(contextTarget.id)) {
+                hideContextMenu()
+                return
+            }
+            const targetId = Number(contextTarget.id)
+            hideContextMenu()
+            socket.emit('challenge', targetId)
         })
 
         document.addEventListener('click', () => hideContextMenu())

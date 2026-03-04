@@ -594,6 +594,7 @@ function getVisibleGames(user) {
         .filter(g => {
             if (g.visibility === 'public') return true
             if (g.owner && (g.owner == user || g.owner.id == user.id)) return true
+            if ((g.prevBlack && g.prevBlack.id == user.id) || (g.prevWhite && g.prevWhite.id == user.id)) return true
             return false
         })
         .map(serializeGame)
@@ -1055,6 +1056,21 @@ function friendEvents(socket, user) {
                 socket.emit('friendUnblocked', { success: true, targetId })
             }
         )
+    })
+
+    socket.on('challenge', (usr) => {
+        const challenger = users.find(u => u.id == usr)
+        if (!challenger) return
+
+        if (user.id == usr) return
+
+        const game = new Game('private', `Challenge from ${user.displayName}`, true, true, true, null)
+        game.owner = user
+        game.update()
+
+        const joinLink = `<a href="/game?code=${game.joinCode}">Accept Challenge</a>`
+        notification(usr, 'Challenge', `${linkTo(user.id)} has challenged you to a game of chess. ${joinLink}`)
+        socket.emit('redirect', `/game?code=${game.joinCode}`)
     })
 
     socket.on('dm', (to, message) => {

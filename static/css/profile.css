@@ -57,15 +57,19 @@ a {
     color: #eaf4fb
 }
 
-.btn.block-button {
+.btn.small-menu-btn {
     font-size: 14px;
-    color: #ff0000;
+    color: #d6e1f7;
     font-weight: 700;
     padding: 6px 10px;
     border-radius: 8px;
     background: rgba(7, 12, 18, 0.95);
     border: 2px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.btn.block-button {
+    color: #ff0000;
 }
 
 /* profile.css — adapted to site theme (dark gradients, shared variables) */
@@ -464,6 +468,7 @@ input:focus {
 }
 
 .notification {
+    flex: 0 0 auto;
     max-width: 100%;
     padding: 10px;
     border-radius: 8px;
