@@ -37,7 +37,7 @@
                         <% if (typeof friends !=='undefined' && friends && friends.length) { %>
                             <% friends.forEach((friend)=> { %>
                                 <div class='friend-item <%= friend.friend_status === "blocked" && Number(friend.blocked_by_me) === 1 ? "blocked" : "" %>'>
-                                    <a href='/profile?usr=<%= friend.formbar_id %>' class='friend-link'>
+                                    <a class='friend-link'>
                                         <div class='friend-avatar'
                                             data-friend-id='<%= friend.formbar_id %>'
                                             data-friend-name='<%= (friend.display_name || "User").replace(/'/g, "&#39;") %>'

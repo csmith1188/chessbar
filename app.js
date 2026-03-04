@@ -1090,7 +1090,7 @@ function friendEvents(socket, user) {
 
                     const recipientOnProfile = recipient && recipient.socket && recipient.socket.currentPath === '/profile'
                     if (!recipientOnProfile) {
-                        notification(to, 'DM', `New message from ${linkTo(user.id)}. "${message}"`)
+                        notification(to, 'DM', `New message from ${linkTo(user.id)}.`)
                     }
                 }
             )

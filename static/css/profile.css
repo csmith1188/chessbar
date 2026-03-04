@@ -464,6 +464,7 @@ input:focus {
 }
 
 .notification {
+    max-width: 100%;
     padding: 10px;
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.02);
@@ -472,6 +473,8 @@ input:focus {
     flex-direction: column;
     gap: 6px;
     position: relative;
+    overflow-x: hidden;
+    scrollbar-width: none;
 }
 
 .notif-creation {
@@ -490,7 +493,14 @@ input:focus {
 .notification .notif-message {
     font-size: 14px;
     color: #eaf4fb;
-    white-space: pre-wrap;
+    max-width: 80%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    word-break: break-word;
 }
 
 .notification.unread {
@@ -793,5 +803,6 @@ input:focus {
 
 body {
     margin: 0;
-    padding: 2rem
+    padding: 2rem;
+    padding: 0
 }
