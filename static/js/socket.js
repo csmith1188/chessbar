@@ -1,5 +1,17 @@
 const socket = io()
 
+function sendPageContext() {
+    try {
+        socket.emit('pageContext', {
+            path: window.location && window.location.pathname ? window.location.pathname : ''
+        })
+    } catch (e) { }
+}
+
+socket.on('connect', () => {
+    sendPageContext()
+})
+
 socket.on('redirect', (url) => {
     console.log(`Redirecting to ${url}`)
     window.location.href = url

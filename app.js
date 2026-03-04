@@ -229,11 +229,14 @@ app.get('/profile', (req, res) => {
                     notes = []
                 }
                 // Fetch friends
-                db.all(`SELECT u.formbar_id, u.display_name, u.avatar 
-                        FROM friends f 
-                        JOIN users u ON (CASE WHEN f.id_1 = ? THEN f.id_2 ELSE f.id_1 END) = u.formbar_id 
-                        WHERE (f.id_1 = ? OR f.id_2 = ?) AND f.status = 'friends'`,
-                    [formbarId, formbarId, formbarId], (ferr, friends) => {
+                                db.all(`SELECT u.formbar_id, u.display_name, u.avatar,
+                                                             f.status AS friend_status,
+                                                             CASE WHEN f.status = 'blocked' AND f.id_1 = ? THEN 1 ELSE 0 END AS blocked_by_me
+                                                FROM friends f 
+                                                JOIN users u ON (CASE WHEN f.id_1 = ? THEN f.id_2 ELSE f.id_1 END) = u.formbar_id 
+                                                WHERE (f.id_1 = ? OR f.id_2 = ?)
+                                                    AND (f.status = 'friends' OR (f.status = 'blocked' AND f.id_1 = ?))`,
+                                        [signedInId, formbarId, formbarId, formbarId, signedInId], (ferr, friends) => {
                         if (ferr) {
                             console.error('DB error fetching friends:', ferr)
                             friends = []
@@ -274,7 +277,9 @@ app.get('/profile', (req, res) => {
         })
     } else {
         // Fetch friends for the profile being viewed
-        db.all(`SELECT u.formbar_id, u.display_name, u.avatar 
+        db.all(`SELECT u.formbar_id, u.display_name, u.avatar,
+                   'friends' AS friend_status,
+                   0 AS blocked_by_me
                 FROM friends f 
                 JOIN users u ON (CASE WHEN f.id_1 = ? THEN f.id_2 ELSE f.id_1 END) = u.formbar_id 
                 WHERE (f.id_1 = ? OR f.id_2 = ?) AND f.status = 'friends'`,
@@ -966,11 +971,170 @@ function friendEvents(socket, user) {
                     notification(to, 'Friendship', `You are now friends with ${linkTo(from)}.`)
                     notification(from, 'Friendship', `You are now friends with ${linkTo(to)}.`)
                 })
+            } else if (status == 'blocked') {
+                notification(from, 'Friendship', `You cannot send a friend request to ${linkTo(to)}.`)
             } else {
                 newFriendRecord(from, to)
                 notification(from, 'Friendship', `Sent a friend request to ${linkTo(to)}.`)
                 notification(to, 'Friendship', `You have a friend request from ${linkTo(from)}.`)
             }
+        })
+    })
+
+    socket.on('blockFriend', (targetUserId) => {
+        const targetId = Number(targetUserId)
+        const meId = Number(user.id)
+        if (!Number.isFinite(targetId) || targetId <= 0 || targetId === meId) {
+            socket.emit('friendBlocked', { success: false, targetId })
+            return
+        }
+
+        db.get(
+            'SELECT friendship FROM friends WHERE (id_1 = ? AND id_2 = ?) OR (id_2 = ? AND id_1 = ?)',
+            [meId, targetId, meId, targetId],
+            (err, row) => {
+                if (err) {
+                    console.log(err)
+                    socket.emit('friendBlocked', { success: false, targetId })
+                    return
+                }
+
+                if (row && row.friendship) {
+                    db.run(
+                        'UPDATE friends SET id_1 = ?, id_2 = ?, status = ? WHERE friendship = ?',
+                        [meId, targetId, 'blocked', row.friendship],
+                        (uerr) => {
+                            if (uerr) {
+                                console.log(uerr)
+                                socket.emit('friendBlocked', { success: false, targetId })
+                                return
+                            }
+                            socket.emit('friendBlocked', { success: true, targetId })
+                        }
+                    )
+                    return
+                }
+
+                db.run(
+                    'INSERT INTO friends (id_1, id_2, status) VALUES (?, ?, ?)',
+                    [meId, targetId, 'blocked'],
+                    (ierr) => {
+                        if (ierr) {
+                            console.log(ierr)
+                            socket.emit('friendBlocked', { success: false, targetId })
+                            return
+                        }
+                        socket.emit('friendBlocked', { success: true, targetId })
+                    }
+                )
+            }
+        )
+    })
+
+    socket.on('unblockFriend', (targetUserId) => {
+        const targetId = Number(targetUserId)
+        const meId = Number(user.id)
+        if (!Number.isFinite(targetId) || targetId <= 0 || targetId === meId) {
+            socket.emit('friendUnblocked', { success: false, targetId })
+            return
+        }
+
+        db.run(
+            'UPDATE friends SET status = ? WHERE id_1 = ? AND id_2 = ? AND status = ?',
+            ['friends', meId, targetId, 'blocked'],
+            function (err) {
+                if (err) {
+                    console.log(err)
+                    socket.emit('friendUnblocked', { success: false, targetId })
+                    return
+                }
+                if (!this || this.changes < 1) {
+                    socket.emit('friendUnblocked', { success: false, targetId })
+                    return
+                }
+                socket.emit('friendUnblocked', { success: true, targetId })
+            }
+        )
+    })
+
+    socket.on('dm', (to, message) => {
+        to = Number(to)
+        const text = typeof message === 'string' ? message.trim() : ''
+        if (!Number.isFinite(to) || to <= 0 || to === Number(user.id) || !text) return
+
+        getStatus(user.id, to).then((status) => {
+            if (status !== 'friends') return
+
+            const createdTime = new Date().toString()
+            db.run(
+                'INSERT INTO dms (id_1, id_2, message, created_time) VALUES (?, ?, ?, ?)',
+                [user.id, to, text, createdTime],
+                (err) => {
+                    if (err) {
+                        console.log(err)
+                        return
+                    }
+
+                    const payload = {
+                        from: Number(user.id),
+                        to: Number(to),
+                        message: text,
+                        createdTime
+                    }
+
+                    socket.emit('dmMessage', payload)
+                    const recipient = users.find(u => Number(u.id) === Number(to))
+                    if (recipient && recipient.socket) {
+                        recipient.socket.emit('dmMessage', payload)
+                    }
+
+                    const recipientOnProfile = recipient && recipient.socket && recipient.socket.currentPath === '/profile'
+                    if (!recipientOnProfile) {
+                        notification(to, 'DM', `New message from ${linkTo(user.id)}. "${message}"`)
+                    }
+                }
+            )
+        })
+    })
+
+    socket.on('dmThread', (otherUserId) => {
+        const otherId = Number(otherUserId)
+        if (!Number.isFinite(otherId) || otherId <= 0 || otherId === Number(user.id)) {
+            socket.emit('dmThread', { withUser: otherId, messages: [] })
+            return
+        }
+
+        getStatus(user.id, otherId).then((status) => {
+            if (status !== 'friends') {
+                socket.emit('dmThread', { withUser: otherId, messages: [] })
+                return
+            }
+
+            db.all(
+                `SELECT id_1, id_2, message, created_time
+                 FROM dms
+                 WHERE (id_1 = ? AND id_2 = ?) OR (id_1 = ? AND id_2 = ?)
+                 ORDER BY dm ASC`,
+                [user.id, otherId, otherId, user.id],
+                (err, rows) => {
+                    if (err) {
+                        console.log(err)
+                        socket.emit('dmThread', { withUser: otherId, messages: [] })
+                        return
+                    }
+
+                    const msgs = Array.isArray(rows)
+                        ? rows.map(r => ({
+                            from: Number(r.id_1),
+                            to: Number(r.id_2),
+                            message: r.message || '',
+                            createdTime: r.created_time || ''
+                        }))
+                        : []
+
+                    socket.emit('dmThread', { withUser: otherId, messages: msgs })
+                }
+            )
         })
     })
 }
@@ -1047,6 +1211,12 @@ app.get('/notifications/unread', (req, res) => {
 io.on('connection', (socket) => {
     // Set up the user and register with database if needed
     let user = initUser(socket)
+
+    socket.on('pageContext', (ctx) => {
+        const currentPath = (ctx && typeof ctx.path === 'string') ? ctx.path : ''
+        socket.currentPath = currentPath
+        if (user) user.currentPath = currentPath
+    })
 
     logUsers()
 

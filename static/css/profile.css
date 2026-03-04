@@ -53,6 +53,21 @@
     }
 }
 
+a {
+    color: #eaf4fb
+}
+
+.btn.block-button {
+    font-size: 14px;
+    color: #ff0000;
+    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgba(7, 12, 18, 0.95);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
 /* profile.css — adapted to site theme (dark gradients, shared variables) */
 
 @import url('colors.css');
@@ -650,6 +665,14 @@ input:focus {
 #messages {
     flex: 1 1 auto;
     overflow: auto;
+    max-height: 25vh;
+    padding-right: 6px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+#messages::-webkit-scrollbar {
+    display: none;
 }
 
 .message-row {
