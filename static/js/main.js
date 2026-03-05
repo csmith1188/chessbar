@@ -40,7 +40,7 @@ function formatTime(seconds) {
 }
 
 // Reusable client-side system alert popup helper
-const KEEP_SYSTEM_ALERT_VISIBLE_FOR_TESTING = true
+const KEEP_SYSTEM_ALERT_VISIBLE_FOR_TESTING = false
 
 function showSystemPopup(title, message, duration = 6000, player = null) {
     try {
