@@ -13,7 +13,7 @@
     padding: 16px 14px 18px;
     display: flex;
     align-items: stretch;
-    z-index: 12000;
+    z-index: 1500;
     transform: translateX(0);
     transition: transform 180ms ease;
 }
