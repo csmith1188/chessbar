@@ -199,16 +199,21 @@ app.get('/profile', (req, res) => {
     const viewingUser = req.query && req.query.usr ? Number(req.query.usr) : null
     const formbarId = viewingUser || Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
 
-    if (!formbarId) return res.render('profile', { avatarUrl: '/img/basic_avatar.png', notifications: [], isOwnProfile: false })
+    if (!formbarId) return res.render('profile', { avatarUrl: '/img/basic_avatar.png', notifications: [], friends: [], isOwnProfile: false })
 
     // Determine whether the visitor is viewing their own profile
     const signedInId = Number(req.session.user.id || req.session.user.formbar_id || req.session.user.user_id) || 0
     const viewingOwnProfile = signedInId && signedInId === Number(formbarId)
 
-    // Helper to render with avatar and notifications
-    function renderWith(avatarUrl, notifications) {
-        // ensure notifications always provided to template
-        return res.render('profile', { avatarUrl, notifications: Array.isArray(notifications) ? notifications : [], isOwnProfile: viewingOwnProfile })
+    // Helper to render with avatar, notifications, and friends
+    function renderWith(avatarUrl, notifications, friends) {
+        // ensure notifications and friends always provided to template
+        return res.render('profile', {
+            avatarUrl,
+            notifications: Array.isArray(notifications) ? notifications : [],
+            friends: Array.isArray(friends) ? friends : [],
+            isOwnProfile: viewingOwnProfile
+        })
     }
 
     // If viewing own profile, fetch notifications; otherwise only fetch avatar
@@ -223,17 +228,31 @@ app.get('/profile', (req, res) => {
                     console.error('DB error fetching notifications:', nerr)
                     notes = []
                 }
-                // Now fetch avatar and render
-                db.get('SELECT avatar FROM users WHERE formbar_id = ?', [formbarId], (err, row) => {
-                    if (err) {
-                        console.error('DB error fetching avatar:', err)
-                        return renderWith('/img/basic_avatar.png', notes)
-                    }
-                    if (row && row.avatar) {
-                        return renderWith(`/img/avatars/${row.avatar}`, notes)
-                    }
-                    return renderWith('/img/basic_avatar.png', notes)
-                })
+                // Fetch friends
+                                db.all(`SELECT u.formbar_id, u.display_name, u.avatar,
+                                                             f.status AS friend_status,
+                                                             CASE WHEN f.status = 'blocked' AND f.id_1 = ? THEN 1 ELSE 0 END AS blocked_by_me
+                                                FROM friends f 
+                                                JOIN users u ON (CASE WHEN f.id_1 = ? THEN f.id_2 ELSE f.id_1 END) = u.formbar_id 
+                                                WHERE (f.id_1 = ? OR f.id_2 = ?)
+                                                    AND (f.status = 'friends' OR (f.status = 'blocked' AND f.id_1 = ?))`,
+                                        [signedInId, formbarId, formbarId, formbarId, signedInId], (ferr, friends) => {
+                        if (ferr) {
+                            console.error('DB error fetching friends:', ferr)
+                            friends = []
+                        }
+                        // Now fetch avatar and render
+                        db.get('SELECT avatar FROM users WHERE formbar_id = ?', [formbarId], (err, row) => {
+                            if (err) {
+                                console.error('DB error fetching avatar:', err)
+                                return renderWith('/img/basic_avatar.png', notes, friends)
+                            }
+                            if (row && row.avatar) {
+                                return renderWith(`/img/avatars/${row.avatar}`, notes, friends)
+                            }
+                            return renderWith('/img/basic_avatar.png', notes, friends)
+                        })
+                    })
             })
         }
 
@@ -257,16 +276,29 @@ app.get('/profile', (req, res) => {
             })
         })
     } else {
-        db.get('SELECT avatar FROM users WHERE formbar_id = ?', [formbarId], (err, row) => {
-            if (err) {
-                console.error('DB error fetching avatar:', err)
-                return renderWith('/img/basic_avatar.png', [])
-            }
-            if (row && row.avatar) {
-                return renderWith(`/img/avatars/${row.avatar}`, [])
-            }
-            return renderWith('/img/basic_avatar.png', [])
-        })
+        // Fetch friends for the profile being viewed
+        db.all(`SELECT u.formbar_id, u.display_name, u.avatar,
+                   'friends' AS friend_status,
+                   0 AS blocked_by_me
+                FROM friends f 
+                JOIN users u ON (CASE WHEN f.id_1 = ? THEN f.id_2 ELSE f.id_1 END) = u.formbar_id 
+                WHERE (f.id_1 = ? OR f.id_2 = ?) AND f.status = 'friends'`,
+            [formbarId, formbarId, formbarId], (ferr, friends) => {
+                if (ferr) {
+                    console.error('DB error fetching friends:', ferr)
+                    friends = []
+                }
+                db.get('SELECT avatar FROM users WHERE formbar_id = ?', [formbarId], (err, row) => {
+                    if (err) {
+                        console.error('DB error fetching avatar:', err)
+                        return renderWith('/img/basic_avatar.png', [], friends)
+                    }
+                    if (row && row.avatar) {
+                        return renderWith(`/img/avatars/${row.avatar}`, [], friends)
+                    }
+                    return renderWith('/img/basic_avatar.png', [], friends)
+                })
+            })
     }
 })
 
@@ -518,19 +550,6 @@ server.listen(PORT, () => {
 })
 
 function logUsers() {
-    /*
-    console.clear()
-    console.log('Users:')
-    users.forEach(u => console.log(`Name: ${u.displayName} | ID: ${u.id} | Active: ${u.active ? ' Active ' : 'Inactive'} | Tokens: ${u.tokens}`))
-    console.log()
-    console.log('Games:')
-    games.forEach(g => {
-        const ownerName = g.owner && g.owner.displayName ? g.owner.displayName : 'None'
-        console.log(`Owner: ${ownerName} | Name: ${g.name} | ID: ${g.id} | Visibility: ${g.visibility} | Users:`)
-        g.users.forEach(u => console.log(`  Name: ${u.displayName}`))
-    })
-    console.log()
-    */
 }
 
 let users = []
@@ -575,6 +594,7 @@ function getVisibleGames(user) {
         .filter(g => {
             if (g.visibility === 'public') return true
             if (g.owner && (g.owner == user || g.owner.id == user.id)) return true
+            if ((g.prevBlack && g.prevBlack.id == user.id) || (g.prevWhite && g.prevWhite.id == user.id)) return true
             return false
         })
         .map(serializeGame)
@@ -952,11 +972,185 @@ function friendEvents(socket, user) {
                     notification(to, 'Friendship', `You are now friends with ${linkTo(from)}.`)
                     notification(from, 'Friendship', `You are now friends with ${linkTo(to)}.`)
                 })
+            } else if (status == 'blocked') {
+                notification(from, 'Friendship', `You cannot send a friend request to ${linkTo(to)}.`)
             } else {
                 newFriendRecord(from, to)
                 notification(from, 'Friendship', `Sent a friend request to ${linkTo(to)}.`)
                 notification(to, 'Friendship', `You have a friend request from ${linkTo(from)}.`)
             }
+        })
+    })
+
+    socket.on('blockFriend', (targetUserId) => {
+        const targetId = Number(targetUserId)
+        const meId = Number(user.id)
+        if (!Number.isFinite(targetId) || targetId <= 0 || targetId === meId) {
+            socket.emit('friendBlocked', { success: false, targetId })
+            return
+        }
+
+        db.get(
+            'SELECT friendship FROM friends WHERE (id_1 = ? AND id_2 = ?) OR (id_2 = ? AND id_1 = ?)',
+            [meId, targetId, meId, targetId],
+            (err, row) => {
+                if (err) {
+                    console.log(err)
+                    socket.emit('friendBlocked', { success: false, targetId })
+                    return
+                }
+
+                if (row && row.friendship) {
+                    db.run(
+                        'UPDATE friends SET id_1 = ?, id_2 = ?, status = ? WHERE friendship = ?',
+                        [meId, targetId, 'blocked', row.friendship],
+                        (uerr) => {
+                            if (uerr) {
+                                console.log(uerr)
+                                socket.emit('friendBlocked', { success: false, targetId })
+                                return
+                            }
+                            socket.emit('friendBlocked', { success: true, targetId })
+                        }
+                    )
+                    return
+                }
+
+                db.run(
+                    'INSERT INTO friends (id_1, id_2, status) VALUES (?, ?, ?)',
+                    [meId, targetId, 'blocked'],
+                    (ierr) => {
+                        if (ierr) {
+                            console.log(ierr)
+                            socket.emit('friendBlocked', { success: false, targetId })
+                            return
+                        }
+                        socket.emit('friendBlocked', { success: true, targetId })
+                    }
+                )
+            }
+        )
+    })
+
+    socket.on('unblockFriend', (targetUserId) => {
+        const targetId = Number(targetUserId)
+        const meId = Number(user.id)
+        if (!Number.isFinite(targetId) || targetId <= 0 || targetId === meId) {
+            socket.emit('friendUnblocked', { success: false, targetId })
+            return
+        }
+
+        db.run(
+            'UPDATE friends SET status = ? WHERE id_1 = ? AND id_2 = ? AND status = ?',
+            ['friends', meId, targetId, 'blocked'],
+            function (err) {
+                if (err) {
+                    console.log(err)
+                    socket.emit('friendUnblocked', { success: false, targetId })
+                    return
+                }
+                if (!this || this.changes < 1) {
+                    socket.emit('friendUnblocked', { success: false, targetId })
+                    return
+                }
+                socket.emit('friendUnblocked', { success: true, targetId })
+            }
+        )
+    })
+
+    socket.on('challenge', (usr) => {
+        const challenger = users.find(u => u.id == usr)
+        if (!challenger) return
+
+        if (user.id == usr) return
+
+        const game = new Game('private', `Challenge from ${user.displayName}`, true, true, true, null)
+        game.owner = user
+        game.update()
+
+        const joinLink = `<a href="/game?code=${game.joinCode}">Accept Challenge</a>`
+        notification(usr, 'Challenge', `${linkTo(user.id)} has challenged you to a game of chess. ${joinLink}`)
+        socket.emit('redirect', `/game?code=${game.joinCode}`)
+    })
+
+    socket.on('dm', (to, message) => {
+        to = Number(to)
+        const text = typeof message === 'string' ? message.trim() : ''
+        if (!Number.isFinite(to) || to <= 0 || to === Number(user.id) || !text) return
+
+        getStatus(user.id, to).then((status) => {
+            if (status !== 'friends') return
+
+            const createdTime = new Date().toString()
+            db.run(
+                'INSERT INTO dms (id_1, id_2, message, created_time) VALUES (?, ?, ?, ?)',
+                [user.id, to, text, createdTime],
+                (err) => {
+                    if (err) {
+                        console.log(err)
+                        return
+                    }
+
+                    const payload = {
+                        from: Number(user.id),
+                        to: Number(to),
+                        message: text,
+                        createdTime
+                    }
+
+                    socket.emit('dmMessage', payload)
+                    const recipient = users.find(u => Number(u.id) === Number(to))
+                    if (recipient && recipient.socket) {
+                        recipient.socket.emit('dmMessage', payload)
+                    }
+
+                    const recipientOnProfile = recipient && recipient.socket && recipient.socket.currentPath === '/profile'
+                    if (!recipientOnProfile) {
+                        notification(to, 'DM', `New message from ${linkTo(user.id)}.`)
+                    }
+                }
+            )
+        })
+    })
+
+    socket.on('dmThread', (otherUserId) => {
+        const otherId = Number(otherUserId)
+        if (!Number.isFinite(otherId) || otherId <= 0 || otherId === Number(user.id)) {
+            socket.emit('dmThread', { withUser: otherId, messages: [] })
+            return
+        }
+
+        getStatus(user.id, otherId).then((status) => {
+            if (status !== 'friends') {
+                socket.emit('dmThread', { withUser: otherId, messages: [] })
+                return
+            }
+
+            db.all(
+                `SELECT id_1, id_2, message, created_time
+                 FROM dms
+                 WHERE (id_1 = ? AND id_2 = ?) OR (id_1 = ? AND id_2 = ?)
+                 ORDER BY dm ASC`,
+                [user.id, otherId, otherId, user.id],
+                (err, rows) => {
+                    if (err) {
+                        console.log(err)
+                        socket.emit('dmThread', { withUser: otherId, messages: [] })
+                        return
+                    }
+
+                    const msgs = Array.isArray(rows)
+                        ? rows.map(r => ({
+                            from: Number(r.id_1),
+                            to: Number(r.id_2),
+                            message: r.message || '',
+                            createdTime: r.created_time || ''
+                        }))
+                        : []
+
+                    socket.emit('dmThread', { withUser: otherId, messages: msgs })
+                }
+            )
         })
     })
 }
@@ -1033,6 +1227,12 @@ app.get('/notifications/unread', (req, res) => {
 io.on('connection', (socket) => {
     // Set up the user and register with database if needed
     let user = initUser(socket)
+
+    socket.on('pageContext', (ctx) => {
+        const currentPath = (ctx && typeof ctx.path === 'string') ? ctx.path : ''
+        socket.currentPath = currentPath
+        if (user) user.currentPath = currentPath
+    })
 
     logUsers()
 

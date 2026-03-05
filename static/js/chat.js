@@ -151,7 +151,7 @@ function buildPGNFromMoves(moves, meta = {}) {
         updatePGN(m); // Update PGN after applying the move
     }
 
-    // Build SAN-ish notation (basic): pawns as e4 / exd5, pieces as Nf3 / Rxa1, castling O-O/O-O-O, promotions =Q
+    // Build long algebraic notation: e2e4, exd5, Rh8h2, castling O-O/O-O-O, promotions =Q
     const boardState = initBoard()
     const parts = []
 
@@ -182,26 +182,21 @@ function buildPGNFromMoves(moves, meta = {}) {
                 return (to.x === 6) ? 'O-O' : 'O-O-O'
             }
 
+            const fromSq = square(from)
             const toSq = square(to)
             const letterMap = { 'Knight': 'N', 'Bishop': 'B', 'Rook': 'R', 'Queen': 'Q', 'King': 'K' }
             const pLetter = letterMap[mover.name] || ''
 
             if (mover.name === 'Pawn') {
-                if (m.takes) {
-                    const file = files[from.x]
-                    let s = `${file}x${toSq}`
-                    if (m.promotion) s += `=${String(m.promotion).charAt(0).toUpperCase()}`
-                    return s
-                } else {
-                    let s = `${toSq}`
-                    if (m.promotion) s += `=${String(m.promotion).charAt(0).toUpperCase()}`
-                    return s
-                }
+                const capture = m.takes ? 'x' : ''
+                let s = `${fromSq}${capture}${toSq}`
+                if (m.promotion) s += `=${String(m.promotion).charAt(0).toUpperCase()}`
+                return s
             }
 
-            // Other pieces - standard PGN format
+            // Other pieces - long algebraic format
             const capture = m.takes ? 'x' : ''
-            return `${pLetter}${capture}${toSq}`
+            return `${pLetter}${fromSq}${capture}${toSq}`
         }
 
         const whiteSAN = whiteMove ? sanFor(whiteMove) : ''
@@ -257,8 +252,16 @@ function logPGNFromGameData(gameData) {
 
 function exportPGNToChat() {
     try {
+        // Diagnostic logging for clipboard API
+        console.log('Clipboard diagnostics:', {
+            isSecure: window.isSecureContext,
+            hasUserActivation: navigator.userActivation?.isActive,
+            inIframe: window.top !== window.self,
+            clipboardAvailable: !!navigator.clipboard
+        });
+
         if (typeof gameData === 'undefined' || !gameData || !Array.isArray(gameData.moves)) {
-            alert('No game moves available to export.')
+            console.warn('No game moves available to export.')
             return
         }
 
@@ -269,28 +272,43 @@ function exportPGNToChat() {
             blackName: (gameData.prevBlack && gameData.prevBlack.displayName) ? gameData.prevBlack.displayName : null
         }
 
-        const pgn = buildPGNFromMoves(gameData.moves); // Removed meta parameter to match function signature
+        const pgn = buildPGNFromMoves(gameData.moves, meta);
 
-        // Log PGN to console instead of pasting into chat input
-        try {
-            console.log('--- Exported PGN START ---')
+        // Copy PGN to clipboard
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(pgn).then(() => {
+                console.log('PGN copied to clipboard')
+                // Use console notification instead of alert to preserve user gesture context
+                console.log('✓ PGN successfully copied to clipboard!')
+                msgInput.value = pgn;
+            }).catch(err => {
+                console.error('Failed to copy to clipboard:', err)
+                // Fallback: paste into chat input
+                msgInput.value = pgn;
+                console.log('PGN pasted into chat input (clipboard API failed)')
+                console.log('--- Exported PGN ---')
+                console.log(pgn)
+            })
+        } else {
+            // Fallback for browsers without clipboard API or non-HTTPS contexts
+            // Paste PGN directly into the chat input field
+            msgInput.value = pgn;
+            console.log('✓ PGN pasted into chat input (Clipboard API unavailable)')
+            console.log('--- Exported PGN ---')
             console.log(pgn)
-            console.log('--- Exported PGN END ---')
-        } catch (e) {
-            // fallback: put into chat input if console fails for some reason
-            if (msgInput) {
-                msgInput.value = pgn
-                msgInput.focus()
-                try { msgInput.select() } catch (e) {}
-            }
         }
     } catch (e) {
         console.error('Failed to export PGN', e)
-        alert('Failed to export PGN. See console for details.')
     }
 }
 
-if (exportPgnBtn) exportPgnBtn.addEventListener('click', exportPGNToChat)
+// IMPORTANT: Call exportPGNToChat() directly inside the click handler to preserve user gesture context
+// Do NOT pass the function reference, as it breaks the Clipboard API's user-gesture requirement
+if (exportPgnBtn) {
+    exportPgnBtn.addEventListener('click', () => {
+        exportPGNToChat();
+    });
+}
 
 // Update user list
 socket.on('userList', (users) => {

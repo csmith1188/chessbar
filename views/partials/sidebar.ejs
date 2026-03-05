@@ -1,6 +1,16 @@
+<link rel='stylesheet' href='/css/sidebar.css'>
+
 <div class="global-sidebar" data-sidebar>
   <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-expanded="true" aria-label="Collapse sidebar">
-    <span class="chevron" aria-hidden="true"><</span>
+       <span class="hamburger" aria-hidden="true" style="display:none">
+         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+           <rect y="4" width="20" height="2" rx="1" fill="currentColor"/>
+           <rect y="9" width="20" height="2" rx="1" fill="currentColor"/>
+           <rect y="14" width="20" height="2" rx="1" fill="currentColor"/>
+         </svg>
+       </span>
+       <span class="chevron" aria-hidden="true"><</span>
+       <span class="close-x" aria-hidden="true" style="display:none">&#10005;</span>
   </button>
 
   <div class="sidebar-inner">
@@ -31,9 +41,5 @@
         <a href="/admin" class="sidebar-link">Admin</a>
       <% } %>
     </nav>
-
-    <div class="sidebar-footer">
-      <p class="sidebar-note">Use the arrow to collapse or expand this menu. It will stay where you left it.</p>
-    </div>
   </div>
 </div>

@@ -1,3 +1,77 @@
+@media (max-width: 1280px) {
+    body {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+    }
+
+    #profile {
+        width: 100%;
+        max-width: 900px;
+        margin-bottom: 18px;
+    }
+
+    #buyTokens {
+        width: 100%;
+        max-width: 420px;
+        margin: 0 auto;
+        order: 3;
+    }
+
+    #player {
+        width: 100%;
+        max-width: 420px;
+        margin: 0 auto 18px auto;
+    }
+
+    #profile {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+    }
+
+    /* Stack the three columns on small screens */
+    body {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+        width: 100vw;
+        overflow-x: hidden;
+    }
+
+    body>#player,
+    body>#profile,
+    body>#buyTokens {
+        flex: none;
+        width: 100%;
+        max-width: none;
+    }
+}
+
+a {
+    color: #eaf4fb
+}
+
+.btn.small-menu-btn {
+    font-size: 14px;
+    color: #d6e1f7;
+    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgba(7, 12, 18, 0.95);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.btn.block-button {
+    color: #ff0000;
+}
+
 /* profile.css — adapted to site theme (dark gradients, shared variables) */
 
 @import url('colors.css');
@@ -60,11 +134,6 @@
     box-sizing: border-box
 }
 
-html,
-body {
-    height: 100%
-}
-
 body {
     font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
     background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
@@ -74,6 +143,8 @@ body {
     gap: 20px;
     align-items: flex-start;
     min-height: 100vh;
+    /* Removed width: 95vw to prevent overflow */
+    box-sizing: border-box;
 }
 
 .page-wrap {
@@ -99,8 +170,7 @@ body {
 
 .panel {
     /* lower-contrast panel so profile feels lighter */
-    min-height: 150px;
-    min-width: 300px;
+    min-height: 4em;
 
     background: rgba(255, 255, 255, 0.012);
     border-radius: 10px;
@@ -121,7 +191,6 @@ body {
     display: flex;
     gap: 10px;
     justify-content: center;
-   
 }
 
 #btn-wrap button {
@@ -143,12 +212,12 @@ body {
 #finished,
 #wdl {
     font-weight: 700;
-    font-size: 40px;
+    font-size: 5vmin;
     margin-top: 6px;
 }
 
 .panel .small {
-    font-size: 25px;
+    font-size: 4vmin;
     /* Increase the font size */
     font-weight: 700;
 }
@@ -172,6 +241,10 @@ body {
     font-weight: 700;
 }
 
+.profile-info {
+    text-align: center;
+}
+
 
 .profile-info p {
     margin: 0 0 12px 0;
@@ -189,11 +262,11 @@ body {
    - center `#profile` -> 1/2 (flex:2)
    - right `#buyTokens`-> 1/4 (flex:1)
 */
-body>#player {
+#player {
     flex: 1 1 0;
 }
 
-body>#buyTokens {
+#buyTokens {
     flex: 1 1 0;
     max-width: none;
 }
@@ -228,7 +301,7 @@ body>#buyTokens {
 
 #buyTokens input[type='number'],
 #buyTokens input[type='text'] {
-    width: calc(100% - 12px);
+    width: 100%;
     padding: 10px 12px;
     margin: 6px 0 10px 0;
     border-radius: 10px;
@@ -267,33 +340,6 @@ body>#buyTokens {
 .btn:hover {
     transform: translateY(-2px);
     filter: brightness(1.03);
-}
-
-@media (max-width: 920px) {
-    #profile {
-        grid-template-columns: 1fr;
-    }
-
-    .profile-avatar {
-        width: 120px;
-        height: 120px;
-        margin: 0 auto;
-    }
-
-    /* Stack the three columns on small screens */
-    body {
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-    }
-
-    body>#player,
-    body>#profile,
-    body>#buyTokens {
-        flex: none;
-        width: 100%;
-        max-width: none;
-    }
 }
 
 /* accessibility focus styles consistent with site */
@@ -408,17 +454,32 @@ input:focus {
     margin-top: 8px;
     max-height: 50vh;
     overflow-y: auto;
-    padding-right: 6px; /* room for scrollbar */
+    padding-right: 6px;
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
 }
+
+.notification-list::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari and Opera */
+}
+
 .notification {
+    flex: 0 0 auto;
+    max-width: 100%;
     padding: 10px;
     border-radius: 8px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.02);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.02);
     display: flex;
     flex-direction: column;
     gap: 6px;
     position: relative;
+    overflow-x: hidden;
+    scrollbar-width: none;
 }
 
 .notif-creation {
@@ -433,16 +494,26 @@ input:focus {
     font-size: 13px;
     color: var(--muted);
 }
+
 .notification .notif-message {
     font-size: 14px;
     color: #eaf4fb;
-    white-space: pre-wrap;
+    max-width: 80%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    word-break: break-word;
 }
+
 .notification.unread {
-    background: linear-gradient(90deg, rgba(94,234,212,0.06), rgba(94,234,212,0.03));
-    border-color: rgba(94,234,212,0.18);
+    background: linear-gradient(90deg, rgba(94, 234, 212, 0.06), rgba(94, 234, 212, 0.03));
+    border-color: rgba(94, 234, 212, 0.18);
     box-shadow: 0 6px 14px rgba(2, 150, 120, 0.06);
 }
+
 .notif-delete {
     position: absolute;
     top: 8px;
@@ -450,8 +521,8 @@ input:focus {
     width: 24px;
     height: 24px;
     border-radius: 6px;
-    border: 1px solid rgba(255,255,255,0.08);
-    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
     color: var(--muted);
     display: inline-flex;
     align-items: center;
@@ -459,15 +530,107 @@ input:focus {
     cursor: pointer;
     transition: all 120ms ease;
 }
+
 .notif-delete:hover {
     color: #fff;
-    border-color: rgba(255,255,255,0.16);
-    background: rgba(255,255,255,0.08);
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.08);
 }
+
 .notif-delete:active {
     transform: scale(0.96);
 }
+
 .no-notifs {
+    color: var(--muted);
+    padding: 10px 6px;
+}
+
+/* Friends List */
+.friends-list {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    margin-top: 8px;
+    max-height: 50vh;
+    overflow: hidden;
+    padding-right: 6px;
+    max-width: 100%
+}
+
+.friend-item {
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: border-radius 180ms ease, background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
+    width: 52px;
+    flex: 0 0 52px;
+    overflow: visible;
+    position: relative;
+    z-index: 1;
+}
+
+.friend-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: scale(1.06);
+    z-index: 3;
+}
+
+.friend-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 5px;
+    text-decoration: none;
+    color: inherit;
+    white-space: nowrap;
+}
+
+.friend-link a {
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 220ms ease 100ms;
+}
+
+.friend-item:hover .friend-link a {
+    opacity: 1;
+}
+
+.friend-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+}
+
+.friend-username {
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: #eaf4fb;
+    font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgba(7, 12, 18, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    transition: opacity 160ms ease;
+}
+
+.friend-item:hover .friend-username {
+    opacity: 1;
+}
+
+.no-friends {
     color: var(--muted);
     padding: 10px 6px;
 }
@@ -517,6 +680,14 @@ input:focus {
 #messages {
     flex: 1 1 auto;
     overflow: auto;
+    max-height: 25vh;
+    padding-right: 6px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+#messages::-webkit-scrollbar {
+    display: none;
 }
 
 .message-row {
@@ -633,4 +804,10 @@ input:focus {
 #send:hover {
     transform: translateY(-2px) scale(1.1);
     transition: transform 180ms cubic-bezier(.2, .9, .3, 1);
+}
+
+body {
+    margin: 0;
+    padding: 2rem;
+    padding: 0
 }

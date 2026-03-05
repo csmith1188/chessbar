@@ -2,16 +2,14 @@
 <html>
 
 <head>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Game - Chessbar</title>
-    <link href='https://fonts.googleapis.com/css2?family=Lavishly+Yours&display=swap' rel='stylesheet'>
-    <link rel='stylesheet' href='/css/sidebar.css'>
     <link rel='stylesheet' href='/css/game.css'>
-    <link rel='stylesheet' href='/css/profile.css'>
+    <link rel="stylesheet" href="/css/colors.css">
 </head>
 
 <body class="with-sidebar">
     <%- include('partials/sidebar') %>
-        <!-- Join code badge (top-left) -->
         <div id='join-code-badge' role='button' tabindex='0' aria-live='polite' aria-label='Copy join code'
             title='Click to copy join code' style='display:none'></div>
 
@@ -29,11 +27,21 @@
                 </div>
             </div>
 
-            <div id='sidebar'>
-                <!-- <div id='CapturedW' class='captureBox'></div>
-            <div id='CapturedB' class='captureBox'></div> -->
+            <!-- === Chat Section === -->
+            <div id='chat-container'>
+                <div id='chat-sidebar'>
+                    <h2>Users</h2>
+                </div>
+
+                <div id='chat-main'>
+                    <div id='messages'></div>
+
+                    <div id='inputBar'>
+                        <input type='text' id='msg' placeholder='Type your message here...' />
+                        <button id='send'>Send</button>
+                    </div>
+                </div>
             </div>
-            <script src='/js/sidebar.js'></script>
         </div>
 
         <!-- Waiting overlay shown when opponent hasn't joined -->
@@ -51,22 +59,6 @@
             <img src="" id="knight">
         </div>
 
-        <!-- === Chat Section === -->
-        <div id='chat-container'>
-            <div id='chat-sidebar'>
-                <h2>Users</h2>
-            </div>
-
-            <div id='chat-main'>
-                <div id='messages'></div>
-
-                <div id='inputBar'>
-                    <input type='text' id='msg' placeholder='Type your message here...' />
-                    <button id='send'>Send</button>
-                </div>
-            </div>
-        </div>
-
         <a href='/' id='back-link'>Back to game selection</a>
 
         <!-- Settings button -->
@@ -80,8 +72,8 @@
         </div>
 
         <!-- Settings modal (hidden by default) -->
-        <div id='settings-modal' class='hidden' role='dialog' aria-modal='true' aria-labelledby='settings-title'
-            aria-hidden='true' style='display:none'>
+        <div id='settings-modal' role='dialog' aria-modal='true' aria-labelledby='settings-title'
+            aria-hidden='true'>
             <div id='settings-panel'>
                 <h3 id='settings-title'>Settings</h3>
 

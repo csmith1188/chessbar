@@ -1,0 +1,215 @@
+:root {
+    --guideline-color: #3f3f3f;
+}
+
+.admin-container {
+    max-width: 95vw;
+    margin: 24px auto;
+    padding: 12px;
+}
+
+@media (max-width: 500px) {
+    .admin-container {
+        width: 95vw;
+    }
+    .players-bar .users-toolbar {
+        display: block
+    }
+}
+
+@media (max-height: 670px) {
+    .users-table-wrap {
+        height: 50vh;
+
+    }
+}
+
+.admin-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 12px
+}
+
+.admin-card {
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--panel-bg, #00000013);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.719)
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.admin-header p {
+    margin: 0;
+}
+
+.users-table-wrap {
+    border: solid 3px var(--guideline-color);
+    max-height: 65vh;
+    scrollbar-width: thin;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.users-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    align-items: center;
+    margin: 8px 0;
+}
+
+.players-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+/* Visible horizontal scrollbar at the bottom */
+.users-table-wrap::-webkit-scrollbar {
+    height: 12px;
+    width: 12px;
+}
+
+.users-table-wrap::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.users-table-wrap::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 8px;
+    border: 2px solid rgba(0, 0, 0, 0.25);
+}
+
+.users-table-wrap::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.55);
+}
+
+/* Chrome, Safari */
+/* Table styling: spaced rows with grey separators */
+#usersTable {
+    width: 100%;
+    font-size: 14px;
+    background: var(--panel-bg, #ffffff1c);
+}
+
+#usersTable thead th {
+    text-align: left;
+    padding: 10px 12px;
+    background: rgba(0, 0, 0, 0.771);
+    /* Restore consistent per-column bottom border so each header cell matches */
+    border-bottom: 2px solid var(--guideline-color) !important;
+    font-weight: 600;
+    border-right: 1px solid var(--guideline-color);
+    position: sticky;
+    top: 0;
+    z-index: 3;
+}
+
+#usersTable thead th:last-child {
+    border-right: none;
+}
+
+/* Make the thead itself sticky and draw a thicker guideline that stays
+           attached to the header while scrolling. */
+#usersTable thead {
+    position: sticky;
+    top: 0;
+    z-index: 6;
+}
+
+#usersTable thead th {
+    position: relative;
+    /* ensure th content sits above the pseudo-element */
+    z-index: 7;
+}
+
+#usersTable tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--guideline-color);
+    border-right: 1px solid var(--guideline-color);
+    vertical-align: middle;
+}
+
+/* Remove right border on the last column so table edges look clean */
+#usersTable tbody td:last-child {
+    border-right: none;
+}
+
+#usersTable tbody tr:last-child td {
+    border-bottom: none;
+}
+
+#usersTable tbody tr:hover td {
+    background: rgba(255, 255, 255, 0.254) !important;
+}
+
+/* Zebra striping: make every other row slightly lighter for readability */
+#usersTable tbody tr:nth-child(even) td {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+/* Remove native number input spinners */
+input[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Clickable indicators: subtle pop & pointer for links and buttons */
+.user-link {
+    text-decoration: none;
+    color: inherit;
+    display: inline-block;
+    cursor: pointer;
+    transition: transform .12s ease, box-shadow .12s ease, color .12s;
+}
+
+.user-link:hover {
+    transform: translateY(-1px) scale(1.1);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+    color: var(--muted);
+    text-decoration: underline;
+}
+
+.award-btn,
+.set-btn {
+    cursor: pointer;
+    transition: transform .12s ease, box-shadow .12s ease, background .12s;
+}
+
+.award-btn:hover,
+.set-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+.award-btn:active,
+.set-btn:active,
+.user-link:active {
+    transform: translateY(0);
+}
+
+#table-container {
+    display: flex;
+    flex-direction: column;
+    max-width: 95vw
+}
+
+body {
+    margin: 0;
+}

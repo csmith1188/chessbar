@@ -170,24 +170,14 @@
     cursor: pointer;
     background: #007bff;
     color: white;
-    transition: background 0.2s ease, transform 0.1s ease;
-}
-
-.overlay-content .btn:hover {
-    background: #0069d9;
-    transform: scale(1.02);
+    transition: background 0.2s ease;
 }
 
 .overlay-content .btn.secondary {
     background: #444;
 }
 
-.overlay-content .btn.secondary:hover {
-    background: #555;
-}
-
-/* === Responsive adjustments === */
-@media screen and (max-width: 450px) {
+@media (max-width: 450px) {
     .overlay-content {
         width: 90%;
         padding: 25px 20px;

@@ -1,16 +1,18 @@
 #notif_popup {
     width: 75%;
-    height: 8em;
+    left: 12.5%;
+    height: 15vmin;
     position: absolute;
     bottom: 0;
-    background-color: rgba(255, 255, 255, 0.06);
-    border-radius: 1em;
-    z-index: 999;
-    padding-left: 2em;
+    background-color: #071b2ad8;
+    border-radius: 1rem;
+    z-index: 99999;
+    padding-left: 3vmin;
     display: block;
     opacity: 1;
     pointer-events: auto;
     transition: opacity 250ms ease;
+    overflow-x: hidden;
 }
 
 #notif_popup a {
@@ -25,4 +27,12 @@
 #notif_popup.hide-popup {
     opacity: 0;
     pointer-events: none;
+}
+
+#notif_type {
+    font-size: 2.5vmin;
+}
+
+#notif_message {
+    font-size: 1.75vmin
 }
