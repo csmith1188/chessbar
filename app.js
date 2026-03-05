@@ -808,17 +808,15 @@ function inGameEvents(socket, user) {
     // ---- Rematch ----
     socket.on('rematch', () => {
         if (!user.game) return; // Ensure the user is in a game
-
-        const opponent = user.side === 'white' ? user.game.blackPlayer : user.game.whitePlayer;
-
-        // Reset the game state
-        user.game.reset();
-
+        
         // Notify both players
-        socket.emit('rematchAccepted', { message: 'Rematch started!' });
+        socket.emit('rematchPending', from.user.id('Rematch sent!'));
         if (opponent && opponent.socket) {
             opponent.socket.emit('rematchAccepted', { message: 'Rematch started!' });
         }
+
+        const opponent = user.side === 'white' ? user.game.blackPlayer : user.game.whitePlayer;
+        user.game.reset();
 
         console.log('Rematch started between players.');
     });
