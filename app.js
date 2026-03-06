@@ -229,14 +229,14 @@ app.get('/profile', (req, res) => {
                     notes = []
                 }
                 // Fetch friends
-                                db.all(`SELECT u.formbar_id, u.display_name, u.avatar,
+                db.all(`SELECT u.formbar_id, u.display_name, u.avatar,
                                                              f.status AS friend_status,
                                                              CASE WHEN f.status = 'blocked' AND f.id_1 = ? THEN 1 ELSE 0 END AS blocked_by_me
                                                 FROM friends f 
                                                 JOIN users u ON (CASE WHEN f.id_1 = ? THEN f.id_2 ELSE f.id_1 END) = u.formbar_id 
                                                 WHERE (f.id_1 = ? OR f.id_2 = ?)
                                                     AND (f.status = 'friends' OR (f.status = 'blocked' AND f.id_1 = ?))`,
-                                        [signedInId, formbarId, formbarId, formbarId, signedInId], (ferr, friends) => {
+                    [signedInId, formbarId, formbarId, formbarId, signedInId], (ferr, friends) => {
                         if (ferr) {
                             console.error('DB error fetching friends:', ferr)
                             friends = []
@@ -811,21 +811,7 @@ function inGameEvents(socket, user) {
 
         socket.emit('validMoves', validMoves)
     })
-    // ---- Rematch ----
-    socket.on('rematch', () => {
-        if (!user.game) return; // Ensure the user is in a game
-        
-        // Notify both players
-        socket.emit('rematchPending', );
-        if (opponent && opponent.socket) {
-            opponent.socket.emit('rematchAccepted', { message: 'Rematch started!' });
-        }
 
-        const opponent = user.side === 'white' ? user.game.blackPlayer : user.game.whitePlayer;
-        user.game.reset();
-
-        console.log('Rematch started between players.');
-    });
 
 
 }
@@ -1192,6 +1178,28 @@ function friendEvents(socket, user) {
             )
         })
     })
+
+    // ---- Rematch ----
+    socket.on('rematch', (usr) => {
+        if (!user.game) return; // Ensure the user is in a game
+
+        const idx = games.findIndex(g => g.id === user.game.id)
+        if (idx !== -1) games.splice(idx, 1)
+        io.emit('refreshGames')
+        console.log(`Game ${user.game.id} removed after rematch request.`)
+
+        const challenger = users.find(u => u.id == usr)
+        if (!challenger) return
+        if (user.id == usr) return
+
+        const game = new Game('private', `Rematch from ${user.displayName}`, true, true, true, null)
+        game.owner = user
+        game.update()
+
+        const joinLink = `<a href="/game?code=${game.joinCode}">Accept Rematch</a>`
+        notification(usr, 'Rematch', `${linkTo(user.id)} wants a rematch. ${joinLink}`)
+        socket.emit('redirect', `/game?code=${game.joinCode}`)
+    });
 }
 
 // Mark a notification as read (AJAX from profile page)
