@@ -229,14 +229,14 @@ app.get('/profile', (req, res) => {
                     notes = []
                 }
                 // Fetch friends
-                                db.all(`SELECT u.formbar_id, u.display_name, u.avatar,
+                db.all(`SELECT u.formbar_id, u.display_name, u.avatar,
                                                              f.status AS friend_status,
                                                              CASE WHEN f.status = 'blocked' AND f.id_1 = ? THEN 1 ELSE 0 END AS blocked_by_me
                                                 FROM friends f 
                                                 JOIN users u ON (CASE WHEN f.id_1 = ? THEN f.id_2 ELSE f.id_1 END) = u.formbar_id 
                                                 WHERE (f.id_1 = ? OR f.id_2 = ?)
                                                     AND (f.status = 'friends' OR (f.status = 'blocked' AND f.id_1 = ?))`,
-                                        [signedInId, formbarId, formbarId, formbarId, signedInId], (ferr, friends) => {
+                    [signedInId, formbarId, formbarId, formbarId, signedInId], (ferr, friends) => {
                         if (ferr) {
                             console.error('DB error fetching friends:', ferr)
                             friends = []
@@ -811,6 +811,9 @@ function inGameEvents(socket, user) {
 
         socket.emit('validMoves', validMoves)
     })
+
+
+
 }
 
 /*
@@ -868,6 +871,28 @@ function chatEvents(socket, user) {
         if (user.game && user.game.messages) socket.emit('messageHistory', user.game.messages)
     })
 }
+
+//kayden was here, making the dm chat
+
+app.get('/api/friends', (req, res) => {
+    if (!req.session || !req.session.user) {
+        return res.status(401).json({ error: 'Not authenticated' })
+    }
+
+    const userId_1 = req.session.user.id;
+
+    //db.run(`...SQL...`, [params], (err, result) => { ... } )
+
+    db.get(`SELECT * FROM friends WHERE (id_1 = ? OR id_2 = ?) AND status = "friends"`, [userId_1, userId_1], (err, rows) => {
+        if (err) {
+            console.error('DB error fetching friends:', err)
+            return res.status(500).json({ error: 'DB error' })
+        }
+        res.json(rows)
+        return rows
+    })
+})
+
 
 /*
 :::::::::: :::::::::  ::::::::::: :::::::::: ::::    ::: :::::::::   ::::::::
@@ -1153,6 +1178,28 @@ function friendEvents(socket, user) {
             )
         })
     })
+
+    // ---- Rematch ----
+    socket.on('rematch', (usr) => {
+        if (!user.game) return; // Ensure the user is in a game
+
+        const idx = games.findIndex(g => g.id === user.game.id)
+        if (idx !== -1) games.splice(idx, 1)
+        io.emit('refreshGames')
+        console.log(`Game ${user.game.id} removed after rematch request.`)
+
+        const challenger = users.find(u => u.id == usr)
+        if (!challenger) return
+        if (user.id == usr) return
+
+        const game = new Game('private', `Rematch from ${user.displayName}`, true, true, true, null)
+        game.owner = user
+        game.update()
+
+        const joinLink = `<a href="/game?code=${game.joinCode}">Accept Rematch</a>`
+        notification(usr, 'Rematch', `${linkTo(user.id)} wants a rematch. ${joinLink}`)
+        socket.emit('redirect', `/game?code=${game.joinCode}`)
+    });
 }
 
 // Mark a notification as read (AJAX from profile page)

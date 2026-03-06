@@ -40,9 +40,26 @@ function formatTime(seconds) {
 }
 
 // Reusable client-side system alert popup helper
-const KEEP_SYSTEM_ALERT_VISIBLE_FOR_TESTING = false
+const KEEP_SYSTEM_ALERT_VISIBLE_FOR_TESTING = true
 
-function showSystemPopup(title, message, duration = 6000, player = null) {
+function emitRematchRequest() {
+    let userId = null
+    if (me && gameData && gameData.prevWhite && gameData.prevBlack) {
+        if (me.id == gameData.prevWhite.id) {
+            userId = gameData.prevBlack.id
+        } else if (me.id == gameData.prevBlack.id) {
+            userId = gameData.prevWhite.id
+        }
+    } else {
+        console.error('Required variables are undefined:', { me, gameData })
+    }
+
+    if (userId && gameData && gameData.finished) {
+        socket.emit('rematch', userId)
+    }
+}
+
+function showSystemPopup(title, message, duration = 6000, player = null, includeRematch = false) {
     try {
         let container = document.getElementById('systemAlert')
         if (!container) {
@@ -70,6 +87,17 @@ function showSystemPopup(title, message, duration = 6000, player = null) {
         p.innerText = message
         inner.appendChild(p)
 
+        if (includeRematch) {
+            const rematchButton = document.createElement('button')
+            rematchButton.id = 'rematch-button'
+            rematchButton.type = 'button'
+            rematchButton.title = 'rematch'
+            rematchButton.setAttribute('aria-label', 'rematch')
+            rematchButton.innerText = 'Rematch'
+            rematchButton.addEventListener('click', emitRematchRequest)
+            inner.appendChild(rematchButton)
+        }
+
         container.classList.add('show')
         container.setAttribute('aria-hidden', 'false')
 
@@ -91,7 +119,7 @@ function showSystemPopup(title, message, duration = 6000, player = null) {
 let freshBoard = false
 
 socket.on('mate', (d) => {
-    showSystemPopup('Checkmate', `Checkmate. ${d.winner} wins!`, 8000)
+    showSystemPopup('Checkmate', `Checkmate. ${d.winner} wins!`, 8000, null, true)
 })
 
 socket.on('stalemate', (d) => {
@@ -109,11 +137,11 @@ socket.on('draw', (d) => {
 // Time-up event (different from checkmate)
 socket.on('timeUp', (d) => {
     const name = (d && d.winnerName) ? d.winnerName : (d && d.winner) ? d.winner : 'Player'
-    showSystemPopup('Time Up', `Time. ${name} wins on time!`, 8000)
+    showSystemPopup('Time Up', `Time. ${name} wins on time!`, 8000, null, true)
 })
 
 socket.on('resign', (u) => {
-    showSystemPopup('Resign', `${u.displayName} has resigned.`, 6000, u)
+    showSystemPopup('Resign', `${u.displayName} has resigned.`, 6000, u, true)
 })
 
 // pending promotion coords and listener-guard

@@ -36,20 +36,23 @@
                     <div class='friends-list'>
                         <% if (typeof friends !=='undefined' && friends && friends.length) { %>
                             <% friends.forEach((friend)=> { %>
-                                <div class='friend-item <%= friend.friend_status === "blocked" && Number(friend.blocked_by_me) === 1 ? "blocked" : "" %>'>
+                                <div
+                                    class='friend-item <%= friend.friend_status === "blocked" && Number(friend.blocked_by_me) === 1 ? "blocked" : "" %>'>
                                     <a class='friend-link'>
-                                        <div class='friend-avatar'
-                                            data-friend-id='<%= friend.formbar_id %>'
-                                            data-friend-name='<%= (friend.display_name || "User").replace(/'/g, "&#39;") %>'
+                                        <div class='friend-avatar' data-friend-id='<%= friend.formbar_id %>'
+                                            data-friend-name='<%= (friend.display_name || "User").replace(/' /g, "&#39;"
+                                            ) %>'
                                             data-friend-status='<%= friend.friend_status || "friends" %>'
-                                            data-blocked-by-me='<%= Number(friend.blocked_by_me) === 1 ? "1" : "0" %>'
-                                            style='background-image: url(<%= friend.avatar ? "/img/avatars/" + friend.avatar : "/img/basic_avatar.png" %>)'>
+                                                data-blocked-by-me='<%= Number(friend.blocked_by_me)===1 ? "1" : "0" %>'
+                                                    style='background-image: url(<%= friend.avatar ? "/img/avatars/" +
+                                                        friend.avatar : "/img/basic_avatar.png" %>)'>
                                         </div>
                                         <div class='friend-username'>
                                             <%= friend.display_name || 'User' %>
-                                            <% if (friend.friend_status === 'blocked' && Number(friend.blocked_by_me) === 1) { %>
-                                                (Blocked)
-                                            <% } %>
+                                                <% if (friend.friend_status==='blocked' &&
+                                                    Number(friend.blocked_by_me)===1) { %>
+                                                    (Blocked)
+                                                    <% } %>
                                         </div>
                                     </a>
                                 </div>
@@ -69,7 +72,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
         <div id='profile'>
@@ -291,6 +293,13 @@
 </script>
 
 <script>
+    const noMenuChallenge = document.getElementById('challenge-btn')
+    noMenuChallenge.addEventListener('click', () => {
+        const targetId = Number(viewingUser)
+        if (!Number.isFinite(targetId)) return
+        socket.emit('challenge', targetId)
+    })
+
     const winPercent = document.getElementById('winPercent')
     const tokens = document.getElementById('tokens')
     const started = document.getElementById('started')
@@ -358,6 +367,7 @@
         })
     }
 </script>
+    
 
 <script>
     ; (() => {

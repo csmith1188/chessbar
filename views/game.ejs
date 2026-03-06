@@ -72,8 +72,7 @@
         </div>
 
         <!-- Settings modal (hidden by default) -->
-        <div id='settings-modal' role='dialog' aria-modal='true' aria-labelledby='settings-title'
-            aria-hidden='true'>
+        <div id='settings-modal' role='dialog' aria-modal='true' aria-labelledby='settings-title' aria-hidden='true'>
             <div id='settings-panel'>
                 <h3 id='settings-title'>Settings</h3>
 
@@ -163,7 +162,6 @@
 <script>
     // Resign button
     const resign = document.getElementById('resign-btn')
-
     resign.onclick = function () {
         socket.emit('resign')
     }

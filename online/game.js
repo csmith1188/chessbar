@@ -298,15 +298,6 @@ class Game {
                 }
             }
 
-            // Update for the users
-            user.socket.emit('updateBoard', serializeGame(this))
-            // Also send clocks so clients get immediate clock values on updates
-            try {
-                user.socket.emit('updateClock', { whiteTime: this.whiteClock, blackTime: this.blackClock })
-            } catch (e) {
-                // ignore socket errors
-            }
-
             if (check) {
                 user.socket.emit('check', { side: opponent })
             }
@@ -360,6 +351,16 @@ class Game {
                     this.leaveTimers = {}
                 }
             }
+
+            // Update users after any state transitions so clients get an accurate `finished` flag
+            user.socket.emit('updateBoard', serializeGame(this))
+            // Also send clocks so clients get immediate clock values on updates
+            try {
+                user.socket.emit('updateClock', { whiteTime: this.whiteClock, blackTime: this.blackClock })
+            } catch (e) {
+                // ignore socket errors
+            }
+
             if (takenPiece == 'Queen') {
                 user.socket.emit('sound', 'smash')
             } else if (mate) {
@@ -403,6 +404,9 @@ class Game {
                 this.users.forEach(u => u.socket.emit('resign', user.serialize()))
 
                 this.finished = true
+
+                // Push final game state so clients update gameData.finished immediately
+                this.emptyUpdate()
 
                 // Clear any outstanding leave timers when the game finishes by resign
                 if (this.leaveTimers) {
@@ -448,6 +452,25 @@ class Game {
         } catch (e) {
             // ignore failures
         }
+    }
+
+    //reset
+    reset() {
+        this.board = new Board()
+        this.prevMove = {}
+        this.moves = []
+        this.finished = false
+        this.winner = null
+        this.loser = null
+        // Do not reset prevWhite/prevBlack here so assignSides() can
+        // use them to alternate colors between games.
+        this.assignSides()
+        // Clear any pending promotion state and chat messages so they
+        // don't leak across games when using reset().
+        this.endPromotion()
+        this.messages = []
+        this.emptyUpdate()
+        console.log('Game reset')
     }
 
     endPromotion() {
