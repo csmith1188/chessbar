@@ -97,8 +97,10 @@ class Game {
                         user.pay()
                         this.paid.push(user)
                     } else {
-                        console.log(`User ${user.id} has not paid.`)
+                        console.log(`User ${user.id} has not paid. 100`)
                         user.socket.emit('redirect', `/pay?code=${this.joinCode}`)
+                        if (this.prevBlack == user) this.prevBlack = null
+                        if (this.prevWhite == user) this.prevWhite = null
                         this.users = this.users.filter(u => u.id != user.id)
                         continue
                     }
@@ -112,8 +114,10 @@ class Game {
                         user.pay()
                         this.paid.push(user)
                     } else {
-                        console.log(`User ${user.id} has not paid.`)
+                        console.log(`User ${user.id} has not paid. 115`)
                         user.socket.emit('redirect', `/pay?code=${this.joinCode}`)
+                        if (this.prevBlack == user) this.prevBlack = null
+                        if (this.prevWhite == user) this.prevWhite = null
                         this.users = this.users.filter(u => u.id != user.id)
                         continue
                     }
@@ -128,7 +132,10 @@ class Game {
                         user.pay()
                         this.paid.push(user)
                     } else {
+                        console.log(`User ${user.id} has not paid. 131`)
                         user.socket.emit('redirect', `/pay?code=${this.joinCode}`)
+                        if (this.prevBlack == user) this.prevBlack = null
+                        if (this.prevWhite == user) this.prevWhite = null
                         this.users = this.users.filter(u => u.id != user.id)
                         continue
                     }
@@ -240,7 +247,6 @@ class Game {
     }
 
     update(move = {}, check = false, mate = false, stalemate = false, draw = false, opponent = null, winner = null, takenPiece = null, enPassant = false) {
-
         if (move && Number.isFinite(move.x1) && Number.isFinite(move.x2)) {
             this.prevMove = move
 
@@ -259,6 +265,18 @@ class Game {
 
         let promotion = false
         for (let user of this.users) {
+
+            if (!this.paid.some(u => u.id === user.id) && (user.side === 'white' || user.side === 'black')) {
+                if (user.tokens > 0) {
+                    user.pay()
+                    this.paid.push(user)
+                } else {
+                    user.socket.emit('redirect', `/pay?code=${this.joinCode}`)
+                    if (this.prevBlack == user) this.prevBlack = null
+                    if (this.prevWhite == user) this.prevWhite = null
+                    this.users = this.users.filter(u => u.id != user.id)
+                }
+            }
 
             user.youAre()
 
