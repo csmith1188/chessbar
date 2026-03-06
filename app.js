@@ -810,7 +810,7 @@ function inGameEvents(socket, user) {
         if (!user.game) return; // Ensure the user is in a game
         
         // Notify both players
-        socket.emit('rematchPending', from.user.id('Rematch sent!'));
+        socket.emit('rematchPending', );
         if (opponent && opponent.socket) {
             opponent.socket.emit('rematchAccepted', { message: 'Rematch started!' });
         }
