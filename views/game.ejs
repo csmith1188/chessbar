@@ -165,25 +165,6 @@
     resign.onclick = function () {
         socket.emit('resign')
     }
-
-
-    // rematch
-    const rematchButton = document.getElementById('rematch-button');
-    rematchButton.addEventListener('click', () => {
-        let usr = null;
-        if (me && gameData && gameData.prevWhite && gameData.prevBlack) {
-            if (me.id == gameData.prevWhite.id) {
-                usr = gameData.prevBlack.id;
-            } else if (me.id == gameData.prevBlack.id) {
-                usr = gameData.prevWhite.id;
-            }
-        } else {
-            console.error('Required variables are undefined:', { me, gameData });
-        }
-        console.log('Rematch button clicked, usr:', usr);
-        if (usr && gameData.finished) socket.emit('rematch', usr);
-    });
-
 </script>
 
 <script>
