@@ -462,9 +462,13 @@ class Game {
         this.finished = false
         this.winner = null
         this.loser = null
-        this.prevWhite = null
-        this.prevBlack = null
+        // Do not reset prevWhite/prevBlack here so assignSides() can
+        // use them to alternate colors between games.
         this.assignSides()
+        // Clear any pending promotion state and chat messages so they
+        // don't leak across games when using reset().
+        this.endPromotion()
+        this.messages = []
         this.emptyUpdate()
         console.log('Game reset')
     }
