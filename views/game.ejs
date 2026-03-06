@@ -22,7 +22,6 @@
                     <div id="whiteClock"></div>
                     <div id='InfoBox'></div>
                     <button id="resign-btn" type="button" title="Resign" aria-label="Resign"></button>
-                    //temp
                     <button id="rematch-button" type="button" title="rematch" aria-label="rematch">Rematch</button>
                     <div id="blackClock"></div>
                     <div id="whiteCaptured"></div>
@@ -74,8 +73,7 @@
         </div>
 
         <!-- Settings modal (hidden by default) -->
-        <div id='settings-modal' role='dialog' aria-modal='true' aria-labelledby='settings-title'
-            aria-hidden='true'>
+        <div id='settings-modal' role='dialog' aria-modal='true' aria-labelledby='settings-title' aria-hidden='true'>
             <div id='settings-panel'>
                 <h3 id='settings-title'>Settings</h3>
 
@@ -165,14 +163,26 @@
 <script>
     // Resign button
     const resign = document.getElementById('resign-btn')
-
     resign.onclick = function () {
         socket.emit('resign')
     }
-    // temp rematch
+
+
+    // rematch
     const rematchButton = document.getElementById('rematch-button');
     rematchButton.addEventListener('click', () => {
-        socket.emit('rematch');
+        let usr = null;
+        if (me && gameData && gameData.prevWhite && gameData.prevBlack) {
+            if (me.id == gameData.prevWhite.id) {
+                usr = gameData.prevBlack.id;
+            } else if (me.id == gameData.prevBlack.id) {
+                usr = gameData.prevWhite.id;
+            }
+        } else {
+            console.error('Required variables are undefined:', { me, gameData });
+        }
+        console.log('Rematch button clicked, usr:', usr);
+        if (usr && gameData.finished) socket.emit('rematch', usr);
     });
 
 </script>
