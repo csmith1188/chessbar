@@ -77,6 +77,14 @@ const tables = [
         new Column('status', 'TEXT NOT NULL DEFAULT "unread"'),
         new Column('created_time', 'DATETIME NOT NULL DEFAULT 0'),
         new Column('read_time', 'DATETIME'),
+    ]),
+
+    new Table('dms', [
+        new Column('dm', 'INTEGER PRIMARY KEY AUTOINCREMENT'),
+        new Column('id_1', 'INTEGER NOT NULL'),
+        new Column('id_2', 'INTEGER NOT NULL'),
+        new Column('message', 'TEXT DEFAULT ""'),
+        new Column('created_time', 'DATETIME NOT NULL DEFAULT 0')
     ])
 ];
 

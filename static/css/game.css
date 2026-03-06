@@ -254,15 +254,15 @@ body {
     color: #eaf5fb;
     padding: 20px 26px;
     border-radius: 14px;
-    min-width: 360px;
-    max-width: 760px;
+    min-width: 320px;
+    max-width: 95vw;
     width: min(70vw, 760px);
     box-shadow: 0 18px 60px rgba(0, 0, 0, 0.6);
     text-align: center;
 }
 
 #systemAlert .system-alert-title {
-    font-weight: 900;
+    font-weight: 700;
     margin-bottom: 8px;
     font-size: 20px;
 }

@@ -40,6 +40,8 @@ function formatTime(seconds) {
 }
 
 // Reusable client-side system alert popup helper
+const KEEP_SYSTEM_ALERT_VISIBLE_FOR_TESTING = false
+
 function showSystemPopup(title, message, duration = 6000, player = null) {
     try {
         let container = document.getElementById('systemAlert')
@@ -72,11 +74,15 @@ function showSystemPopup(title, message, duration = 6000, player = null) {
         container.setAttribute('aria-hidden', 'false')
 
         if (container._timeout) clearTimeout(container._timeout)
-        container._timeout = setTimeout(() => {
-            container.classList.remove('show')
-            container.setAttribute('aria-hidden', 'true')
+        if (!KEEP_SYSTEM_ALERT_VISIBLE_FOR_TESTING) {
+            container._timeout = setTimeout(() => {
+                container.classList.remove('show')
+                container.setAttribute('aria-hidden', 'true')
+                container._timeout = null
+            }, duration)
+        } else {
             container._timeout = null
-        }, duration)
+        }
     } catch (e) {
         try { alert(message) } catch (e) { }
     }

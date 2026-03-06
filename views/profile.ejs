@@ -36,13 +36,20 @@
                     <div class='friends-list'>
                         <% if (typeof friends !=='undefined' && friends && friends.length) { %>
                             <% friends.forEach((friend)=> { %>
-                                <div class='friend-item'>
-                                    <a href='/profile?usr=<%= friend.formbar_id %>' class='friend-link'>
+                                <div class='friend-item <%= friend.friend_status === "blocked" && Number(friend.blocked_by_me) === 1 ? "blocked" : "" %>'>
+                                    <a class='friend-link'>
                                         <div class='friend-avatar'
+                                            data-friend-id='<%= friend.formbar_id %>'
+                                            data-friend-name='<%= (friend.display_name || "User").replace(/'/g, "&#39;") %>'
+                                            data-friend-status='<%= friend.friend_status || "friends" %>'
+                                            data-blocked-by-me='<%= Number(friend.blocked_by_me) === 1 ? "1" : "0" %>'
                                             style='background-image: url(<%= friend.avatar ? "/img/avatars/" + friend.avatar : "/img/basic_avatar.png" %>)'>
                                         </div>
                                         <div class='friend-username'>
                                             <%= friend.display_name || 'User' %>
+                                            <% if (friend.friend_status === 'blocked' && Number(friend.blocked_by_me) === 1) { %>
+                                                (Blocked)
+                                            <% } %>
                                         </div>
                                     </a>
                                 </div>
@@ -351,5 +358,283 @@
     }
 </script>
     
+
+<script>
+    ; (() => {
+        const dmMessagesEl = document.getElementById('messages')
+        const dmInput = document.getElementById('msg')
+        const dmSendBtn = document.getElementById('send')
+        const friendAvatars = document.querySelectorAll('.friend-avatar[data-friend-id]')
+
+        if (!dmMessagesEl || !dmInput || !dmSendBtn || !friendAvatars || friendAvatars.length === 0) return
+
+        let activeDmUserId = null
+        let activeDmName = ''
+        let previousSender = null
+        let contextTarget = null
+
+        const friendContextMenu = document.createElement('div')
+        friendContextMenu.style.position = 'fixed'
+        friendContextMenu.style.zIndex = '2500'
+        friendContextMenu.style.display = 'none'
+        friendContextMenu.style.minWidth = '150px'
+        friendContextMenu.style.padding = '8px'
+
+        const goToProfileBtn = document.createElement('button')
+        goToProfileBtn.type = 'button'
+        goToProfileBtn.className = 'btn small-menu-btn'
+        goToProfileBtn.style.width = '70%'
+        goToProfileBtn.style.marginBottom = '6px'
+        goToProfileBtn.textContent = 'Go to profile'
+        friendContextMenu.appendChild(goToProfileBtn)
+
+        const challengeBtn = document.createElement('button')
+        challengeBtn.type = 'button'
+        challengeBtn.className = 'btn small-menu-btn'
+        challengeBtn.style.width = '70%'
+        challengeBtn.style.marginBottom = '6px'
+        challengeBtn.textContent = 'Send Challenge Request'
+        friendContextMenu.appendChild(challengeBtn)
+
+        const toggleBlockBtn = document.createElement('button')
+        toggleBlockBtn.type = 'button'
+        toggleBlockBtn.className = 'btn block-button small-menu-btn'
+        toggleBlockBtn.style.width = '70%'
+        toggleBlockBtn.textContent = 'Block user'
+        friendContextMenu.appendChild(toggleBlockBtn)
+        document.body.appendChild(friendContextMenu)
+
+        function hideContextMenu() {
+            friendContextMenu.style.display = 'none'
+            contextTarget = null
+        }
+
+        function showContextMenu(x, y, target) {
+            contextTarget = target
+            if (contextTarget && contextTarget.status === 'blocked' && contextTarget.blockedByMe) {
+                toggleBlockBtn.textContent = 'Unblock user'
+            } else {
+                toggleBlockBtn.textContent = 'Block user'
+            }
+            friendContextMenu.style.left = `${x}px`
+            friendContextMenu.style.top = `${y}px`
+            friendContextMenu.style.display = 'block'
+        }
+
+        function setFriendBlockedState(friendId, blocked) {
+            const avatar = document.querySelector(`.friend-avatar[data-friend-id="${friendId}"]`)
+            if (!avatar) return
+            const item = avatar.closest('.friend-item')
+            const nameEl = item ? item.querySelector('.friend-username') : null
+
+            avatar.dataset.friendStatus = blocked ? 'blocked' : 'friends'
+            avatar.dataset.blockedByMe = blocked ? '1' : '0'
+
+            if (item) {
+                if (blocked) item.classList.add('blocked')
+                else item.classList.remove('blocked')
+            }
+
+            if (nameEl) {
+                const baseName = avatar.dataset.friendName || 'User'
+                nameEl.textContent = blocked ? `${baseName} (Blocked)` : baseName
+            }
+        }
+
+        function clearMessages() {
+            dmMessagesEl.innerHTML = ''
+            previousSender = null
+        }
+
+        function renderSystemLine(text) {
+            const line = document.createElement('div')
+            line.className = 'sender'
+            line.textContent = text
+            dmMessagesEl.appendChild(line)
+            dmMessagesEl.scrollTop = dmMessagesEl.scrollHeight
+        }
+
+        function renderDmMessage(entry) {
+            if (!entry || typeof entry.message !== 'string') return
+
+            const fromId = Number(entry.from)
+            const isMine = typeof me !== 'undefined' && me && Number(me.id) === fromId
+
+            const row = document.createElement('div')
+            row.classList.add('message-row')
+            row.classList.add(isMine ? 'you' : 'other')
+
+            if (!isMine && previousSender !== fromId) {
+                const sender = document.createElement('div')
+                sender.classList.add('sender')
+                sender.textContent = activeDmName || 'Friend'
+                row.appendChild(sender)
+            }
+
+            const bubble = document.createElement('div')
+            bubble.classList.add('message')
+            bubble.textContent = entry.message
+            row.appendChild(bubble)
+
+            dmMessagesEl.appendChild(row)
+            dmMessagesEl.scrollTop = dmMessagesEl.scrollHeight
+            previousSender = fromId
+        }
+
+        function openDmThread(friendId, friendName) {
+            activeDmUserId = Number(friendId)
+            activeDmName = friendName || 'Friend'
+            clearMessages()
+            renderSystemLine(`DM with ${activeDmName}`)
+            socket.emit('dmThread', activeDmUserId)
+            dmInput.focus()
+        }
+
+        friendAvatars.forEach((avatar) => {
+            avatar.style.cursor = 'pointer'
+            avatar.addEventListener('click', (e) => {
+                hideContextMenu()
+                e.preventDefault()
+                e.stopPropagation()
+
+                const friendId = Number(avatar.dataset.friendId)
+                if (!Number.isFinite(friendId)) return
+                const friendName = avatar.dataset.friendName || 'Friend'
+                openDmThread(friendId, friendName)
+            })
+
+            avatar.addEventListener('contextmenu', (e) => {
+                e.preventDefault()
+                e.stopPropagation()
+
+                const friendId = Number(avatar.dataset.friendId)
+                if (!Number.isFinite(friendId)) return
+
+                showContextMenu(e.clientX, e.clientY, {
+                    id: friendId,
+                    name: avatar.dataset.friendName || 'Friend',
+                    status: avatar.dataset.friendStatus || 'friends',
+                    blockedByMe: avatar.dataset.blockedByMe === '1',
+                    item: avatar.closest('.friend-item')
+                })
+            })
+        })
+
+        toggleBlockBtn.addEventListener('click', () => {
+            if (!contextTarget || !Number.isFinite(contextTarget.id)) {
+                hideContextMenu()
+                return
+            }
+            const shouldUnblock = contextTarget.status === 'blocked' && contextTarget.blockedByMe
+            if (shouldUnblock) {
+                socket.emit('unblockFriend', contextTarget.id)
+            } else {
+                socket.emit('blockFriend', contextTarget.id)
+            }
+            hideContextMenu()
+        })
+
+        goToProfileBtn.addEventListener('click', () => {
+            if (!contextTarget || !Number.isFinite(contextTarget.id)) {
+                hideContextMenu()
+                return
+            }
+            const targetId = Number(contextTarget.id)
+            hideContextMenu()
+            window.location.href = `/profile?usr=${encodeURIComponent(targetId)}`
+        })
+
+        challengeBtn.addEventListener('click', () => {
+            if (!contextTarget || !Number.isFinite(contextTarget.id)) {
+                hideContextMenu()
+                return
+            }
+            const targetId = Number(contextTarget.id)
+            hideContextMenu()
+            socket.emit('challenge', targetId)
+        })
+
+        document.addEventListener('click', () => hideContextMenu())
+        window.addEventListener('resize', () => hideContextMenu())
+        window.addEventListener('scroll', () => hideContextMenu(), true)
+
+        function sendDm() {
+            if (!Number.isFinite(activeDmUserId)) {
+                renderSystemLine('Select a friend icon to open DMs first.')
+                return
+            }
+
+            const text = dmInput.value.trim()
+            if (!text) return
+
+            socket.emit('dm', activeDmUserId, text)
+            dmInput.value = ''
+        }
+
+        dmSendBtn.addEventListener('click', sendDm)
+        dmInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault()
+                sendDm()
+            }
+        })
+
+        socket.on('dmThread', (payload) => {
+            if (!payload || Number(payload.withUser) !== Number(activeDmUserId)) return
+            clearMessages()
+
+            const list = Array.isArray(payload.messages) ? payload.messages : []
+            if (list.length === 0) {
+                renderSystemLine(`No messages yet with ${activeDmName}.`)
+                return
+            }
+
+            list.forEach(renderDmMessage)
+        })
+
+        socket.on('dmMessage', (payload) => {
+            if (!payload) return
+            const fromId = Number(payload.from)
+            const toId = Number(payload.to)
+            const myId = typeof me !== 'undefined' && me ? Number(me.id) : null
+            const inActiveThread = Number(activeDmUserId) === fromId || Number(activeDmUserId) === toId
+            const mine = myId != null && fromId === myId
+
+            if (!inActiveThread || (!mine && Number(activeDmUserId) !== fromId && Number(activeDmUserId) !== toId)) {
+                return
+            }
+
+            renderDmMessage(payload)
+        })
+
+        socket.on('friendBlocked', (result) => {
+            if (!result || result.success !== true) {
+                renderSystemLine('Failed to block user.')
+                return
+            }
+
+            const blockedId = Number(result.targetId)
+            setFriendBlockedState(blockedId, true)
+
+            if (Number(activeDmUserId) === blockedId) {
+                activeDmUserId = null
+                activeDmName = ''
+                clearMessages()
+                renderSystemLine('User blocked.')
+            }
+        })
+
+        socket.on('friendUnblocked', (result) => {
+            if (!result || result.success !== true) {
+                renderSystemLine('Failed to unblock user.')
+                return
+            }
+
+            const unblockedId = Number(result.targetId)
+            setFriendBlockedState(unblockedId, false)
+            renderSystemLine('User unblocked.')
+        })
+    })()
+</script>
 
 </html>
