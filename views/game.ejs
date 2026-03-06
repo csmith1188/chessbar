@@ -22,6 +22,8 @@
                     <div id="whiteClock"></div>
                     <div id='InfoBox'></div>
                     <button id="resign-btn" type="button" title="Resign" aria-label="Resign"></button>
+                    //temp
+                    <button id="rematch-button" type="button" title="rematch" aria-label="rematch">Rematch</button>
                     <div id="blackClock"></div>
                     <div id="whiteCaptured"></div>
                 </div>
@@ -167,6 +169,12 @@
     resign.onclick = function () {
         socket.emit('resign')
     }
+    // temp rematch
+    const rematchButton = document.getElementById('rematch-button');
+    rematchButton.addEventListener('click', () => {
+        socket.emit('rematch');
+    });
+
 </script>
 
 <script>
