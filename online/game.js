@@ -97,8 +97,10 @@ class Game {
                         user.pay()
                         this.paid.push(user)
                     } else {
-                        console.log(`User ${user.id} has not paid.`)
+                        console.log(`User ${user.id} has not paid. 100`)
                         user.socket.emit('redirect', `/pay?code=${this.joinCode}`)
+                        if (this.prevBlack == user) this.prevBlack = null
+                        if (this.prevWhite == user) this.prevWhite = null
                         this.users = this.users.filter(u => u.id != user.id)
                         continue
                     }
@@ -112,8 +114,10 @@ class Game {
                         user.pay()
                         this.paid.push(user)
                     } else {
-                        console.log(`User ${user.id} has not paid.`)
+                        console.log(`User ${user.id} has not paid. 115`)
                         user.socket.emit('redirect', `/pay?code=${this.joinCode}`)
+                        if (this.prevBlack == user) this.prevBlack = null
+                        if (this.prevWhite == user) this.prevWhite = null
                         this.users = this.users.filter(u => u.id != user.id)
                         continue
                     }
@@ -128,7 +132,10 @@ class Game {
                         user.pay()
                         this.paid.push(user)
                     } else {
+                        console.log(`User ${user.id} has not paid. 131`)
                         user.socket.emit('redirect', `/pay?code=${this.joinCode}`)
+                        if (this.prevBlack == user) this.prevBlack = null
+                        if (this.prevWhite == user) this.prevWhite = null
                         this.users = this.users.filter(u => u.id != user.id)
                         continue
                     }
@@ -240,7 +247,6 @@ class Game {
     }
 
     update(move = {}, check = false, mate = false, stalemate = false, draw = false, opponent = null, winner = null, takenPiece = null, enPassant = false) {
-
         if (move && Number.isFinite(move.x1) && Number.isFinite(move.x2)) {
             this.prevMove = move
 
@@ -260,6 +266,18 @@ class Game {
         let promotion = false
         for (let user of this.users) {
 
+            if (!this.paid.some(u => u.id === user.id) && (user.side === 'white' || user.side === 'black')) {
+                if (user.tokens > 0) {
+                    user.pay()
+                    this.paid.push(user)
+                } else {
+                    user.socket.emit('redirect', `/pay?code=${this.joinCode}`)
+                    if (this.prevBlack == user) this.prevBlack = null
+                    if (this.prevWhite == user) this.prevWhite = null
+                    this.users = this.users.filter(u => u.id != user.id)
+                }
+            }
+
             user.youAre()
 
             // Only request promotion once per move: use a flag on the move object
@@ -278,15 +296,6 @@ class Game {
                         this.promotionCoords = { x: move.x2, y: move.y2 }
                     }
                 }
-            }
-
-            // Update for the users
-            user.socket.emit('updateBoard', serializeGame(this))
-            // Also send clocks so clients get immediate clock values on updates
-            try {
-                user.socket.emit('updateClock', { whiteTime: this.whiteClock, blackTime: this.blackClock })
-            } catch (e) {
-                // ignore socket errors
             }
 
             if (check) {
@@ -342,6 +351,16 @@ class Game {
                     this.leaveTimers = {}
                 }
             }
+
+            // Update users after any state transitions so clients get an accurate `finished` flag
+            user.socket.emit('updateBoard', serializeGame(this))
+            // Also send clocks so clients get immediate clock values on updates
+            try {
+                user.socket.emit('updateClock', { whiteTime: this.whiteClock, blackTime: this.blackClock })
+            } catch (e) {
+                // ignore socket errors
+            }
+
             if (takenPiece == 'Queen') {
                 user.socket.emit('sound', 'smash')
             } else if (mate) {
@@ -385,6 +404,9 @@ class Game {
                 this.users.forEach(u => u.socket.emit('resign', user.serialize()))
 
                 this.finished = true
+
+                // Push final game state so clients update gameData.finished immediately
+                this.emptyUpdate()
 
                 // Clear any outstanding leave timers when the game finishes by resign
                 if (this.leaveTimers) {
